@@ -14,7 +14,7 @@ export default tseslint.config(
     reactHooks.configs.flat.recommended,
     jsxA11y.flatConfigs.recommended,
     {
-        files: ['resources/js/**/*.{ts,tsx}', 'vite.config.ts'],
+        files: ['resources/js/**/*.{ts,tsx}', 'vite.config.ts', 'vitest.config.ts'],
         languageOptions: {
             globals: { ...globals.browser },
             parserOptions: {
