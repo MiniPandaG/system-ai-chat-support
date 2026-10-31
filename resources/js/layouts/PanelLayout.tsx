@@ -3,10 +3,10 @@ import { useEffect, useRef, useState } from 'react';
 import type { ComponentType, ReactNode, SVGProps } from 'react';
 import logo from '../../images/logo.png';
 import { Button } from '../components/Button';
-import { MenuIcon, PaletteIcon, ShieldIcon, UserIcon, UsersIcon } from '../components/icons';
+import { GaugeIcon, MenuIcon, PaletteIcon, ShieldIcon, UserIcon, UsersIcon } from '../components/icons';
 import type { SharedProps } from '../types';
 
-export type PanelSection = 'account' | 'team' | 'branding' | 'security';
+export type PanelSection = 'account' | 'team' | 'branding' | 'plan' | 'security';
 
 interface PanelLayoutProps {
     title: string;
@@ -26,6 +26,7 @@ const navItems: NavItem[] = [
     { key: 'account', href: '/account', Icon: UserIcon },
     { key: 'team', href: '/settings/team', Icon: UsersIcon },
     { key: 'branding', href: '/settings/branding', Icon: PaletteIcon },
+    { key: 'plan', href: '/settings/plan', Icon: GaugeIcon },
     { key: 'security', href: '/settings/security', Icon: ShieldIcon },
 ];
 
@@ -65,10 +66,13 @@ export function PanelLayout({ title, section, wide = false, children }: PanelLay
         if (!menuOpen && sheet.open) sheet.close();
     }, [menuOpen]);
 
-    const labels: Record<PanelSection, string> = { account: panel.account, team: panel.team, branding: panel.branding, security: panel.security };
+    const labels: Record<PanelSection, string> = { account: panel.account, team: panel.team, branding: panel.branding, plan: panel.plan, security: panel.security };
     // El servidor decide qué secciones ve cada rol; aquí solo se ocultan las que no puede abrir.
     const visibleItems = navItems.filter(
-        (item) => (item.key !== 'team' || auth?.can.team === true) && (item.key !== 'branding' || auth?.can.branding === true),
+        (item) =>
+            (item.key !== 'team' || auth?.can.team === true) &&
+            (item.key !== 'branding' || auth?.can.branding === true) &&
+            (item.key !== 'plan' || auth?.can.plan === true),
     );
     const companyName = auth?.tenant?.name ?? panel.platform;
     const roleLabel = auth?.user.role == null ? null : (panel.roles[auth.user.role] ?? null);

@@ -155,3 +155,15 @@ export function ChatIcon(props: IconProps) {
         </Icon>
     );
 }
+
+export function GaugeIcon(props: IconProps) {
+    return (
+        <Icon {...props}>
+            <path d="M4 17a8 8 0 1 1 16 0" />
+            <path d="m12 17 4-5" />
+            <path d="M12 9V7" />
+            <path d="M6.3 11.3 5 10" />
+            <path d="m17.7 11.3 1.3-1.3" />
+        </Icon>
+    );
+}

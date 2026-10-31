@@ -8,6 +8,7 @@ return [
     'security' => 'Seguridad',
     'team' => 'Equipo',
     'branding' => 'Marca',
+    'plan' => 'Plan',
     'platform' => 'Plataforma',
     'open_menu' => 'Abrir menú',
     'close_menu' => 'Cerrar menú',

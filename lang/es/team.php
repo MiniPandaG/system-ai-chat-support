@@ -71,5 +71,9 @@ return [
     'resending' => 'Reenviando…',
     'revoke' => 'Cancelar invitación',
     'revoke_label' => 'Cancelar la invitación a :email',
+    'seats' => 'Puestos de agente: :used de :max (plan :plan)',
+    'seats_unlimited' => 'Puestos de agente: :used (plan :plan, sin límite)',
+    'seats_full' => 'Tu plan :plan permite :max puestos de agente y ya los usas. Los observadores no ocupan puesto; para invitar a más agentes o administradores, pide un cambio de plan al equipo de TikaroChat.',
+    'seats_over' => 'Tu empresa usa :used puestos y su plan :plan permite :max. Nadie pierde el acceso, pero no se pueden añadir más agentes ni administradores hasta que el plan lo permita.',
     'empty' => 'Aún no hay otros miembros en tu equipo.',
 ];

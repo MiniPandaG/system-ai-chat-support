@@ -69,13 +69,25 @@ interface TeamCopy extends InviteCopy {
     resend_label: string;
     revoke: string;
     revoke_label: string;
+    seats: string;
+    seats_unlimited: string;
+    seats_full: string;
+    seats_over: string;
+}
+
+interface Seats {
+    plan: string;
+    used: number;
+    max: number | null;
+    remaining: number | null;
+    over: boolean;
 }
 
 type Pending = { kind: 'promote' | 'deactivate'; member: Member } | null;
 
 const roleOrder = ['admin', 'agent', 'observer'];
 
-export default function Team({ copy, members, invitations }: { copy: TeamCopy; members: Member[]; invitations: PendingInvitation[] }) {
+export default function Team({ copy, members, invitations, seats }: { copy: TeamCopy; members: Member[]; invitations: PendingInvitation[]; seats: Seats | null }) {
     const { props } = usePage<SharedProps>();
     const [pending, setPending] = useState<Pending>(null);
     const [busy, setBusy] = useState(false);
@@ -112,11 +124,19 @@ export default function Team({ copy, members, invitations }: { copy: TeamCopy; m
 
     const roleOptions = roleOrder.map((role) => ({ value: role, label: copy.roles[role] ?? role }));
     const errors = Object.values(props.errors);
+    const seatsMax = seats?.max ?? null;
 
     return (
         <PanelLayout title={copy.title} section="team" wide>
             {props.flash.status !== null && <Alert variant="success">{props.flash.status}</Alert>}
             {errors.length > 0 && <Alert variant="danger">{errors.join(' ')}</Alert>}
+            {seats !== null && seatsMax !== null && seats.over && (
+                <Alert variant="warning">{copy.seats_over.replace(':used', String(seats.used)).replace(':plan', seats.plan).replace(':max', String(seatsMax))}</Alert>
+            )}
+            {seats !== null && seatsMax !== null && !seats.over && seats.remaining === 0 && (
+                <Alert variant="info">{copy.seats_full.replace(':plan', seats.plan).replace(':max', String(seatsMax))}</Alert>
+            )}
+
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <p className="text-text-secondary">{copy.detail}</p>
                 <Button
@@ -246,6 +266,14 @@ export default function Team({ copy, members, invitations }: { copy: TeamCopy; m
             </div>
 
             {members.length <= 1 && invitations.length === 0 && <p className="text-sm text-text-secondary">{copy.empty}</p>}
+
+            {seats !== null && (
+                <p className="text-sm text-text-secondary">
+                    {seats.max === null
+                        ? copy.seats_unlimited.replace(':used', String(seats.used)).replace(':plan', seats.plan)
+                        : copy.seats.replace(':used', String(seats.used)).replace(':max', String(seats.max)).replace(':plan', seats.plan)}
+                </p>
+            )}
 
             <ul className="flex flex-col gap-1 text-sm text-text-secondary">
                 {roleOrder.map((role) => (

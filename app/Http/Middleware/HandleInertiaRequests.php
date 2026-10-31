@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Middleware;
 
 use App\Files\FileStore;
+use App\Models\Plan;
 use App\Models\Tenant;
 use App\Models\TenantBranding;
 use App\Models\User;
@@ -27,7 +28,7 @@ class HandleInertiaRequests extends Middleware
     }
 
     /**
-     * @return array{user: array{name: string, email: string, role: string|null}, tenant: array{name: string, logo_url: string|null, theme: array<string, string>|null}|null, can: array{team: bool, branding: bool}}|null
+     * @return array{user: array{name: string, email: string, role: string|null}, tenant: array{name: string, logo_url: string|null, theme: array<string, string>|null}|null, can: array{team: bool, branding: bool, plan: bool}}|null
      */
     private function authenticated(Request $request): ?array
     {
@@ -45,6 +46,7 @@ class HandleInertiaRequests extends Middleware
             'can' => [
                 'team' => Gate::forUser($user)->allows('viewAny', User::class),
                 'branding' => Gate::forUser($user)->allows('manage', TenantBranding::class),
+                'plan' => Gate::forUser($user)->allows('viewAny', Plan::class),
             ],
         ];
     }

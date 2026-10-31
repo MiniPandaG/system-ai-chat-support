@@ -9,6 +9,7 @@ use App\Http\Controllers\BrandingController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\PasswordController;
+use App\Http\Controllers\PlanController;
 use App\Http\Controllers\SecurityController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\TeamController;
@@ -40,6 +41,9 @@ Route::middleware(['auth', 'verified', 'two-factor.required'])->group(function (
     Route::put('/settings/team/members/{member}/role', [TeamController::class, 'updateRole'])->whereNumber('member')->name('team.members.role');
     Route::post('/settings/team/members/{member}/deactivate', [TeamController::class, 'deactivate'])->whereNumber('member')->name('team.members.deactivate');
     Route::post('/settings/team/members/{member}/activate', [TeamController::class, 'activate'])->whereNumber('member')->name('team.members.activate');
+
+    // Plan y uso: solo lectura para administradores (PlanPolicy). El plan lo cambia la plataforma con plans:assign.
+    Route::get('/settings/plan', [PlanController::class, 'show'])->name('plan');
 
     // Marca de la empresa: solo administradores (TenantBrandingPolicy).
     Route::get('/settings/branding', [BrandingController::class, 'show'])->name('branding');

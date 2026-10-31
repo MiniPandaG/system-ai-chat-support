@@ -1,7 +1,9 @@
-import { useForm } from '@inertiajs/react';
+import { useForm, usePage } from '@inertiajs/react';
 import { useEffect, useRef } from 'react';
+import { Alert } from './Alert';
 import { Button } from './Button';
 import { EmailChips } from './EmailChips';
+import type { SharedProps } from '../types';
 import { SelectField } from './SelectField';
 
 export interface InviteCopy {
@@ -29,6 +31,7 @@ const roleOrder = ['agent', 'observer', 'admin'];
 
 /** Formulario para invitar (design/pantallas/registro-empresa.md): varios correos como insignias y un rol. */
 export function InviteDialog({ open, copy, onClose }: InviteDialogProps) {
+    const { props } = usePage<SharedProps>();
     const form = useForm<{ emails: string[]; role: string }>({ emails: [], role: 'agent' });
     const dialogRef = useRef<HTMLDialogElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -44,6 +47,13 @@ export function InviteDialog({ open, copy, onClose }: InviteDialogProps) {
         if (!open && dialog.open) dialog.close();
     }, [open]);
 
+    // Al cerrar sin enviar no se conserva el borrador: la próxima vez empieza limpio, para no reenviar por sorpresa.
+    const close = () => {
+        form.reset();
+        form.clearErrors();
+        onClose();
+    };
+
     const emailError = Object.entries(form.errors).find(([key]) => key === 'emails' || key.startsWith('emails.'))?.[1];
 
     return (
@@ -53,7 +63,7 @@ export function InviteDialog({ open, copy, onClose }: InviteDialogProps) {
             className="m-auto w-[calc(100%-2rem)] max-w-[40rem] rounded-lg bg-surface-raised p-6 text-text shadow-lg backdrop:bg-[var(--color-overlay-backdrop)]"
             onCancel={(event) => {
                 event.preventDefault();
-                if (!form.processing) onClose();
+                if (!form.processing) close();
             }}
         >
             <form
@@ -74,6 +84,8 @@ export function InviteDialog({ open, copy, onClose }: InviteDialogProps) {
                     {copy.invite_title}
                 </h2>
                 <p className="text-text-secondary">{copy.invite_detail}</p>
+
+                {props.errors.limit !== undefined && <Alert variant="warning">{props.errors.limit}</Alert>}
 
                 <EmailChips
                     label={copy.invite_emails}
@@ -102,7 +114,7 @@ export function InviteDialog({ open, copy, onClose }: InviteDialogProps) {
                 </div>
 
                 <div className="flex justify-end gap-3">
-                    <Button variant="text" disabled={form.processing} onClick={onClose}>
+                    <Button variant="text" disabled={form.processing} onClick={close}>
                         {copy.invite_cancel}
                     </Button>
                     <Button type="submit" loading={form.processing} loadingLabel={copy.invite_submitting} disabled={form.data.emails.length === 0}>
