@@ -37,4 +37,5 @@ enum AuditEvent: string
     case BrandingLogoRemoved = 'branding.logo_removed';
     case BrandingPaletteChanged = 'branding.palette_changed';
     case BrandingPaletteReset = 'branding.palette_reset';
+    case PlanAssigned = 'plan.assigned';
 }

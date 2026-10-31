@@ -9,6 +9,8 @@ use App\Enums\Role;
 use App\Http\Requests\StoreInvitationRequest;
 use App\Models\Invitation;
 use App\Models\User;
+use App\Plans\Limit;
+use App\Plans\PlanLimits;
 use App\Services\AuditLogger;
 use App\Services\InvitationService;
 use App\Tenancy\TenantContext;
@@ -27,7 +29,7 @@ class InvitationController extends Controller
     /** Invitaciones que una empresa puede enviar por hora. */
     private const HOURLY_LIMIT = 20;
 
-    public function store(StoreInvitationRequest $request, InvitationService $invitations, AuditLogger $audit, TenantContext $context): RedirectResponse
+    public function store(StoreInvitationRequest $request, InvitationService $invitations, AuditLogger $audit, TenantContext $context, PlanLimits $limits): RedirectResponse
     {
         $inviter = $request->user();
         $tenantId = $context->id();
@@ -54,13 +56,23 @@ class InvitationController extends Controller
             throw ValidationException::withMessages(['emails' => [__('team.invite_limit')]]);
         }
 
-        foreach ($toInvite as $email) {
-            RateLimiter::hit($key, 3600);
+        $send = function () use ($toInvite, $key, $invitations, $inviter, $role, $audit): void {
+            foreach ($toInvite as $email) {
+                RateLimiter::hit($key, 3600);
 
-            $invitation = $invitations->invite($inviter, $email, $role);
+                $invitation = $invitations->invite($inviter, $email, $role);
 
-            $audit->record(AuditEvent::InvitationCreated, $inviter->id, ['invitation_id' => $invitation->id, 'role' => $role->value]);
-        }
+                $audit->record(AuditEvent::InvitationCreated, $inviter->id, ['invitation_id' => $invitation->id, 'role' => $role->value]);
+            }
+        };
+
+        // Los puestos que hacen falta: uno por cada persona nueva en un rol con puesto, salvo quien ya tiene una
+        // invitación abierta que lo reserva. Si no caben todos, no se envía ninguno.
+        $seats = PlanLimits::takesSeat($role) ? $this->newSeatsNeeded($toInvite) : 0;
+        $tenant = $context->current();
+        abort_if($tenant === null, 403);
+
+        $seats > 0 ? $limits->guard($tenant, Limit::Agents, $seats, $send) : $send();
 
         $redirect = back()->with('status', trans_choice('team.invite_sent', count($toInvite), ['count' => count($toInvite)]));
 
@@ -71,12 +83,30 @@ class InvitationController extends Controller
         return $redirect;
     }
 
-    public function resend(Request $request, Invitation $invitation, InvitationService $invitations, AuditLogger $audit): RedirectResponse
+    /**
+     * @param  list<string>  $emails
+     */
+    private function newSeatsNeeded(array $emails): int
+    {
+        $holding = array_values(array_filter(
+            Invitation::query()->open()->where('expires_at', '>', now())->whereIn('email', $emails)->whereIn('role', ['admin', 'agent'])->pluck('email')->all(),
+            is_string(...),
+        ));
+
+        return count(array_diff($emails, $holding));
+    }
+
+    public function resend(Request $request, Invitation $invitation, InvitationService $invitations, AuditLogger $audit, TenantContext $context, PlanLimits $limits): RedirectResponse
     {
         Gate::authorize('resend', $invitation);
         abort_unless($invitation->accepted_at === null && $invitation->revoked_at === null, 404);
 
-        $invitations->resend($invitation);
+        $resend = fn () => $invitations->resend($invitation);
+        $tenant = $context->current();
+        abort_if($tenant === null, 403);
+
+        // Reenviar una invitación caducada la vuelve a abrir y a reservar su puesto.
+        $invitation->isExpired() && PlanLimits::takesSeat($invitation->role) ? $limits->guard($tenant, Limit::Agents, 1, $resend) : $resend();
 
         $audit->record(AuditEvent::InvitationResent, $request->user()?->id, ['invitation_id' => $invitation->id]);
 

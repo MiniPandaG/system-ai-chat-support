@@ -10,6 +10,9 @@ use App\Http\Requests\AcceptInvitationRequest;
 use App\Models\Invitation;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Plans\Limit;
+use App\Plans\LimitReached;
+use App\Plans\PlanLimits;
 use App\Services\AuditLogger;
 use App\Services\InvitationService;
 use App\Tenancy\TenantContext;
@@ -29,6 +32,7 @@ class AcceptInvitationController extends Controller
     public function __construct(
         private readonly InvitationService $invitations,
         private readonly TenantContext $context,
+        private readonly PlanLimits $limits,
     ) {}
 
     public function show(string $token): Response
@@ -52,7 +56,12 @@ class AcceptInvitationController extends Controller
             throw $this->invalid();
         }
 
-        $user = $this->context->run($tenant, fn (): User => $this->accept($token, $request->string('name')->toString(), $request->string('password')->toString()));
+        try {
+            $user = $this->context->run($tenant, fn (): User => $this->limits->exclusively($tenant, fn (): User => $this->accept($token, $request->string('name')->toString(), $request->string('password')->toString())));
+        } catch (LimitReached $reached) {
+            // A quien acepta no se le cuentan los detalles del plan de la empresa.
+            throw ValidationException::withMessages(['token' => [__('plans.reached.accept')]]);
+        }
 
         $audit->record(AuditEvent::InvitationAccepted, $user->id, ['tenant_id' => $user->tenant_id]);
 
@@ -70,6 +79,12 @@ class AcceptInvitationController extends Controller
 
             if ($invitation === null || ! $invitation->isUsable()) {
                 throw $this->invalid();
+            }
+
+            // La empresa ya está bloqueada (exclusively): si su plan bajó y está por encima del tope, no se aceptan más.
+            // Aceptar no añade un puesto (la invitación ya lo reservaba), solo se exige no estar pasado.
+            if (PlanLimits::takesSeat($invitation->role)) {
+                $this->limits->ensure(Tenant::query()->findOrFail($invitation->tenant_id), Limit::Agents, 0);
             }
 
             if (User::query()->where('email', $invitation->email)->exists()) {

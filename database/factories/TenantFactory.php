@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\Plan;
 use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -14,11 +15,16 @@ class TenantFactory extends Factory
 {
     protected $model = Tenant::class;
 
+    public function onPlan(string $slug): static
+    {
+        return $this->state(fn (): array => ['plan_id' => Plan::query()->where('slug', $slug)->firstOrFail()->id]);
+    }
+
     /**
      * @return array<string, mixed>
      */
     public function definition(): array
     {
-        return ['name' => fake()->unique()->company()];
+        return ['name' => fake()->unique()->company(), 'plan_id' => Plan::default()->id];
     }
 }

@@ -8,6 +8,7 @@ use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetTenantContext;
 use App\Http\Middleware\ThrottleAccountEmails;
+use App\Plans\LimitReached;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -36,6 +37,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectUsersTo('/account');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // Pasar el límite del plan es un resultado esperado, no un error del sistema: no se reporta y se muestra al usuario.
+        $exceptions->dontReport(LimitReached::class);
+        $exceptions->render(fn (LimitReached $exception, Request $request) => $request->expectsJson()
+            ? response()->json(['message' => $exception->getMessage(), 'limit' => $exception->limit->value], 422)
+            : back()->withErrors(['limit' => $exception->getMessage()]));
+
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
