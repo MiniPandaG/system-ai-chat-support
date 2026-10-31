@@ -3,6 +3,7 @@ export interface PanelCopy {
     account: string;
     security: string;
     team: string;
+    branding: string;
     platform: string;
     open_menu: string;
     close_menu: string;
@@ -13,8 +14,9 @@ export interface PanelCopy {
 
 export interface AuthenticatedUser {
     user: { name: string; email: string; role: string | null };
-    tenant: { name: string } | null;
-    can: { team: boolean };
+    /** theme: variables CSS de la empresa para el panel (solo el primario y su texto, ya validados); null con la paleta por defecto. */
+    tenant: { name: string; logo_url: string | null; theme: Record<string, string> | null } | null;
+    can: { team: boolean; branding: boolean };
 }
 
 export interface SharedProps {

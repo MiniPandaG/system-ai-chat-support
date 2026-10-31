@@ -24,6 +24,7 @@ const panel: SharedProps['panel'] = {
     account: 'Mi cuenta',
     security: 'Seguridad',
     team: 'Equipo',
+    branding: 'Marca',
     platform: 'Plataforma',
     open_menu: 'Abrir menú',
     close_menu: 'Cerrar menú',
@@ -37,7 +38,7 @@ describe('PanelLayout', () => {
         post.mockClear();
         shared = {
             panel,
-            auth: { user: { name: 'Ana Torres', email: 'ana@empresa-ejemplo.com', role: 'admin' }, tenant: { name: 'Soporte Ejemplo SAS' }, can: { team: true } },
+            auth: { user: { name: 'Ana Torres', email: 'ana@empresa-ejemplo.com', role: 'admin' }, tenant: { name: 'Soporte Ejemplo SAS', logo_url: null, theme: null }, can: { team: true, branding: true } },
         };
     });
 
@@ -63,7 +64,7 @@ describe('PanelLayout', () => {
         expect(screen.getAllByRole('link', { name: 'Equipo', hidden: true }).length).toBeGreaterThan(0);
         unmount();
 
-        shared = { panel, auth: { user: { name: 'Luis', email: 'luis@empresa-ejemplo.com', role: 'agent' }, tenant: { name: 'Soporte Ejemplo SAS' }, can: { team: false } } };
+        shared = { panel, auth: { user: { name: 'Luis', email: 'luis@empresa-ejemplo.com', role: 'agent' }, tenant: { name: 'Soporte Ejemplo SAS', logo_url: null, theme: null }, can: { team: false, branding: false } } };
         render(
             <PanelLayout title="Mi cuenta" section="account">
                 <p>x</p>
@@ -87,7 +88,7 @@ describe('PanelLayout', () => {
     });
 
     it('el personal de la plataforma ve «Plataforma» y ningún rol de empresa', () => {
-        shared = { panel, auth: { user: { name: 'Admin Plataforma', email: 'admin@pandacore.net', role: null }, tenant: null, can: { team: false } } };
+        shared = { panel, auth: { user: { name: 'Admin Plataforma', email: 'admin@pandacore.net', role: null }, tenant: null, can: { team: false, branding: false } } };
 
         render(
             <PanelLayout title="Mi cuenta" section="account">
@@ -128,5 +129,44 @@ describe('PanelLayout', () => {
 
         await user.click(screen.getByRole('button', { name: 'Cerrar menú', hidden: true }));
         expect(sheet?.hasAttribute('open')).toBe(false);
+    });
+
+    it('aplica la paleta de la empresa como variables CSS y la quita al desmontar', () => {
+        shared = {
+            panel,
+            auth: {
+                user: { name: 'Ana', email: 'ana@empresa-ejemplo.com', role: 'admin' },
+                tenant: { name: 'Soporte Ejemplo SAS', logo_url: null, theme: { '--color-primary': '#2164DA', '--color-primary-foreground': '#F6F1EA' } },
+                can: { team: true, branding: true },
+            },
+        };
+
+        const first = document.createElement('style');
+        first.id = 'brand-theme';
+        document.head.appendChild(first);
+
+        const { unmount } = render(
+            <PanelLayout title="Mi cuenta" section="account">
+                <p>x</p>
+            </PanelLayout>,
+        );
+
+        expect(document.documentElement.style.getPropertyValue('--color-primary')).toBe('#2164DA');
+        expect(document.documentElement.style.getPropertyValue('--color-primary-foreground')).toBe('#F6F1EA');
+        expect(document.getElementById('brand-theme')).toBeNull();
+
+        unmount();
+
+        expect(document.documentElement.style.getPropertyValue('--color-primary')).toBe('');
+    });
+
+    it('sin paleta no toca las variables', () => {
+        render(
+            <PanelLayout title="Mi cuenta" section="account">
+                <p>x</p>
+            </PanelLayout>,
+        );
+
+        expect(document.documentElement.style.getPropertyValue('--color-primary')).toBe('');
     });
 });

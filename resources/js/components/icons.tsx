@@ -124,3 +124,34 @@ export function XIcon(props: IconProps) {
         </Icon>
     );
 }
+
+export function PaletteIcon(props: IconProps) {
+    return (
+        <Icon {...props}>
+            <path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.3 0 2-.8 2-1.7 0-1.3-1.2-1.5-1.2-2.6 0-.9.7-1.5 1.7-1.5H17a3.5 3.5 0 0 0 3.5-3.5C20.5 6.7 16.7 3.5 12 3.5Z" />
+            <circle cx="7.8" cy="11" r="1" />
+            <circle cx="10.5" cy="7.6" r="1" />
+            <circle cx="15" cy="7.8" r="1" />
+        </Icon>
+    );
+}
+
+export function UploadIcon(props: IconProps) {
+    return (
+        <Icon {...props}>
+            <path d="M12 16V5" />
+            <path d="m7.5 9.5 4.5-4.5 4.5 4.5" />
+            <path d="M4.5 16.5V19h15v-2.5" />
+        </Icon>
+    );
+}
+
+export function ChatIcon(props: IconProps) {
+    return (
+        <Icon {...props}>
+            <path d="M4 5.5h16v10.5H9.5L5.5 20v-4H4V5.5Z" />
+            <path d="M8 10h8" />
+            <path d="M8 13h5" />
+        </Icon>
+    );
+}

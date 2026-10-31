@@ -30,4 +30,11 @@ export default tseslint.config(
             '@typescript-eslint/consistent-type-imports': 'error',
         },
     },
+    {
+        // Esta regla de jsx-a11y se cae al recorrer los hijos de un label porque el override de minimatch 11 (por una
+        // vulnerabilidad) cambió la API que usa. Aquí el label sí está asociado (htmlFor al input que contiene) y lo
+        // comprueban las pruebas de FileUpload. Quitar cuando jsx-a11y soporte minimatch 11.
+        files: ['resources/js/components/FileUpload.tsx'],
+        rules: { 'jsx-a11y/label-has-associated-control': 'off' },
+    },
 );

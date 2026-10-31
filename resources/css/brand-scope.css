@@ -1,0 +1,58 @@
+/*
+  GENERADO a partir de resources/tokens/tokens.css: no editar a mano.
+
+  Los tokens calculados de tokens.css se resuelven en :root, así que cambiar --color-primary dentro de un
+  contenedor no los recalcula. Este ámbito los vuelve a declarar con las mismas fórmulas, de modo que la
+  vista previa de la marca use los tokens reales y no una aproximación. Una prueba comprueba que no se
+  desincronicen: si tokens.css cambia, hay que regenerar este archivo.
+*/
+
+[data-brand-scope] {
+  --color-primary-hover: color-mix(in oklch, var(--color-primary) 88%, white 12%);
+  --color-primary-active: color-mix(in oklch, var(--color-primary) 84%, black 16%);
+  --color-primary-surface: color-mix(in oklch, var(--color-primary) 14%, var(--color-surface) 86%);
+  --color-primary-border: color-mix(in oklch, var(--color-primary) 40%, var(--color-border) 60%);
+  --color-secondary-hover: color-mix(in oklch, var(--color-secondary) 88%, white 12%);
+  --color-secondary-active: color-mix(in oklch, var(--color-secondary) 84%, black 16%);
+  --color-secondary-surface: color-mix(in oklch, var(--color-secondary) 14%, var(--color-surface) 86%);
+  --color-accent-hover: color-mix(in oklch, var(--color-accent) 88%, white 12%);
+  --color-accent-surface: color-mix(in oklch, var(--color-accent) 16%, var(--color-surface) 84%);
+  --color-surface-raised: color-mix(in oklch, var(--color-surface) 82%, white 18%);
+  --color-surface-sunken: color-mix(in oklch, var(--color-surface) 90%, black 10%);
+  --color-surface-hover: color-mix(in oklch, var(--color-surface) 92%, white 8%);
+  --color-overlay-backdrop: color-mix(in oklch, var(--color-background) 70%, transparent 30%);
+  --color-text-secondary: color-mix(in oklch, var(--color-text) 72%, var(--color-background) 28%);
+  --color-text-tertiary: color-mix(in oklch, var(--color-text) 52%, var(--color-background) 48%);
+  --color-text-disabled: color-mix(in oklch, var(--color-text) 36%, var(--color-background) 64%);
+  --color-border: color-mix(in oklch, var(--color-text) 14%, var(--color-background) 86%);
+  --color-border-strong: color-mix(in oklch, var(--color-text) 26%, var(--color-background) 74%);
+  --color-focus-ring: var(--color-primary);
+  --color-success-surface: color-mix(in oklch, var(--color-success) 16%, var(--color-surface) 84%);
+  --color-success-border: color-mix(in oklch, var(--color-success) 45%, var(--color-border) 55%);
+  --color-warning-surface: color-mix(in oklch, var(--color-warning) 16%, var(--color-surface) 84%);
+  --color-warning-border: color-mix(in oklch, var(--color-warning) 45%, var(--color-border) 55%);
+  --color-danger-surface: color-mix(in oklch, var(--color-danger) 16%, var(--color-surface) 84%);
+  --color-danger-border: color-mix(in oklch, var(--color-danger) 45%, var(--color-border) 55%);
+  --color-info-surface: color-mix(in oklch, var(--color-info) 16%, var(--color-surface) 84%);
+  --color-info-border: color-mix(in oklch, var(--color-info) 45%, var(--color-border) 55%);
+  --color-bubble-agente: var(--color-surface-raised);
+  --color-bubble-agente-texto: var(--color-text);
+  --color-bubble-cliente: var(--color-primary-surface);
+  --color-bubble-cliente-texto: var(--color-text);
+  --color-bubble-ia: color-mix(in oklch, var(--color-accent) 10%, var(--color-surface) 90%);
+  --color-bubble-ia-borde: var(--color-accent-surface);
+  --color-nota-interna: color-mix(in oklch, var(--color-warning) 10%, var(--color-surface) 90%);
+  --color-nota-interna-borde: var(--color-warning-border);
+}
+
+[data-brand-scope][data-mode='claro'] {
+  --color-surface-raised: #FFFFFF;
+  --color-surface-sunken: color-mix(in oklch, var(--color-surface) 92%, black 8%);
+  --color-surface-hover: color-mix(in oklch, var(--color-surface) 94%, black 6%);
+  --color-overlay-backdrop: color-mix(in oklch, var(--color-background) 60%, transparent 40%);
+  --color-text-secondary: color-mix(in oklch, var(--color-text) 68%, var(--color-background) 32%);
+  --color-text-tertiary: color-mix(in oklch, var(--color-text) 48%, var(--color-background) 52%);
+  --color-text-disabled: color-mix(in oklch, var(--color-text) 32%, var(--color-background) 68%);
+  --color-border: color-mix(in oklch, var(--color-text) 12%, var(--color-background) 88%);
+  --color-border-strong: color-mix(in oklch, var(--color-text) 24%, var(--color-background) 76%);
+}

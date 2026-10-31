@@ -3,10 +3,10 @@ import { useEffect, useRef, useState } from 'react';
 import type { ComponentType, ReactNode, SVGProps } from 'react';
 import logo from '../../images/logo.png';
 import { Button } from '../components/Button';
-import { MenuIcon, ShieldIcon, UserIcon, UsersIcon } from '../components/icons';
+import { MenuIcon, PaletteIcon, ShieldIcon, UserIcon, UsersIcon } from '../components/icons';
 import type { SharedProps } from '../types';
 
-export type PanelSection = 'account' | 'team' | 'security';
+export type PanelSection = 'account' | 'team' | 'branding' | 'security';
 
 interface PanelLayoutProps {
     title: string;
@@ -25,6 +25,7 @@ interface NavItem {
 const navItems: NavItem[] = [
     { key: 'account', href: '/account', Icon: UserIcon },
     { key: 'team', href: '/settings/team', Icon: UsersIcon },
+    { key: 'branding', href: '/settings/branding', Icon: PaletteIcon },
     { key: 'security', href: '/settings/security', Icon: ShieldIcon },
 ];
 
@@ -38,6 +39,23 @@ export function PanelLayout({ title, section, wide = false, children }: PanelLay
     const logout = useForm({});
     const [menuOpen, setMenuOpen] = useState(false);
     const sheetRef = useRef<HTMLDialogElement>(null);
+    const theme = auth?.tenant?.theme ?? null;
+
+    // La paleta de la empresa llega ya validada (solo el primario y su texto). Se aplica con setProperty, que la CSP
+    // permite, y al volver a la paleta por defecto se quitan las variables para recuperar la de fábrica.
+    useEffect(() => {
+        const root = document.documentElement;
+        // La etiqueta de estilo de la primera carga evita el parpadeo; desde aquí React se encarga y, si la empresa
+        // vuelve a la paleta por defecto, no queda un color viejo atrapado en ella.
+        document.getElementById('brand-theme')?.remove();
+        const names = theme === null ? [] : Object.keys(theme);
+
+        for (const name of names) root.style.setProperty(name, theme?.[name] ?? '');
+
+        return () => {
+            for (const name of names) root.style.removeProperty(name);
+        };
+    }, [theme]);
 
     useEffect(() => {
         const sheet = sheetRef.current;
@@ -47,9 +65,11 @@ export function PanelLayout({ title, section, wide = false, children }: PanelLay
         if (!menuOpen && sheet.open) sheet.close();
     }, [menuOpen]);
 
-    const labels: Record<PanelSection, string> = { account: panel.account, team: panel.team, security: panel.security };
+    const labels: Record<PanelSection, string> = { account: panel.account, team: panel.team, branding: panel.branding, security: panel.security };
     // El servidor decide qué secciones ve cada rol; aquí solo se ocultan las que no puede abrir.
-    const visibleItems = navItems.filter((item) => item.key !== 'team' || auth?.can.team === true);
+    const visibleItems = navItems.filter(
+        (item) => (item.key !== 'team' || auth?.can.team === true) && (item.key !== 'branding' || auth?.can.branding === true),
+    );
     const companyName = auth?.tenant?.name ?? panel.platform;
     const roleLabel = auth?.user.role == null ? null : (panel.roles[auth.user.role] ?? null);
 
@@ -82,7 +102,7 @@ export function PanelLayout({ title, section, wide = false, children }: PanelLay
             <div className="flex min-h-screen bg-background text-text">
                 <aside className="hidden shrink-0 flex-col border-r border-border bg-surface md:flex md:w-16 lg:w-60">
                     <div className="flex h-14 items-center gap-3 border-b border-border px-4">
-                        <img src={logo} alt="" className="size-8 shrink-0" />
+                        <img src={auth?.tenant?.logo_url ?? logo} alt="" className="size-8 shrink-0 rounded-sm object-contain" />
                         <span className="truncate font-display font-bold md:sr-only lg:not-sr-only">{companyName}</span>
                     </div>
                     <nav aria-label={panel.nav_label} className="flex flex-col gap-1 py-2">

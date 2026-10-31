@@ -10,6 +10,7 @@
 
 @import 'tailwindcss' source(none);
 @import '../tokens/tokens.css';
+@import './brand-scope.css';
 
 @config '../../tailwind.config.js';
 @source '../js';

@@ -108,6 +108,7 @@ describe('Team', () => {
                 account: 'Mi cuenta',
                 security: 'Seguridad',
                 team: 'Equipo',
+                branding: 'Marca',
                 platform: 'Plataforma',
                 open_menu: 'Abrir menú',
                 close_menu: 'Cerrar menú',
@@ -115,7 +116,7 @@ describe('Team', () => {
                 logging_out: 'Cerrando sesión…',
                 roles: { admin: 'Administrador' },
             },
-            auth: { user: { name: 'Ana Torres', email: 'ana@empresa-ejemplo.com', role: 'admin' }, tenant: { name: 'Soporte Ejemplo SAS' }, can: { team: true } },
+            auth: { user: { name: 'Ana Torres', email: 'ana@empresa-ejemplo.com', role: 'admin' }, tenant: { name: 'Soporte Ejemplo SAS', logo_url: null, theme: null }, can: { team: true, branding: true } },
         };
     });
 
