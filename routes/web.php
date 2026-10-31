@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Auth\AcceptInvitationController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\BrandingController;
+use App\Http\Controllers\FileController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\SecurityController;
@@ -30,11 +32,23 @@ Route::middleware('guest')->group(function (): void {
 Route::middleware(['auth', 'verified', 'two-factor.required'])->group(function (): void {
     Route::get('/account', AccountController::class)->name('account');
 
+    // Descarga de archivos de la empresa: URL firmada que caduca, sesión y empresa dueña (FileStore::temporaryUrl).
+    Route::get('/files/{file}', [FileController::class, 'show'])->middleware('signed')->where('file', '[0-9a-z]{26}')->name('files.show');
+
     // Equipo: solo administradores de la empresa (UserPolicy). El miembro se busca dentro de la empresa del usuario.
     Route::get('/settings/team', [TeamController::class, 'index'])->name('team');
     Route::put('/settings/team/members/{member}/role', [TeamController::class, 'updateRole'])->whereNumber('member')->name('team.members.role');
     Route::post('/settings/team/members/{member}/deactivate', [TeamController::class, 'deactivate'])->whereNumber('member')->name('team.members.deactivate');
     Route::post('/settings/team/members/{member}/activate', [TeamController::class, 'activate'])->whereNumber('member')->name('team.members.activate');
+
+    // Marca de la empresa: solo administradores (TenantBrandingPolicy).
+    Route::get('/settings/branding', [BrandingController::class, 'show'])->name('branding');
+    Route::put('/settings/branding/name', [BrandingController::class, 'updateName'])->name('branding.name');
+    Route::put('/settings/branding/colors', [BrandingController::class, 'updateColors'])->name('branding.colors.update');
+    Route::delete('/settings/branding/colors', [BrandingController::class, 'resetColors'])->name('branding.colors.reset');
+    Route::post('/settings/branding/palette/check', [BrandingController::class, 'checkPalette'])->middleware('throttle:palette-check')->name('branding.palette.check');
+    Route::post('/settings/branding/logo', [BrandingController::class, 'storeLogo'])->name('branding.logo.store');
+    Route::delete('/settings/branding/logo', [BrandingController::class, 'destroyLogo'])->name('branding.logo.destroy');
 
     // Invitaciones: la invitación se resuelve con el filtro automático, así que una de otra empresa da 404.
     Route::post('/settings/team/invitations', [InvitationController::class, 'store'])->name('team.invitations.store');

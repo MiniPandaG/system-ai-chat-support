@@ -7,6 +7,7 @@ return [
     'account' => 'Mi cuenta',
     'security' => 'Seguridad',
     'team' => 'Equipo',
+    'branding' => 'Marca',
     'platform' => 'Plataforma',
     'open_menu' => 'Abrir menú',
     'close_menu' => 'Cerrar menú',

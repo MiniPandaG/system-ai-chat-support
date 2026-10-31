@@ -30,4 +30,11 @@ enum AuditEvent: string
     case InvitationResent = 'invitation.resent';
     case InvitationRevoked = 'invitation.revoked';
     case InvitationAccepted = 'invitation.accepted';
+    case FileUploaded = 'file.uploaded';
+    case FileDeleted = 'file.deleted';
+    case BrandingNameChanged = 'branding.name_changed';
+    case BrandingLogoChanged = 'branding.logo_changed';
+    case BrandingLogoRemoved = 'branding.logo_removed';
+    case BrandingPaletteChanged = 'branding.palette_changed';
+    case BrandingPaletteReset = 'branding.palette_reset';
 }

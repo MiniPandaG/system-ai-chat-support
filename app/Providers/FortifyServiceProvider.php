@@ -139,6 +139,8 @@ class FortifyServiceProvider extends ServiceProvider
 
         RateLimiter::for('invitation', fn (Request $request): Limit => Limit::perMinute(20)->by('invitation:'.$request->ip()));
 
+        RateLimiter::for('palette-check', fn (Request $request): Limit => Limit::perMinute(120)->by('palette-check:'.$this->accountSubject($request)));
+
         RateLimiter::for('login-ip', fn (Request $request): Limit => Limit::perMinute(30)->by((string) $request->ip()));
     }
 

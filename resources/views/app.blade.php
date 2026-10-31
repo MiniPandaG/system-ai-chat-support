@@ -6,6 +6,9 @@
     <title inertia>{{ config('app.name') }}</title>
     @viteReactRefresh
     @vite(['resources/css/app.css', 'resources/js/app.tsx'])
+    @if (($brandingCss ?? '') !== '')
+        <style id="brand-theme" nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">{{ $brandingCss }}</style>
+    @endif
     @inertiaHead
 </head>
 <body>

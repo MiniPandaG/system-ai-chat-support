@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Files\FileStore;
 use App\Models\Tenant;
+use App\Models\TenantBranding;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -25,7 +27,7 @@ class HandleInertiaRequests extends Middleware
     }
 
     /**
-     * @return array{user: array{name: string, email: string, role: string|null}, tenant: array{name: string}|null, can: array{team: bool}}|null
+     * @return array{user: array{name: string, email: string, role: string|null}, tenant: array{name: string, logo_url: string|null, theme: array<string, string>|null}|null, can: array{team: bool, branding: bool}}|null
      */
     private function authenticated(Request $request): ?array
     {
@@ -39,9 +41,34 @@ class HandleInertiaRequests extends Middleware
 
         return [
             'user' => ['name' => $user->name, 'email' => $user->email, 'role' => $user->role?->value],
-            'tenant' => $tenant === null ? null : ['name' => $tenant->name],
-            'can' => ['team' => Gate::forUser($user)->allows('viewAny', User::class)],
+            'tenant' => $tenant === null ? null : ['name' => $tenant->name, 'logo_url' => $this->logoUrl(), 'theme' => $this->theme()],
+            'can' => [
+                'team' => Gate::forUser($user)->allows('viewAny', User::class),
+                'branding' => Gate::forUser($user)->allows('manage', TenantBranding::class),
+            ],
         ];
+    }
+
+    /**
+     * Variables CSS de la empresa para el panel (solo el primario y su texto, ya validados); nulo con la paleta por defecto.
+     *
+     * @return array<string, string>|null
+     */
+    private function theme(): ?array
+    {
+        $variables = TenantBranding::query()->first()?->panelVariables() ?? [];
+
+        return $variables === [] ? null : $variables;
+    }
+
+    /**
+     * Enlace firmado del logo de la empresa en contexto; nulo si no subió uno.
+     */
+    private function logoUrl(): ?string
+    {
+        $logo = TenantBranding::query()->first()?->logo();
+
+        return $logo === null ? null : app(FileStore::class)->temporaryUrl($logo);
     }
 
     /**
