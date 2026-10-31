@@ -1,4 +1,4 @@
-import tokens from './design/tokens/tailwind.tokens.js';
+import tokens from './resources/tokens/tailwind.tokens.js';
 
 export default {
     theme: {

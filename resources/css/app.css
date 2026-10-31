@@ -9,7 +9,7 @@
 @import '@fontsource/ibm-plex-mono/latin-500.css';
 
 @import 'tailwindcss' source(none);
-@import '../../design/tokens/tokens.css';
+@import '../tokens/tokens.css';
 
 @config '../../tailwind.config.js';
 @source '../js';

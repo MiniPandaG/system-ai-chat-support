@@ -13,7 +13,7 @@ parameters:
     checkMissingCallableSignature: true
     treatPhpDocTypesAsCertain: false
     ignoreErrors:
-        # El modelo User lo crea el módulo M1; mientras tanto la configuración de autenticación lo nombra.
+        # El modelo User todavía no existe; la configuración de autenticación ya lo nombra.
         -
             identifier: class.notFound
             path: config/auth.php

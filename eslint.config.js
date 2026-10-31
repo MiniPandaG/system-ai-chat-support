@@ -6,7 +6,7 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-    { ignores: ['public/build/**', 'vendor/**', 'node_modules/**', 'storage/**', 'design/**', 'docs/**', 'eslint.config.js'] },
+    { ignores: ['public/build/**', 'vendor/**', 'node_modules/**', 'storage/**', 'eslint.config.js'] },
     eslint.configs.recommended,
     tseslint.configs.strictTypeChecked,
     tseslint.configs.stylisticTypeChecked,
