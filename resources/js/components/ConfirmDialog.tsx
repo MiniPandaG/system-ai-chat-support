@@ -1,6 +1,8 @@
 import { useEffect, useId, useRef } from 'react';
 import { Button } from './Button';
 
+type ConfirmVariant = 'primary' | 'danger';
+
 interface ConfirmDialogProps {
     open: boolean;
     title: string;
@@ -9,6 +11,8 @@ interface ConfirmDialogProps {
     confirmLabel: string;
     confirmingLabel: string;
     loading?: boolean;
+    /** Danger para acciones destructivas; primary para una confirmación que otorga permisos. */
+    confirmVariant?: ConfirmVariant;
     onConfirm: () => void;
     onCancel: () => void;
 }
@@ -17,7 +21,7 @@ interface ConfirmDialogProps {
  * Confirmación de una acción destructiva (design/componentes/modal.md). Usa el elemento dialog del navegador, que
  * ya atrapa el foco, lo devuelve a quien lo abrió y cierra con Esc. Un clic fuera nunca lo cierra.
  */
-export function ConfirmDialog({ open, title, detail, cancelLabel, confirmLabel, confirmingLabel, loading = false, onConfirm, onCancel }: ConfirmDialogProps) {
+export function ConfirmDialog({ open, title, detail, cancelLabel, confirmLabel, confirmingLabel, loading = false, confirmVariant = 'danger', onConfirm, onCancel }: ConfirmDialogProps) {
     const ref = useRef<HTMLDialogElement>(null);
     const titleId = useId();
     const detailId = useId();
@@ -54,7 +58,7 @@ export function ConfirmDialog({ open, title, detail, cancelLabel, confirmLabel, 
                     <Button variant="text" disabled={loading} onClick={onCancel}>
                         {cancelLabel}
                     </Button>
-                    <Button variant="danger" loading={loading} loadingLabel={confirmingLabel} onClick={onConfirm}>
+                    <Button variant={confirmVariant} loading={loading} loadingLabel={confirmingLabel} onClick={onConfirm}>
                         {confirmLabel}
                     </Button>
                 </div>

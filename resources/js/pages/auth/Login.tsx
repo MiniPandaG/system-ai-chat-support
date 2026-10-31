@@ -20,6 +20,8 @@ interface LoginCopy {
     invalid_email: string;
     summary: string;
     forgot: string;
+    register_prompt: string;
+    register_link: string;
 }
 
 interface LoginProps {
@@ -143,6 +145,13 @@ export default function Login({ copy }: LoginProps) {
                     {copy.submit}
                 </Button>
             </form>
+
+            <p className="text-sm text-text-secondary">
+                {copy.register_prompt}{' '}
+                <Link href="/register" className="underline hover:text-text">
+                    {copy.register_link}
+                </Link>
+            </p>
         </AuthLayout>
     );
 }

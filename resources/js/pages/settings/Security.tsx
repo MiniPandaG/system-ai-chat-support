@@ -8,7 +8,7 @@ import { PasswordChangeForm } from '../../components/PasswordChangeForm';
 import type { PasswordChangeCopy } from '../../components/PasswordChangeForm';
 import { SessionsList } from '../../components/SessionsList';
 import type { SessionItem, SessionsCopy } from '../../components/SessionsList';
-import { AuthLayout } from '../../layouts/AuthLayout';
+import { PanelLayout } from '../../layouts/PanelLayout';
 import type { SharedProps } from '../../types';
 
 interface SecurityCopy {
@@ -154,16 +154,16 @@ export default function Security({ copy, twoFactor, setup, sessions }: SecurityP
 
     if (issuedCodes !== null) {
         return (
-            <AuthLayout title={copy.title}>
+            <PanelLayout title={copy.title} section="security">
                 <RecoveryCodes copy={copy.recovery} codes={issuedCodes} />
-            </AuthLayout>
+            </PanelLayout>
         );
     }
 
     const remaining = remainingText();
 
     return (
-        <AuthLayout title={copy.title}>
+        <PanelLayout title={copy.title} section="security">
             {props.flash.status !== null && <Alert variant="success">{props.flash.status}</Alert>}
 
             <section aria-labelledby="dos-pasos" className="flex flex-col gap-4">
@@ -302,6 +302,6 @@ export default function Security({ copy, twoFactor, setup, sessions }: SecurityP
                     {copy.back}
                 </Link>
             ) : null}
-        </AuthLayout>
+        </PanelLayout>
     );
 }

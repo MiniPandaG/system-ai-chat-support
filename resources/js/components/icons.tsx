@@ -68,3 +68,59 @@ export function AlertTriangleIcon(props: IconProps) {
         </Icon>
     );
 }
+
+export function UserIcon(props: IconProps) {
+    return (
+        <Icon {...props}>
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 20c0-4 3.6-6 8-6s8 2 8 6" />
+        </Icon>
+    );
+}
+
+export function ShieldIcon(props: IconProps) {
+    return (
+        <Icon {...props}>
+            <path d="M12 3 4.5 6v6c0 4.5 3.2 7.6 7.5 9 4.3-1.4 7.5-4.5 7.5-9V6L12 3Z" />
+            <path d="m9 12 2.2 2.2L15.5 10" />
+        </Icon>
+    );
+}
+
+export function MenuIcon(props: IconProps) {
+    return (
+        <Icon {...props}>
+            <path d="M4 7h16" />
+            <path d="M4 12h16" />
+            <path d="M4 17h16" />
+        </Icon>
+    );
+}
+
+export function CheckIcon(props: IconProps) {
+    return (
+        <Icon {...props}>
+            <path d="m5 12.5 4.5 4.5L19 7.5" />
+        </Icon>
+    );
+}
+
+export function UsersIcon(props: IconProps) {
+    return (
+        <Icon {...props}>
+            <circle cx="9" cy="8" r="3.5" />
+            <path d="M2.5 20c0-3.6 2.8-5.5 6.5-5.5s6.5 1.9 6.5 5.5" />
+            <path d="M16 4.7a3.5 3.5 0 0 1 0 6.6" />
+            <path d="M18 14.8c2.2.6 3.5 2.2 3.5 5.2" />
+        </Icon>
+    );
+}
+
+export function XIcon(props: IconProps) {
+    return (
+        <Icon {...props}>
+            <path d="M6 6l12 12" />
+            <path d="M18 6 6 18" />
+        </Icon>
+    );
+}
