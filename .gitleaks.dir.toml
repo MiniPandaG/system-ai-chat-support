@@ -1,0 +1,19 @@
+# Configuración para escanear el árbol de trabajo. Añade a la regla estricta de
+# .gitleaks.toml solo carpetas generadas o ignoradas por Git. El historial se
+# escanea con .gitleaks.toml, sin estas excepciones.
+title = "TikaroChat (árbol de trabajo)"
+
+[extend]
+path = "/repo/.gitleaks.toml"
+
+[[allowlists]]
+description = "Archivos locales ignorados por Git y carpetas generadas"
+paths = [
+    '''^/repo/\.env$''',
+    '''^/repo/\.git/''',
+    '''^/repo/node_modules/''',
+    '''^/repo/\.pnpm-store/''',
+    '''^/repo/vendor/''',
+    '''^/repo/public/build/''',
+    '''^/repo/storage/''',
+]

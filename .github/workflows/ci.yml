@@ -1,0 +1,32 @@
+name: Calidad y seguridad
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  calidad:
+    name: Pruebas, análisis, auditorías y secretos
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      # Historial completo: gitleaks revisa todos los commits, no solo el último.
+      - name: Descargar el código
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Preparar el entorno (.env, contenedores, dependencias, migraciones y frontend)
+        run: bash scripts/setup.sh
+
+      - name: Calidad y seguridad (formato, análisis, pruebas, auditorías y secretos)
+        run: bash scripts/qa.sh
