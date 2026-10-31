@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Models\Tenant;
 use App\Models\User;
 use App\Services\RecoveryCodes;
 use Illuminate\Http\Request;
@@ -20,8 +21,18 @@ class AccountController extends Controller
         return Inertia::render('Account', [
             'copy' => __('auth.account'),
             'name' => $user->name,
+            'detail' => $this->detail($user),
             'recoveryWarning' => $this->recoveryWarning($user),
         ]);
+    }
+
+    private function detail(User $user): string
+    {
+        if ($user->tenant_id === null) {
+            return __('auth.account.detail_platform');
+        }
+
+        return __('auth.account.detail', ['company' => Tenant::query()->find($user->tenant_id)->name ?? '']);
     }
 
     private function recoveryWarning(User $user): ?string

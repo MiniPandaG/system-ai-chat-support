@@ -22,4 +22,12 @@ enum AuditEvent: string
     case PasswordChanged = 'password.changed';
     case SessionRevoked = 'session.revoked';
     case SessionsRevoked = 'sessions.revoked';
+    case TenantCreated = 'tenant.created';
+    case MemberRoleChanged = 'member.role_changed';
+    case MemberDeactivated = 'member.deactivated';
+    case MemberActivated = 'member.activated';
+    case InvitationCreated = 'invitation.created';
+    case InvitationResent = 'invitation.resent';
+    case InvitationRevoked = 'invitation.revoked';
+    case InvitationAccepted = 'invitation.accepted';
 }

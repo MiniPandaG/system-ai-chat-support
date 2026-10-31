@@ -28,7 +28,7 @@ class SecurityController extends Controller
             'twoFactor' => [
                 'enabled' => $enabled,
                 'pending' => $pending,
-                'required' => $user->is_platform_admin,
+                'required' => $user->requiresTwoFactor(),
                 'remainingCodes' => $enabled ? RecoveryCodes::remaining($user) : 0,
             ],
             // El QR y la clave solo existen mientras se activa el 2FA; después no se vuelven a entregar.

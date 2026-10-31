@@ -9,9 +9,9 @@ return [
     'two_factor' => [
         'title' => 'Verificación en dos pasos',
         'detail' => 'Además de la contraseña, te pedimos un código de 6 dígitos de una aplicación de autenticación cada vez que inicias sesión.',
-        'required_for_admin' => 'La verificación en dos pasos es obligatoria para administradores de la plataforma y no se puede desactivar.',
+        'required_for_admin' => 'La verificación en dos pasos es obligatoria para administradores y no se puede desactivar.',
         'not_enabled' => 'Primero activa la verificación en dos pasos.',
-        'required_notice' => 'Eres administrador de la plataforma: tienes que activar la verificación en dos pasos antes de usar el resto de la aplicación.',
+        'required_notice' => 'Eres administrador: tienes que activar la verificación en dos pasos antes de usar el resto de la aplicación.',
         'status_off' => 'Desactivada',
         'status_on' => 'Activada',
         'enable' => 'Activar verificación en dos pasos',

@@ -15,6 +15,7 @@ use App\Http\Controllers\Auth\RecoveryCodeController;
 use App\Http\Requests\TwoFactorChallengeRequest;
 use App\Http\Responses\PasswordResetLinkResponse;
 use App\Models\User;
+use App\Services\AuditLogger;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Foundation\Application;
@@ -90,6 +91,11 @@ class FortifyServiceProvider extends ServiceProvider
                 return null;
             }
 
+            // Un miembro desactivado recibe el mismo rechazo genérico, después de gastar el mismo tiempo de cálculo.
+            if ($user->disabled_at !== null) {
+                return null;
+            }
+
             if (Hash::needsRehash($user->password)) {
                 $user->forceFill(['password' => $password])->save();
             }
@@ -117,6 +123,21 @@ class FortifyServiceProvider extends ServiceProvider
 
                 return back()->withErrors(['current_password' => trans('auth.throttle', ['minutes' => max(1, (int) ceil($seconds / 60))])]);
             }));
+
+        // Cinco registros por IP y tres por correo cada hora. La clave del correo es una huella, para no guardarlo.
+        RateLimiter::for('register', fn (Request $request): array => array_map(
+            fn (Limit $limit): Limit => $limit->response(function (Request $request, array $headers) {
+                $seconds = is_numeric($headers['Retry-After'] ?? null) ? (int) $headers['Retry-After'] : 3600;
+
+                return back()->withErrors(['email' => trans('auth.throttle', ['minutes' => max(1, (int) ceil($seconds / 60))])]);
+            }),
+            [
+                Limit::perHour(5)->by('register-ip:'.$request->ip()),
+                Limit::perHour(3)->by('register-email:'.AuditLogger::fingerprint($request->string('email')->toString())),
+            ],
+        ));
+
+        RateLimiter::for('invitation', fn (Request $request): Limit => Limit::perMinute(20)->by('invitation:'.$request->ip()));
 
         RateLimiter::for('login-ip', fn (Request $request): Limit => Limit::perMinute(30)->by((string) $request->ip()));
     }

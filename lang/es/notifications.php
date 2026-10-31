@@ -21,6 +21,15 @@ return [
         'action' => 'Restablecer contraseña',
     ],
 
+    'invitation' => [
+        'subject' => 'Te invitaron a :company en TikaroChat',
+        'greeting' => 'Hola.',
+        'intro' => 'Te invitaron a unirte a :company en TikaroChat con el rol de :role.',
+        'action' => 'Aceptar la invitación',
+        'expire' => 'El enlace funciona una sola vez y caduca en :hours horas.',
+        'ignore' => 'Si no esperabas esta invitación, ignora este correo: no se crea ninguna cuenta.',
+    ],
+
     'verify' => [
         'subject' => 'Verifica tu correo en TikaroChat',
         'intro' => 'Confirma que este correo es tuyo para empezar a usar tu cuenta.',

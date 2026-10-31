@@ -12,3 +12,4 @@ parameters:
         - routes
     checkMissingCallableSignature: true
     treatPhpDocTypesAsCertain: false
+

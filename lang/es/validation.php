@@ -12,6 +12,7 @@ return [
     'min' => [
         'string' => 'La :attribute debe tener al menos :min caracteres.',
     ],
+    'company_required' => 'Escribe el nombre de tu empresa.',
     'confirmed' => 'Las contraseñas no coinciden.',
     'current_password' => 'La contraseña actual no es correcta.',
     'different' => 'La contraseña nueva debe ser distinta de la actual.',
@@ -29,5 +30,6 @@ return [
         'current_password' => 'contraseña actual',
         'password_confirmation' => 'confirmación de la contraseña',
         'name' => 'nombre',
+        'company_name' => 'nombre de la empresa',
     ],
 ];

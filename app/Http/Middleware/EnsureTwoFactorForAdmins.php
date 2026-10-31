@@ -10,9 +10,10 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Un administrador de la plataforma sin 2FA activo solo puede llegar a la pantalla de seguridad para activarlo.
+ * Un administrador (de la plataforma o de una empresa) sin 2FA activo solo puede llegar a la pantalla de seguridad
+ * para activarlo (RS-03).
  */
-class EnsureTwoFactorForPlatformAdmins
+class EnsureTwoFactorForAdmins
 {
     /**
      * @param  Closure(Request): Response  $next
@@ -21,7 +22,7 @@ class EnsureTwoFactorForPlatformAdmins
     {
         $user = $request->user();
 
-        if ($user instanceof User && $user->is_platform_admin && ! $user->hasEnabledTwoFactorAuthentication()) {
+        if ($user instanceof User && $user->requiresTwoFactor() && ! $user->hasEnabledTwoFactorAuthentication()) {
             return redirect()->route('security');
         }
 

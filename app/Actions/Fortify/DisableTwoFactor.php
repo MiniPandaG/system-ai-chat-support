@@ -12,7 +12,7 @@ class DisableTwoFactor extends DisableTwoFactorAuthentication
 {
     public function __invoke($user)
     {
-        if ($user instanceof User && $user->is_platform_admin && $user->hasEnabledTwoFactorAuthentication()) {
+        if ($user instanceof User && $user->requiresTwoFactor() && $user->hasEnabledTwoFactorAuthentication()) {
             throw ValidationException::withMessages([
                 'two_factor' => [__('security.two_factor.required_for_admin')],
             ]);
