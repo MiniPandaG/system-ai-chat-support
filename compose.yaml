@@ -1,0 +1,76 @@
+name: tikarochat
+
+services:
+  app:
+    build: ./docker/php
+    image: tikarochat-app:dev
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  web:
+    image: nginx:stable-alpine
+    ports:
+      - "127.0.0.1:8080:80"
+    volumes:
+      - ./:/var/www/html:ro
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+
+  node:
+    image: node:24-alpine
+    profiles: ["tools"]
+    working_dir: /var/www/html
+    environment:
+      # El almacén de pnpm vive en el mismo volumen que node_modules: permite enlaces duros y no ensucia el repositorio.
+      npm_config_store_dir: /var/www/html/node_modules/.pnpm-store
+    ports:
+      - "127.0.0.1:5173:5173"
+    volumes:
+      - ./:/var/www/html
+      - node-modules:/var/www/html/node_modules
+
+  mysql:
+    image: mysql:8.4
+    ports:
+      - "127.0.0.1:3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?define DB_ROOT_PASSWORD en .env}
+      MYSQL_DATABASE: ${DB_DATABASE:?define DB_DATABASE en .env}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME:?define DB_USERNAME en .env}
+      DB_PASSWORD: ${DB_PASSWORD:?define DB_PASSWORD en .env}
+      DB_MIGRATOR_USERNAME: ${DB_MIGRATOR_USERNAME:?define DB_MIGRATOR_USERNAME en .env}
+      DB_MIGRATOR_PASSWORD: ${DB_MIGRATOR_PASSWORD:?define DB_MIGRATOR_PASSWORD en .env}
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./docker/mysql/provision-users.sh:/docker-entrypoint-initdb.d/01-provision-users.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?define REDIS_PASSWORD en .env}
+    command: ["sh", "-c", "exec redis-server --requirepass \"$$REDIS_PASSWORD\""]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" --no-auth-warning ping | grep -q PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  node-modules:
+  mysql-data:
+  redis-data:
