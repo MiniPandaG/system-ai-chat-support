@@ -1,0 +1,40 @@
+@import '@fontsource/space-grotesk/latin-500.css';
+@import '@fontsource/space-grotesk/latin-600.css';
+@import '@fontsource/space-grotesk/latin-700.css';
+@import '@fontsource/work-sans/latin-400.css';
+@import '@fontsource/work-sans/latin-500.css';
+@import '@fontsource/work-sans/latin-600.css';
+@import '@fontsource/work-sans/latin-700.css';
+@import '@fontsource/ibm-plex-mono/latin-400.css';
+@import '@fontsource/ibm-plex-mono/latin-500.css';
+
+@import 'tailwindcss' source(none);
+@import '../../design/tokens/tokens.css';
+
+@config '../../tailwind.config.js';
+@source '../js';
+@source '../views';
+
+@layer base {
+    html {
+        color-scheme: dark;
+    }
+
+    html[data-theme='claro'] {
+        color-scheme: light;
+    }
+
+    body {
+        background-color: var(--color-background);
+        color: var(--color-text);
+        font-family: var(--font-body);
+        font-size: var(--text-base-size);
+        line-height: var(--text-base-lh);
+        -webkit-font-smoothing: antialiased;
+    }
+
+    :focus-visible {
+        outline: 2px solid var(--color-focus-ring);
+        outline-offset: 2px;
+    }
+}
