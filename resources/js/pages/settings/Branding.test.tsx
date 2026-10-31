@@ -155,6 +155,7 @@ describe('Branding', () => {
                 security: 'Seguridad',
                 team: 'Equipo',
                 branding: 'Marca',
+                plan: 'Plan',
                 platform: 'Plataforma',
                 open_menu: 'Abrir menú',
                 close_menu: 'Cerrar menú',
@@ -165,7 +166,7 @@ describe('Branding', () => {
             auth: {
                 user: { name: 'Ana', email: 'ana@empresa-ejemplo.com', role: 'admin' },
                 tenant: { name: 'Soporte Ejemplo SAS', logo_url: null, theme: null },
-                can: { team: true, branding: true },
+                can: { team: true, branding: true, plan: true },
             },
         };
     });

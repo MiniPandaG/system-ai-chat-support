@@ -6,6 +6,7 @@ use App\Enums\AuditEvent;
 use App\Enums\Role;
 use App\Models\AuditLog;
 use App\Models\Invitation;
+use App\Models\Plan;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Notifications\InvitationNotification;
@@ -24,7 +25,7 @@ function invitedPassword(): string
 
 function inviteAdmin(?Tenant $tenant = null): User
 {
-    $user = User::factory()->forTenant($tenant ?? Tenant::factory()->create(), Role::Admin)->create();
+    $user = User::factory()->forTenant($tenant ?? Tenant::factory()->onPlan('negocio')->create(), Role::Admin)->create();
     $user->forceFill([
         'two_factor_secret' => encrypt('SECRETOPRUEBA'),
         'two_factor_recovery_codes' => encrypt(json_encode(['x'])),
@@ -69,7 +70,7 @@ beforeEach(function (): void {
 });
 
 it('un administrador invita: queda la invitación, con solo el hash del token, y sale el correo por cola', function (): void {
-    $tenant = Tenant::factory()->create();
+    $tenant = Tenant::factory()->onPlan('negocio')->create();
     $admin = inviteAdmin($tenant);
 
     $this->actingAs($admin)->post('/settings/team/invitations', ['emails' => ['Nueva@Empresa-Ejemplo.com'], 'role' => 'observer'])
@@ -98,7 +99,7 @@ it('el correo de invitación está en español y apunta al enlace con el token',
 });
 
 it('invita a varias personas a la vez, sin repetir correos aunque cambien las mayúsculas', function (): void {
-    $tenant = Tenant::factory()->create();
+    $tenant = Tenant::factory()->onPlan('negocio')->create();
 
     $this->actingAs(inviteAdmin($tenant))->post('/settings/team/invitations', [
         'emails' => ['uno@empresa-ejemplo.com', 'DOS@empresa-ejemplo.com', 'uno@empresa-ejemplo.com'],
@@ -110,7 +111,7 @@ it('invita a varias personas a la vez, sin repetir correos aunque cambien las ma
 });
 
 it('rechaza correos inválidos, listas vacías o demasiado largas y roles inexistentes', function (array $payload, string $field): void {
-    $tenant = Tenant::factory()->create();
+    $tenant = Tenant::factory()->onPlan('negocio')->create();
 
     $this->actingAs(inviteAdmin($tenant))->post('/settings/team/invitations', $payload)->assertSessionHasErrors($field);
 
@@ -126,7 +127,7 @@ it('rechaza correos inválidos, listas vacías o demasiado largas y roles inexis
 ]);
 
 it('no invita a quien ya es del equipo y se lo dice al administrador', function (): void {
-    $tenant = Tenant::factory()->create();
+    $tenant = Tenant::factory()->onPlan('negocio')->create();
     $admin = inviteAdmin($tenant);
     $member = User::factory()->forTenant($tenant, Role::Agent)->create();
 
@@ -138,8 +139,8 @@ it('no invita a quien ya es del equipo y se lo dice al administrador', function 
 });
 
 it('invitar a un correo con cuenta en otra empresa no lo revela: se crea igual', function (): void {
-    $elsewhere = User::factory()->forTenant(Tenant::factory()->create(), Role::Agent)->create();
-    $tenant = Tenant::factory()->create();
+    $elsewhere = User::factory()->forTenant(Tenant::factory()->onPlan('negocio')->create(), Role::Agent)->create();
+    $tenant = Tenant::factory()->onPlan('negocio')->create();
 
     $this->actingAs(inviteAdmin($tenant))->post('/settings/team/invitations', ['emails' => [$elsewhere->email], 'role' => 'agent'])
         ->assertSessionHasNoErrors()
@@ -149,7 +150,7 @@ it('invitar a un correo con cuenta en otra empresa no lo revela: se crea igual',
 });
 
 it('volver a invitar al mismo correo reutiliza la invitación y el enlace anterior deja de servir', function (): void {
-    $tenant = Tenant::factory()->create();
+    $tenant = Tenant::factory()->onPlan('negocio')->create();
     $admin = inviteAdmin($tenant);
     $first = openInvitation($admin);
     $second = openInvitation($admin);
@@ -163,7 +164,7 @@ it('volver a invitar al mismo correo reutiliza la invitación y el enlace anteri
 });
 
 it('solo un administrador activo de la empresa puede invitar', function (Role $role, int $status): void {
-    $tenant = Tenant::factory()->create();
+    $tenant = Tenant::factory()->onPlan('negocio')->create();
     $actor = User::factory()->forTenant($tenant, $role)->create();
 
     $this->actingAs($actor)->post('/settings/team/invitations', ['emails' => ['a@empresa-ejemplo.com'], 'role' => 'agent'])->assertStatus($status);
@@ -184,7 +185,7 @@ it('un visitante y el personal de la plataforma no pueden invitar', function ():
 });
 
 it('reenviar genera un enlace nuevo, invalida el anterior y reinicia la caducidad', function (): void {
-    $tenant = Tenant::factory()->create();
+    $tenant = Tenant::factory()->onPlan('negocio')->create();
     $admin = inviteAdmin($tenant);
     $old = openInvitation($admin);
     $invitation = invitationFor($tenant, 'nueva@empresa-ejemplo.com');
@@ -205,7 +206,7 @@ it('reenviar genera un enlace nuevo, invalida el anterior y reinicia la caducida
 });
 
 it('cancelar deja el enlace sin efecto y no se puede reenviar después', function (): void {
-    $tenant = Tenant::factory()->create();
+    $tenant = Tenant::factory()->onPlan('negocio')->create();
     $admin = inviteAdmin($tenant);
     $token = openInvitation($admin);
     $invitation = invitationFor($tenant, 'nueva@empresa-ejemplo.com');
@@ -222,10 +223,10 @@ it('cancelar deja el enlace sin efecto y no se puede reenviar después', functio
 });
 
 it('otra empresa recibe 404 al reenviar o cancelar y la invitación no cambia', function (): void {
-    $tenant = Tenant::factory()->create();
+    $tenant = Tenant::factory()->onPlan('negocio')->create();
     openInvitation(inviteAdmin($tenant));
     $invitation = invitationFor($tenant, 'nueva@empresa-ejemplo.com');
-    $intruder = inviteAdmin(Tenant::factory()->create());
+    $intruder = inviteAdmin(Tenant::factory()->onPlan('negocio')->create());
 
     $this->assertOtherTenantGets404($intruder, 'POST', '/settings/team/invitations/'.$invitation?->id.'/resend');
     $this->assertOtherTenantGets404($intruder, 'POST', '/settings/team/invitations/'.$invitation?->id.'/revoke');
@@ -236,13 +237,13 @@ it('otra empresa recibe 404 al reenviar o cancelar y la invitación no cambia', 
 });
 
 it('el equipo lista solo las invitaciones abiertas de su empresa, con las caducadas marcadas', function (): void {
-    $tenant = Tenant::factory()->create();
+    $tenant = Tenant::factory()->onPlan('negocio')->create();
     $admin = inviteAdmin($tenant);
     openInvitation($admin, 'abierta@empresa-ejemplo.com');
     openInvitation($admin, 'cancelada@empresa-ejemplo.com');
     $cancelled = invitationFor($tenant, 'cancelada@empresa-ejemplo.com');
     $this->actingAs($admin)->post('/settings/team/invitations/'.$cancelled?->id.'/revoke');
-    openInvitation(inviteAdmin(Tenant::factory()->create()), 'ajena@empresa-ejemplo.com');
+    openInvitation(inviteAdmin(Tenant::factory()->onPlan('negocio')->create()), 'ajena@empresa-ejemplo.com');
 
     $this->actingAs($admin)->get('/settings/team')->assertInertia(fn (AssertableInertia $page) => $page
         ->has('invitations', 1)
@@ -255,6 +256,8 @@ it('el equipo lista solo las invitaciones abiertas de su empresa, con las caduca
 });
 
 it('limita a 20 invitaciones por hora por empresa', function (): void {
+    // El tope del plan quedaría antes que el de la hora: aquí se mide solo el de la hora.
+    Plan::query()->where('slug', 'negocio')->update(['max_agents' => null]);
     $admin = inviteAdmin();
     $batch = fn (string $prefix): array => array_map(fn (int $i): string => "{$prefix}{$i}@empresa-ejemplo.com", range(1, 10));
 
@@ -277,7 +280,7 @@ it('el audit de invitaciones no guarda correos ni tokens', function (): void {
 
 describe('aceptar', function (): void {
     it('crea la cuenta en la empresa y con el rol de la invitación, verificada, y abre la sesión', function (): void {
-        $tenant = Tenant::factory()->create();
+        $tenant = Tenant::factory()->onPlan('negocio')->create();
         $token = openInvitation(inviteAdmin($tenant), 'nueva@empresa-ejemplo.com', 'observer');
         auth()->logout();
 
@@ -335,7 +338,7 @@ describe('aceptar', function (): void {
     });
 
     it('si el correo ya tiene una cuenta se lo dice a quien acepta y no crea nada', function (): void {
-        $tenant = Tenant::factory()->create();
+        $tenant = Tenant::factory()->onPlan('negocio')->create();
         $token = openInvitation(inviteAdmin($tenant), 'existente@empresa-ejemplo.com');
         auth()->logout();
         User::factory()->create(['email' => 'existente@empresa-ejemplo.com']);
@@ -348,8 +351,8 @@ describe('aceptar', function (): void {
     });
 
     it('valida el nombre y la contraseña, e ignora el correo, el rol y la empresa que envíe el cliente', function (): void {
-        $tenant = Tenant::factory()->create();
-        $other = Tenant::factory()->create();
+        $tenant = Tenant::factory()->onPlan('negocio')->create();
+        $other = Tenant::factory()->onPlan('negocio')->create();
         $token = openInvitation(inviteAdmin($tenant), 'nueva@empresa-ejemplo.com', 'agent');
         auth()->logout();
 

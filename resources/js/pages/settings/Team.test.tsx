@@ -12,7 +12,7 @@ let shared: Partial<SharedProps> = {};
 vi.mock('@inertiajs/react', () => ({
     Head: () => null,
     Link: ({ href, children }: { href: string; children: ReactNode }) => <a href={href}>{children}</a>,
-    useForm: () => ({ post: vi.fn(), processing: false, data: { emails: [], role: 'agent' }, errors: {}, setData: vi.fn(), reset: vi.fn() }),
+    useForm: () => ({ post: vi.fn(), processing: false, data: { emails: [], role: 'agent' }, errors: {}, setData: vi.fn(), reset: vi.fn(), clearErrors: vi.fn() }),
     usePage: () => ({ props: shared }),
     router: {
         put: (url: string, data: unknown, options?: { onFinish?: () => void }) => {
@@ -76,7 +76,13 @@ const copy = {
     resend_label: 'Reenviar la invitación a :email',
     revoke: 'Cancelar invitación',
     revoke_label: 'Cancelar la invitación a :email',
+    seats: 'Puestos de agente: :used de :max (plan :plan)',
+    seats_unlimited: 'Puestos de agente: :used (plan :plan, sin límite)',
+    seats_full: 'Tu plan :plan permite :max puestos de agente y ya los usas.',
+    seats_over: 'Tu empresa usa :used puestos y su plan :plan permite :max.',
 };
+
+const seats = { plan: 'Inicial', used: 1, max: 2, remaining: 1, over: false };
 
 const pendingInvitations = [
     { id: 11, email: 'nueva@empresa-ejemplo.com', role: 'agent', expired: false, expires_label: '3 de nov., 10:00 am' },
@@ -109,6 +115,7 @@ describe('Team', () => {
                 security: 'Seguridad',
                 team: 'Equipo',
                 branding: 'Marca',
+                plan: 'Plan',
                 platform: 'Plataforma',
                 open_menu: 'Abrir menú',
                 close_menu: 'Cerrar menú',
@@ -116,12 +123,12 @@ describe('Team', () => {
                 logging_out: 'Cerrando sesión…',
                 roles: { admin: 'Administrador' },
             },
-            auth: { user: { name: 'Ana Torres', email: 'ana@empresa-ejemplo.com', role: 'admin' }, tenant: { name: 'Soporte Ejemplo SAS', logo_url: null, theme: null }, can: { team: true, branding: true } },
+            auth: { user: { name: 'Ana Torres', email: 'ana@empresa-ejemplo.com', role: 'admin' }, tenant: { name: 'Soporte Ejemplo SAS', logo_url: null, theme: null }, can: { team: true, branding: true, plan: true } },
         };
     });
 
     it('es una tabla real con encabezados de columna y una fila por miembro', () => {
-        render(<Team copy={copy} members={members} invitations={[]} />);
+        render(<Team copy={copy} members={members} invitations={[]} seats={seats} />);
 
         const table = screen.getByRole('table', { name: 'Miembros del equipo' });
 
@@ -130,7 +137,7 @@ describe('Team', () => {
     });
 
     it('la fila propia no ofrece cambiar el rol ni desactivar', () => {
-        render(<Team copy={copy} members={members} invitations={[]} />);
+        render(<Team copy={copy} members={members} invitations={[]} seats={seats} />);
 
         expect(screen.getByText('Tú')).toBeTruthy();
         expect(screen.queryByLabelText('Cambiar el rol de Ana Torres')).toBeNull();
@@ -139,7 +146,7 @@ describe('Team', () => {
 
     it('cambiar a un rol sin privilegios se aplica de inmediato', async () => {
         const user = userEvent.setup();
-        render(<Team copy={copy} members={members} invitations={[]} />);
+        render(<Team copy={copy} members={members} invitations={[]} seats={seats} />);
 
         await user.selectOptions(screen.getByLabelText('Cambiar el rol de Luis Pérez'), 'observer');
 
@@ -148,7 +155,7 @@ describe('Team', () => {
 
     it('dar el rol de administrador pide confirmación y solo actúa al confirmar', async () => {
         const user = userEvent.setup();
-        render(<Team copy={copy} members={members} invitations={[]} />);
+        render(<Team copy={copy} members={members} invitations={[]} seats={seats} />);
 
         await user.selectOptions(screen.getByLabelText('Cambiar el rol de Luis Pérez'), 'admin');
         expect(put).not.toHaveBeenCalled();
@@ -164,7 +171,7 @@ describe('Team', () => {
 
     it('desactivar pide confirmación y envía la petición solo al confirmar', async () => {
         const user = userEvent.setup();
-        render(<Team copy={copy} members={members} invitations={[]} />);
+        render(<Team copy={copy} members={members} invitations={[]} seats={seats} />);
 
         await user.click(screen.getByRole('button', { name: 'Desactivar a Luis Pérez' }));
         expect(post).not.toHaveBeenCalled();
@@ -175,7 +182,7 @@ describe('Team', () => {
 
     it('un miembro desactivado se marca como tal, no se le cambia el rol y se reactiva sin confirmar', async () => {
         const user = userEvent.setup();
-        render(<Team copy={copy} members={members} invitations={[]} />);
+        render(<Team copy={copy} members={members} invitations={[]} seats={seats} />);
 
         expect(screen.getByText('Desactivado')).toBeTruthy();
         expect(screen.getByLabelText<HTMLSelectElement>('Cambiar el rol de Marta Gil').disabled).toBe(true);
@@ -186,21 +193,21 @@ describe('Team', () => {
 
     it('muestra el aviso de éxito y los errores del servidor', () => {
         shared = { ...shared, flash: { status: 'Actualizamos el rol.', recovery_codes: null }, errors: { role: 'El rol no es válido.' } };
-        render(<Team copy={copy} members={members} invitations={[]} />);
+        render(<Team copy={copy} members={members} invitations={[]} seats={seats} />);
 
         expect(screen.getByText('Actualizamos el rol.')).toBeTruthy();
         expect(screen.getByText('El rol no es válido.')).toBeTruthy();
     });
 
     it('si el equipo solo tiene a su administrador, lo dice', () => {
-        render(<Team copy={copy} members={members.slice(0, 1)} invitations={[]} />);
+        render(<Team copy={copy} members={members.slice(0, 1)} invitations={[]} seats={seats} />);
 
         expect(screen.getByText('Aún no hay otros miembros en tu equipo.')).toBeTruthy();
     });
 
     it('lista las invitaciones pendientes y caducadas con sus acciones', async () => {
         const user = userEvent.setup();
-        render(<Team copy={copy} members={members} invitations={pendingInvitations} />);
+        render(<Team copy={copy} members={members} invitations={pendingInvitations} seats={seats} />);
 
         expect(screen.getByText('Invitación pendiente')).toBeTruthy();
         expect(screen.getByText('Caducada')).toBeTruthy();
@@ -215,12 +222,39 @@ describe('Team', () => {
 
     it('el botón de invitar abre el formulario de invitación', async () => {
         const user = userEvent.setup();
-        render(<Team copy={copy} members={members} invitations={[]} />);
+        render(<Team copy={copy} members={members} invitations={[]} seats={seats} />);
 
         await user.click(screen.getByRole('button', { name: 'Invitar a alguien' }));
 
         const dialog = document.querySelector('dialog[aria-labelledby="invite-title"]');
         expect(dialog?.hasAttribute('open')).toBe(true);
         expect(within(dialog as HTMLElement).getByLabelText('Correos')).toBeTruthy();
+    });
+
+    it('muestra los puestos usados y el plan', () => {
+        render(<Team copy={copy} members={members} invitations={[]} seats={seats} />);
+
+        expect(screen.getByText('Puestos de agente: 1 de 2 (plan Inicial)')).toBeTruthy();
+        expect(screen.queryByText(/ya los usas/)).toBeNull();
+    });
+
+    it('avisa cuando no quedan puestos, sin impedir invitar observadores', () => {
+        render(<Team copy={copy} members={members} invitations={[]} seats={{ ...seats, used: 2, remaining: 0 }} />);
+
+        expect(screen.getByText(/Tu plan Inicial permite 2 puestos de agente y ya los usas/)).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Invitar a alguien' }).hasAttribute('disabled')).toBe(false);
+    });
+
+    it('avisa cuando la empresa está por encima del tope tras bajar de plan', () => {
+        render(<Team copy={copy} members={members} invitations={[]} seats={{ ...seats, used: 5, max: 2, remaining: 0, over: true }} />);
+
+        expect(screen.getByText('Tu empresa usa 5 puestos y su plan Inicial permite 2.')).toBeTruthy();
+    });
+
+    it('sin límite lo dice y no muestra avisos', () => {
+        render(<Team copy={copy} members={members} invitations={[]} seats={{ ...seats, max: null, remaining: null }} />);
+
+        expect(screen.getByText('Puestos de agente: 1 (plan Inicial, sin límite)')).toBeTruthy();
+        expect(screen.queryByText(/Tu empresa usa/)).toBeNull();
     });
 });

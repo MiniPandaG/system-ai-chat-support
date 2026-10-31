@@ -25,6 +25,7 @@ const panel: SharedProps['panel'] = {
     security: 'Seguridad',
     team: 'Equipo',
     branding: 'Marca',
+    plan: 'Plan',
     platform: 'Plataforma',
     open_menu: 'Abrir menú',
     close_menu: 'Cerrar menú',
@@ -38,7 +39,7 @@ describe('PanelLayout', () => {
         post.mockClear();
         shared = {
             panel,
-            auth: { user: { name: 'Ana Torres', email: 'ana@empresa-ejemplo.com', role: 'admin' }, tenant: { name: 'Soporte Ejemplo SAS', logo_url: null, theme: null }, can: { team: true, branding: true } },
+            auth: { user: { name: 'Ana Torres', email: 'ana@empresa-ejemplo.com', role: 'admin' }, tenant: { name: 'Soporte Ejemplo SAS', logo_url: null, theme: null }, can: { team: true, branding: true, plan: true } },
         };
     });
 
@@ -64,7 +65,7 @@ describe('PanelLayout', () => {
         expect(screen.getAllByRole('link', { name: 'Equipo', hidden: true }).length).toBeGreaterThan(0);
         unmount();
 
-        shared = { panel, auth: { user: { name: 'Luis', email: 'luis@empresa-ejemplo.com', role: 'agent' }, tenant: { name: 'Soporte Ejemplo SAS', logo_url: null, theme: null }, can: { team: false, branding: false } } };
+        shared = { panel, auth: { user: { name: 'Luis', email: 'luis@empresa-ejemplo.com', role: 'agent' }, tenant: { name: 'Soporte Ejemplo SAS', logo_url: null, theme: null }, can: { team: false, branding: false, plan: false } } };
         render(
             <PanelLayout title="Mi cuenta" section="account">
                 <p>x</p>
@@ -88,7 +89,7 @@ describe('PanelLayout', () => {
     });
 
     it('el personal de la plataforma ve «Plataforma» y ningún rol de empresa', () => {
-        shared = { panel, auth: { user: { name: 'Admin Plataforma', email: 'admin@pandacore.net', role: null }, tenant: null, can: { team: false, branding: false } } };
+        shared = { panel, auth: { user: { name: 'Admin Plataforma', email: 'admin@pandacore.net', role: null }, tenant: null, can: { team: false, branding: false, plan: false } } };
 
         render(
             <PanelLayout title="Mi cuenta" section="account">
@@ -137,7 +138,7 @@ describe('PanelLayout', () => {
             auth: {
                 user: { name: 'Ana', email: 'ana@empresa-ejemplo.com', role: 'admin' },
                 tenant: { name: 'Soporte Ejemplo SAS', logo_url: null, theme: { '--color-primary': '#2164DA', '--color-primary-foreground': '#F6F1EA' } },
-                can: { team: true, branding: true },
+                can: { team: true, branding: true, plan: true },
             },
         };
 
@@ -168,5 +169,23 @@ describe('PanelLayout', () => {
         );
 
         expect(document.documentElement.style.getPropertyValue('--color-primary')).toBe('');
+    });
+
+    it('solo ofrece Plan a quien puede verlo', () => {
+        const { unmount } = render(
+            <PanelLayout title="Mi cuenta" section="account">
+                <p>x</p>
+            </PanelLayout>,
+        );
+        expect(screen.getAllByRole('link', { name: 'Plan', hidden: true }).length).toBeGreaterThan(0);
+        unmount();
+
+        shared = { panel, auth: { user: { name: 'Luis', email: 'luis@empresa-ejemplo.com', role: 'agent' }, tenant: { name: 'Soporte Ejemplo SAS', logo_url: null, theme: null }, can: { team: false, branding: false, plan: false } } };
+        render(
+            <PanelLayout title="Mi cuenta" section="account">
+                <p>x</p>
+            </PanelLayout>,
+        );
+        expect(screen.queryByRole('link', { name: 'Plan', hidden: true })).toBeNull();
     });
 });
