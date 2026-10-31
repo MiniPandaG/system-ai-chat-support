@@ -32,5 +32,5 @@ it('la respuesta JSON de error tampoco revela estructura interna', function (): 
 });
 
 it('no expone cabeceras que delatan la tecnología del servidor', function (): void {
-    $this->get('/')->assertHeaderMissing('X-Powered-By');
+    $this->get('/login')->assertHeaderMissing('X-Powered-By');
 });

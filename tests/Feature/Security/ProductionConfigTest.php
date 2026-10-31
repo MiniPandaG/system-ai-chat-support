@@ -39,7 +39,7 @@ it('el .env.example no contiene secretos reales', function (): void {
 
 it('las cookies de sesión llevan HttpOnly, Secure y SameSite', function (): void {
     $name = Str::slug((string) config('app.name')).'-session';
-    $cookie = collect($this->get('/')->headers->getCookies())
+    $cookie = collect($this->get('/login')->headers->getCookies())
         ->first(fn (Cookie $cookie): bool => $cookie->getName() === $name);
 
     expect($cookie)->toBeInstanceOf(Cookie::class)

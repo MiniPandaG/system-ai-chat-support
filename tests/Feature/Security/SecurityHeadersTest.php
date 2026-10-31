@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\File;
 
 it('envía las cabeceras de seguridad en la página principal', function (): void {
-    $response = $this->get('/')->assertOk();
+    $response = $this->get('/login')->assertOk();
 
     $response->assertHeader('X-Content-Type-Options', 'nosniff');
     $response->assertHeader('X-Frame-Options', 'DENY');
@@ -28,7 +28,7 @@ it('envía las mismas cabeceras en una respuesta de error', function (): void {
 });
 
 it('usa una CSP estricta sin unsafe-inline ni unsafe-eval', function (): void {
-    $csp = (string) $this->get('/')->headers->get('Content-Security-Policy');
+    $csp = (string) $this->get('/login')->headers->get('Content-Security-Policy');
 
     expect($csp)
         ->toContain("default-src 'self'")
@@ -41,8 +41,8 @@ it('usa una CSP estricta sin unsafe-inline ni unsafe-eval', function (): void {
 });
 
 it('usa un nonce distinto en cada respuesta y coincide con el de las etiquetas', function (): void {
-    $first = $this->get('/');
-    $second = $this->get('/');
+    $first = $this->get('/login');
+    $second = $this->get('/login');
 
     preg_match("/'nonce-([^']+)'/", (string) $first->headers->get('Content-Security-Policy'), $inHeader);
     preg_match("/'nonce-([^']+)'/", (string) $second->headers->get('Content-Security-Policy'), $inSecondHeader);

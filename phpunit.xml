@@ -27,6 +27,8 @@
         <env name="BROADCAST_CONNECTION" value="null"/>
         <env name="CACHE_STORE" value="array"/>
         <env name="DB_DATABASE" value="tikarochat_test"/>
+        <env name="HASH_ARGON_MEMORY" value="1024"/>
+        <env name="HASH_ARGON_TIME" value="1"/>
         <env name="DB_URL" value=""/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>

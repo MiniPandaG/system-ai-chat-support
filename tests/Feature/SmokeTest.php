@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 use Inertia\Testing\AssertableInertia;
 
-it('muestra la página base con textos en español', function (): void {
-    $this->get('/')
+it('la página principal lleva a la cuenta y, sin sesión, al inicio de sesión', function (): void {
+    $this->followingRedirects()->get('/')
         ->assertOk()
-        ->assertInertia(fn (AssertableInertia $page) => $page
-            ->component('Base')
-            ->where('copy.heading', 'Base del proyecto en marcha'));
+        ->assertInertia(fn (AssertableInertia $page) => $page->component('auth/Login'));
 });
 
 it('responde al chequeo de salud sin exponer detalles internos', function (): void {
