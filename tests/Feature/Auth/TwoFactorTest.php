@@ -337,7 +337,7 @@ it('un administrador de la plataforma con 2FA activo entra y no puede desactivar
     $this->actingAs($admin)->get('/account')->assertOk();
 
     $this->withSession(recentPassword())->actingAs($admin)->delete('/user/two-factor-authentication')
-        ->assertSessionHasErrors(['two_factor' => 'La verificación en dos pasos es obligatoria para administradores de la plataforma y no se puede desactivar.']);
+        ->assertSessionHasErrors(['two_factor' => 'La verificación en dos pasos es obligatoria para administradores y no se puede desactivar.']);
 
     expect($admin->fresh()?->hasEnabledTwoFactorAuthentication())->toBeTrue();
 });

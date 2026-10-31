@@ -15,6 +15,8 @@ const PUBLIC_ROUTES = [
     'up',       // chequeo de salud sin datos
     'login',    // inicio de sesión
     'logout',   // cierra la sesión actual; sin sesión no hace nada
+    'invitations/{token}',      // aceptar una invitación; el token de un solo uso es la credencial y hay límite de intentos
+    'register',                 // alta de una empresa nueva; solo para visitantes y con límite de intentos
     'forgot-password',          // pide el enlace de recuperación; responde igual exista o no la cuenta
     'reset-password/{token}',   // pantalla a la que llega el enlace del correo
     'reset-password',           // cambia la contraseña con un enlace de un solo uso
