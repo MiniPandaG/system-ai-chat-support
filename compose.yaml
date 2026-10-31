@@ -23,6 +23,24 @@ services:
     depends_on:
       - app
 
+  queue:
+    image: tikarochat-app:dev
+    working_dir: /var/www/html
+    command: ["php", "artisan", "queue:work", "--tries=3", "--timeout=60"]
+    restart: unless-stopped
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  mailpit:
+    image: axllent/mailpit:v1.32.0
+    ports:
+      - "127.0.0.1:8025:8025"
+
   node:
     image: node:24-alpine
     profiles: ["tools"]
@@ -38,6 +56,9 @@ services:
 
   mysql:
     image: mysql:8.4
+    # Con el registro binario activo, MySQL exige esta variable (o SUPER) para crear los disparadores
+    # que vuelven de solo inserción la tabla audit_logs. El usuario de migraciones no tiene SUPER.
+    command: ["--log-bin-trust-function-creators=1"]
     ports:
       - "127.0.0.1:3307:3306"
     environment:

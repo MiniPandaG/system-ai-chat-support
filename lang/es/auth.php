@@ -1,0 +1,112 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'failed' => 'El correo o la contraseña no son correctos.',
+    'throttle' => 'Demasiados intentos. Vuelve a intentarlo en :minutes minutos.',
+
+    'login' => [
+        'title' => 'Iniciar sesión',
+        'email' => 'Correo',
+        'password' => 'Contraseña',
+        'show_password' => 'Mostrar contraseña',
+        'hide_password' => 'Ocultar contraseña',
+        'submit' => 'Iniciar sesión',
+        'submitting' => 'Iniciando sesión…',
+        'required' => 'Escribe tu :field.',
+        'required_suffix' => '(obligatorio)',
+        'invalid_email' => 'Escribe un correo válido, por ejemplo nombre@empresa.com.',
+        'summary' => 'Revisa :count campos: :fields.',
+        'forgot' => '¿Olvidaste tu contraseña?',
+    ],
+
+    'forgot' => [
+        'title' => 'Recuperar contraseña',
+        'detail' => 'Escribe el correo de tu cuenta y te enviamos un enlace para elegir una contraseña nueva.',
+        'email' => 'Correo',
+        'required_suffix' => '(obligatorio)',
+        'required' => 'Escribe tu correo.',
+        'invalid_email' => 'Escribe un correo válido, por ejemplo nombre@empresa.com.',
+        'submit' => 'Enviar enlace de recuperación',
+        'submitting' => 'Enviando enlace…',
+        'back' => 'Volver a iniciar sesión',
+        'sent_title' => 'Revisa tu correo',
+    ],
+
+    'reset' => [
+        'title' => 'Elige una contraseña nueva',
+        'email' => 'Correo',
+        'password' => 'Nueva contraseña',
+        'confirmation' => 'Confirmar contraseña',
+        'show_password' => 'Mostrar contraseña',
+        'hide_password' => 'Ocultar contraseña',
+        'requirements' => 'Mínimo 10 caracteres, una mayúscula y un número.',
+        'required_suffix' => '(obligatorio)',
+        'required' => 'Escribe tu :field.',
+        'mismatch' => 'Las contraseñas no coinciden.',
+        'submit' => 'Cambiar contraseña',
+        'submitting' => 'Cambiando contraseña…',
+        'request_new' => 'Solicitar otro enlace',
+        'summary' => 'Revisa :count campos: :fields.',
+        'strength' => [
+            'label' => 'Seguridad de la contraseña',
+            'empty' => 'Aún no escribes nada',
+            'weak' => 'Débil',
+            'fair' => 'Aceptable',
+            'strong' => 'Fuerte',
+            'missing' => 'Te falta: :items.',
+            'length' => 'llegar a 10 caracteres',
+            'uppercase' => 'una mayúscula',
+            'number' => 'un número',
+        ],
+    ],
+
+    'verify' => [
+        'title' => 'Verifica tu correo',
+        'detail' => 'Enviamos un enlace de verificación a tu correo. Ábrelo para activar tu cuenta.',
+        'resent' => 'Te enviamos otro enlace. Revisa tu bandeja de entrada.',
+        'resend' => 'Reenviar enlace',
+        'resending' => 'Reenviando enlace…',
+        'logout' => 'Cerrar sesión',
+        'logging_out' => 'Cerrando sesión…',
+    ],
+
+    'challenge' => [
+        'title' => 'Verificación en dos pasos',
+        'detail' => 'Abre tu aplicación de autenticación e ingresa el código de 6 dígitos.',
+        'code_label' => 'Código de 6 dígitos',
+        'digit' => 'Dígito :number de :total',
+        'submit' => 'Verificar',
+        'submitting' => 'Verificando…',
+        'use_recovery' => 'Usar un código de recuperación en su lugar',
+        'use_app' => 'Usar el código de mi aplicación',
+        'recovery_detail' => 'Escribe uno de los códigos de recuperación que guardaste. Cada uno sirve una sola vez.',
+        'recovery_label' => 'Código de recuperación',
+        'recovery_submit' => 'Entrar con el código',
+        'back' => 'Volver a iniciar sesión',
+        'incomplete' => 'Escribe los 6 dígitos del código.',
+        'required' => 'Escribe tu código de recuperación.',
+    ],
+
+    'confirm' => [
+        'title' => 'Confirma tu contraseña',
+        'detail' => 'Esta zona protege tu cuenta. Escribe tu contraseña para continuar.',
+        'password' => 'Contraseña',
+        'show_password' => 'Mostrar contraseña',
+        'hide_password' => 'Ocultar contraseña',
+        'required_suffix' => '(obligatorio)',
+        'required' => 'Escribe tu contraseña.',
+        'submit' => 'Confirmar',
+        'submitting' => 'Comprobando…',
+    ],
+
+    'account' => [
+        'title' => 'Sesión iniciada',
+        'greeting' => 'Hola, :name.',
+        'detail' => 'Esta pantalla es provisional: el panel llega en módulos posteriores.',
+        'security' => 'Seguridad de la cuenta',
+        'logout' => 'Cerrar sesión',
+        'logging_out' => 'Cerrando sesión…',
+    ],
+];

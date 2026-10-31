@@ -10,36 +10,29 @@ use Inertia\Middleware;
 class HandleInertiaRequests extends Middleware
 {
     /**
-     * The root template that's loaded on the first page visit.
-     *
-     * @see https://inertiajs.com/server-side-setup#root-template
+     * Plantilla raíz que se carga en la primera visita.
      *
      * @var string
      */
     protected $rootView = 'app';
 
-    /**
-     * Determines the current asset version.
-     *
-     * @see https://inertiajs.com/asset-versioning
-     */
     public function version(Request $request): ?string
     {
         return parent::version($request);
     }
 
     /**
-     * Define the props that are shared by default.
-     *
-     * @see https://inertiajs.com/shared-data
-     *
      * @return array<string, mixed>
      */
     public function share(Request $request): array
     {
         return [
             ...parent::share($request),
-            //
+            'flash' => [
+                'status' => fn (): ?string => is_string($status = $request->session()->get('status')) ? $status : null,
+                // Códigos de recuperación recién emitidos: se entregan una sola vez.
+                'recovery_codes' => fn (): ?array => is_array($codes = $request->session()->get('recovery_codes')) ? array_values($codes) : null,
+            ],
         ];
     }
 }

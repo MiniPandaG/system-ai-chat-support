@@ -24,9 +24,12 @@ done
 # Valores propios del entorno local (en producción se usa .env.example tal cual).
 content="${content/APP_ENV=production/APP_ENV=local}"
 content="${content/APP_DEBUG=false/APP_DEBUG=true}"
-content="${content/APP_URL=https:\/\/tikarochat.example/APP_URL=http://localhost:8080}"
+content="${content/APP_URL=https:\/\/tikarochat.example/APP_URL=http://127.0.0.1:8080}"
 content="${content/LOG_LEVEL=warning/LOG_LEVEL=debug}"
 content="${content/SESSION_SECURE_COOKIE=true/SESSION_SECURE_COOKIE=false}"
+content="${content/MAIL_MAILER=log/MAIL_MAILER=smtp}"
+content="${content/MAIL_HOST=127.0.0.1/MAIL_HOST=mailpit}"
+content="${content/MAIL_PORT=2525/MAIL_PORT=1025}"
 
 umask 077
 printf '%s\n' "$content" > .env

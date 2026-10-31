@@ -12,9 +12,3 @@ parameters:
         - routes
     checkMissingCallableSignature: true
     treatPhpDocTypesAsCertain: false
-    ignoreErrors:
-        # El modelo User todavía no existe; la configuración de autenticación ya lo nombra.
-        -
-            identifier: class.notFound
-            path: config/auth.php
-            count: 1

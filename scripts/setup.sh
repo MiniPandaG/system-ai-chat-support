@@ -19,5 +19,5 @@ docker compose exec -T app php artisan migrate --database=mysql_migrator --force
 
 docker compose run --rm node sh -c "corepack enable && pnpm install --frozen-lockfile && pnpm build"
 
-docker compose up -d web
+docker compose up -d web queue mailpit
 echo "Listo: http://127.0.0.1:8080"
