@@ -25,7 +25,7 @@ class SecurityHeaders
         $headers = $response->headers;
         // Una respuesta que ya trae su propia política (la descarga de un adjunto la lleva más estricta) la conserva.
         if (! $headers->has('Content-Security-Policy')) {
-            $headers->set('Content-Security-Policy', $this->contentSecurityPolicy($nonce));
+            $headers->set('Content-Security-Policy', $this->contentSecurityPolicy($nonce, $request));
         }
 
         $headers->set('X-Content-Type-Options', 'nosniff');
@@ -43,7 +43,7 @@ class SecurityHeaders
         return $response;
     }
 
-    private function contentSecurityPolicy(string $nonce): string
+    private function contentSecurityPolicy(string $nonce, Request $request): string
     {
         $viteDev = $this->viteDevOrigins();
         $webSockets = array_values(array_filter($viteDev, static fn (string $origin): bool => str_starts_with($origin, 'ws:')));
@@ -55,7 +55,9 @@ class SecurityHeaders
             'style-src' => ["'self'", "'nonce-{$nonce}'", ...$httpOrigins],
             'img-src' => ["'self'", 'data:'],
             'font-src' => ["'self'", ...$httpOrigins],
-            'connect-src' => ["'self'", ...$httpOrigins, ...$webSockets],
+            // El tiempo real se conecta por WebSocket al mismo sitio. «'self'» ya lo cubre en los navegadores recientes; el origen
+            // ws/wss explícito cubre a los que aún no lo entienden.
+            'connect-src' => ["'self'", $this->webSocketOrigin($request), ...$httpOrigins, ...$webSockets],
             'object-src' => ["'none'"],
             'base-uri' => ["'self'"],
             'form-action' => ["'self'"],
@@ -71,6 +73,15 @@ class SecurityHeaders
             array_keys($directives),
             $directives,
         ));
+    }
+
+    /**
+     * El mismo sitio con el esquema de WebSocket: wss si la página es https y siempre en producción, aunque un proxy mal
+     * configurado haga que la petición parezca http (nunca se abre un ws:// sin cifrar fuera de local y pruebas).
+     */
+    private function webSocketOrigin(Request $request): string
+    {
+        return ($request->isSecure() || app()->environment('production') ? 'wss://' : 'ws://').$request->getHttpHost();
     }
 
     /**

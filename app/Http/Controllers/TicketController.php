@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\CreateTicket;
 use App\Actions\UpdateTicket;
+use App\Broadcasting\LiveUpdates;
 use App\Enums\Role;
 use App\Http\Requests\InboxRequest;
 use App\Http\Requests\StoreTicketRequest;
@@ -17,9 +18,11 @@ use App\Models\User;
 use App\Tenancy\TenantContext;
 use App\Tickets\Inbox;
 use App\Tickets\InboxFilters;
+use App\Tickets\Reads;
 use App\Tickets\Thread;
 use App\Tickets\TicketPriority;
 use App\Tickets\TicketStatus;
+use Closure;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
@@ -32,7 +35,7 @@ use Inertia\Response;
  */
 class TicketController extends Controller
 {
-    public function __construct(private readonly Thread $thread, private readonly Inbox $inbox) {}
+    public function __construct(private readonly Thread $thread, private readonly Inbox $inbox, private readonly Reads $reads) {}
 
     public function index(InboxRequest $request): Response
     {
@@ -42,6 +45,12 @@ class TicketController extends Controller
     public function show(InboxRequest $request, Ticket $ticket): Response
     {
         Gate::authorize('view', $ticket);
+
+        // Abrir el ticket (o volver a pedirlo mientras está abierto) es leerlo. Solo se escribe si había algo sin leer, y
+        // entonces se avisa a quien lo tenga abierto para que actualice «Visto por».
+        if ($this->reads->markRead($this->member($request), $ticket)) {
+            LiveUpdates::ticket($ticket);
+        }
 
         return $this->render($request, $ticket);
     }
@@ -106,34 +115,58 @@ class TicketController extends Controller
         $user = $this->member($request);
         [$filters, $saved] = $this->resolve($request, $user);
 
-        $views = TicketView::query()->visibleTo($user)->orderBy('name')->get();
-        $counts = $this->inbox->counts($user, $views);
-        $page = $this->inbox->page($filters, $user);
+        // Cada bloque se calcula solo si la pantalla lo pide: la recarga en vivo de un ticket (o de la bandeja) no repite
+        // las consultas del otro. En la primera carga se piden todos.
+        $views = $this->once(fn () => TicketView::query()->visibleTo($user)->orderBy('name')->get());
+        $counts = $this->once(fn () => $this->inbox->counts($user, $views()));
+        $page = $this->once(fn () => $this->inbox->page($filters, $user));
 
         return Inertia::render('tickets/Index', [
-            'copy' => __('tickets'),
-            'tickets' => $page['rows'],
-            'next_cursor' => $page['next'],
-            'total' => $this->inbox->filtered($filters, $user)->count(),
+            'copy' => fn (): mixed => __('tickets'),
+            'tickets' => fn (): array => $page()['rows'],
+            'next_cursor' => fn (): ?string => $page()['next'],
+            'total' => fn (): int => $this->inbox->filtered($filters, $user)->count(),
             'filters' => [...$filters->toArray(), 'saved' => $saved?->id],
-            'counts' => ['all' => $counts['all'], 'mine' => $counts['mine'], 'unassigned' => $counts['unassigned']],
-            'views' => array_values($views->map(fn (TicketView $view): array => [
+            'counts' => fn (): array => ['all' => $counts()['all'], 'mine' => $counts()['mine'], 'unassigned' => $counts()['unassigned']],
+            'views' => fn (): array => array_values($views()->map(fn (TicketView $view): array => [
                 'id' => $view->id,
                 'name' => $view->name,
                 'shared' => $view->shared,
-                'count' => $counts['views'][$view->id] ?? 0,
+                'count' => $counts()['views'][$view->id] ?? 0,
                 'deletable' => Gate::allows('delete', $view),
             ])->all()),
-            'filter_tags' => $this->tagOptions(),
-            'selected' => $selected === null ? null : $this->detail($selected),
-            'assignees' => $this->assignees($selected),
-            'tag_options' => $selected !== null && Gate::allows('tag', $selected) ? $this->tagOptions() : [],
-            'can' => [
+            'filter_tags' => fn (): array => $this->tagOptions(),
+            'selected' => fn (): ?array => $selected === null ? null : $this->detail($selected, $user),
+            'assignees' => fn (): array => $this->assignees($selected),
+            'tag_options' => fn (): array => $selected !== null && Gate::allows('tag', $selected) ? $this->tagOptions() : [],
+            'can' => fn (): array => [
                 'create' => Gate::allows('create', Ticket::class),
                 'update' => $selected !== null && Gate::allows('update', $selected),
                 'save_view' => Gate::allows('create', TicketView::class),
             ],
         ]);
+    }
+
+    /**
+     * Calcula una vez, la primera vez que se pide, y reutiliza el resultado.
+     *
+     * @template T
+     *
+     * @param  Closure(): T  $compute
+     * @return Closure(): T
+     */
+    private function once(Closure $compute): Closure
+    {
+        /** @var list<T> $computed */
+        $computed = [];
+
+        return function () use (&$computed, $compute) {
+            if ($computed === []) {
+                $computed = [$compute()];
+            }
+
+            return $computed[0];
+        };
     }
 
     /**
@@ -182,9 +215,10 @@ class TicketController extends Controller
     /**
      * @return array<string, mixed>
      */
-    private function detail(Ticket $ticket): array
+    private function detail(Ticket $ticket, User $viewer): array
     {
         $ticket->load(['customer', 'tags']);
+        $seen = $this->reads->seenBy($viewer, $ticket);
 
         return [
             'id' => $ticket->id,
@@ -199,6 +233,8 @@ class TicketController extends Controller
             'created_label' => $ticket->created_at->isoFormat('D [de] MMM [de] YYYY, h:mm a'),
             'tags' => $ticket->tags->sortBy('name')->map(fn (Tag $tag): array => ['id' => $tag->id, 'name' => $tag->name, 'tone' => $tag->tone->value])->values()->all(),
             'thread' => $this->thread->of($ticket, Gate::allows('viewNotes', $ticket)),
+            'seen_by' => $seen['names'],
+            'seen_more' => $seen['more'],
         ];
     }
 

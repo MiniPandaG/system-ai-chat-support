@@ -146,12 +146,24 @@ class FortifyServiceProvider extends ServiceProvider
 
         RateLimiter::for('tickets-write', fn (Request $request): Limit => Limit::perMinute(120)->by('tickets-write:'.$this->accountSubject($request)));
 
+        // «Escribiendo»: una señal cada 2 segundos y 30 por minuto, por persona y ticket (la ruta pasa por el límite antes de
+        // resolver el ticket, así que se usa el valor de la dirección tal cual).
+        RateLimiter::for('tickets-typing', function (Request $request): array {
+            $key = $this->accountSubject($request).':'.(string) $request->route()?->originalParameter('ticket');
+
+            return [
+                (new Limit('tickets-typing-burst:'.$key, 1, 2))->by('tickets-typing-burst:'.$key),
+                Limit::perMinute(30)->by('tickets-typing:'.$key),
+            ];
+        });
         RateLimiter::for('tickets-message', fn (Request $request): Limit => Limit::perMinute(60)->by('tickets-message:'.$this->accountSubject($request)));
 
         // Abrir la bandeja o un ticket es lo más frecuente; buscar texto es lo más caro, así que tiene su propio tope.
         RateLimiter::for('tickets-list', fn (Request $request): Limit => $request->filled('q')
             ? Limit::perMinute(60)->by('inbox-search:'.$this->accountSubject($request))
             : Limit::perMinute(300)->by('inbox:'.$this->accountSubject($request)));
+
+        RateLimiter::for('broadcast-auth', fn (Request $request): Limit => Limit::perMinute(60)->by('broadcast-auth:'.$this->accountSubject($request)));
 
         RateLimiter::for('tickets-search', fn (Request $request): Limit => Limit::perMinute(60)->by('tickets-search:'.$this->accountSubject($request)));
 

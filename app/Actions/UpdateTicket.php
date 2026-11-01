@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Broadcasting\LiveUpdates;
 use App\Enums\AuditEvent;
 use App\Models\Ticket;
 use App\Models\User;
@@ -39,6 +40,10 @@ class UpdateTicket
         }
 
         $ticket->save();
+
+        if ($ticket->wasChanged()) {
+            LiveUpdates::both($ticket);
+        }
 
         if ($ticket->assigned_to !== $previousAssignee) {
             $this->audit->record(AuditEvent::TicketAssigned, $actor->id, [

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Broadcasting\LiveUpdates;
 use App\Models\Tag;
 use App\Models\Tenant;
 use App\Models\Ticket;
@@ -39,6 +40,7 @@ class AttachTicketTag
             }
 
             $ticket->tags()->attach($tag->id, ['tenant_id' => $ticket->tenant_id]);
+            LiveUpdates::both($ticket);
 
             return $tag;
         });

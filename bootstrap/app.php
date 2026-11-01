@@ -8,6 +8,7 @@ use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetTenantContext;
 use App\Http\Middleware\ThrottleAccountEmails;
+use App\Http\Middleware\ValidateBroadcastAuth;
 use App\Plans\LimitReached;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -36,6 +37,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectGuestsTo('/login');
         $middleware->redirectUsersTo('/');
     })
+    // Autorización de los canales de tiempo real: la misma sesión, correo verificado y 2FA que el panel, y un límite por persona.
+    ->withBroadcasting(__DIR__.'/../routes/channels.php', [
+        'middleware' => ['web', 'auth', 'verified', 'two-factor.required', 'throttle:broadcast-auth', ValidateBroadcastAuth::class],
+    ])
     ->withExceptions(function (Exceptions $exceptions): void {
         // Pasar el límite del plan es un resultado esperado, no un error del sistema: no se reporta y se muestra al usuario.
         $exceptions->dontReport(LimitReached::class);

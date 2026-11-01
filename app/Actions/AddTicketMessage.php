@@ -6,6 +6,7 @@ namespace App\Actions;
 
 use App\Actions\Concerns\LocksOpenTicket;
 use App\Attachments\AttachmentStore;
+use App\Broadcasting\LiveUpdates;
 use App\Files\FileRejected;
 use App\Jobs\ScanAttachment;
 use App\Models\Ticket;
@@ -73,6 +74,8 @@ class AddTicketMessage
         foreach ($stored as $attachment) {
             ScanAttachment::dispatch($attachment->id);
         }
+
+        LiveUpdates::both($ticket);
 
         return $message;
     }

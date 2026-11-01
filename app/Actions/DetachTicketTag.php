@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Broadcasting\LiveUpdates;
 use App\Models\Tag;
 use App\Models\Ticket;
 
@@ -14,6 +15,8 @@ class DetachTicketTag
 {
     public function __invoke(Ticket $ticket, Tag $tag): void
     {
-        $ticket->tags()->detach($tag->id);
+        if ($ticket->tags()->detach($tag->id) > 0) {
+            LiveUpdates::both($ticket);
+        }
     }
 }

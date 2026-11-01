@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Actions\Concerns\LocksOpenTicket;
+use App\Broadcasting\LiveUpdates;
 use App\Models\Ticket;
 use App\Models\TicketNote;
 use App\Models\User;
@@ -29,6 +30,9 @@ class AddTicketNote
 
             $note = new TicketNote(['body' => $body]);
             $note->forceFill(['ticket_id' => $locked->id, 'user_id' => $author->id])->save();
+
+            // Solo el ticket: una nota no cambia lo que la bandeja muestra ni cuenta.
+            LiveUpdates::ticket($locked);
 
             return $note;
         });

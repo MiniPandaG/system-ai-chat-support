@@ -30,6 +30,8 @@ class Inbox
     /** Lo que sigue pendiente: los filtros «Asignados a mí» y «Sin asignar» muestran solo esto si no se elige estado. */
     private const PENDING = [TicketStatus::Open, TicketStatus::WaitingCustomer];
 
+    public function __construct(private readonly Reads $reads) {}
+
     /**
      * Los tickets que cumplen los filtros, sin orden ni relaciones.
      *
@@ -99,7 +101,7 @@ class Inbox
         $page = $query->cursorPaginate(self::PAGE_SIZE, ['*'], 'after', $this->cursor($cursor, $filters->sort));
 
         return [
-            'rows' => $this->rows($page->items(), $filters->search),
+            'rows' => $this->rows($page->items(), $filters->search, $user),
             'next' => $page instanceof CursorPaginator ? $page->nextCursor()?->encode() : null,
         ];
     }
@@ -129,15 +131,17 @@ class Inbox
     }
 
     /**
-     * Las filas que ve la lista. Con una búsqueda, cada una dice en qué coincidió.
+     * Las filas que ve la lista. Con una búsqueda, cada una dice en qué coincidió; y cada una dice si está sin leer para
+     * quien la mira.
      *
      * @param  iterable<int, Ticket>  $tickets
      * @return list<array<string, mixed>>
      */
-    public function rows(iterable $tickets, ?string $search): array
+    public function rows(iterable $tickets, ?string $search, User $viewer): array
     {
         $tickets = Collection::make($tickets);
         $matches = $search === null ? [] : $this->matchSources($tickets, $search);
+        $unread = array_flip($this->reads->unreadIds($viewer, array_values($tickets->map(static fn (Ticket $ticket): int => $ticket->id)->all())));
 
         return array_values($tickets->map(fn (Ticket $ticket): array => [
             'id' => $ticket->id,
@@ -150,6 +154,7 @@ class Inbox
             'last_message_at' => $ticket->last_message_at->toIso8601String(),
             'last_message_label' => $ticket->last_message_at->isoFormat('D [de] MMM, h:mm a'),
             'match' => $matches[$ticket->id] ?? null,
+            'unread' => isset($unread[$ticket->id]),
         ])->all());
     }
 

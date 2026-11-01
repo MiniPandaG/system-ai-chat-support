@@ -20,6 +20,7 @@ use App\Http\Controllers\TicketController;
 use App\Http\Controllers\TicketMessageController;
 use App\Http\Controllers\TicketNoteController;
 use App\Http\Controllers\TicketTagController;
+use App\Http\Controllers\TicketTypingController;
 use App\Http\Controllers\TicketViewController;
 use Illuminate\Support\Facades\Route;
 
@@ -53,6 +54,7 @@ Route::middleware(['auth', 'verified', 'two-factor.required'])->group(function (
     Route::patch('/tickets/{ticket}', [TicketController::class, 'update'])->middleware('throttle:tickets-write')->whereNumber('ticket')->name('tickets.update');
     // Dentro del ticket: respuestas al cliente, notas internas (solo equipo) y etiquetas.
     Route::post('/tickets/{ticket}/messages', [TicketMessageController::class, 'store'])->middleware('throttle:tickets-message')->whereNumber('ticket')->name('tickets.messages.store');
+    Route::post('/tickets/{ticket}/typing', [TicketTypingController::class, 'store'])->middleware('throttle:tickets-typing')->whereNumber('ticket')->name('tickets.typing');
     Route::post('/tickets/{ticket}/notes', [TicketNoteController::class, 'store'])->middleware('throttle:tickets-message')->whereNumber('ticket')->name('tickets.notes.store');
     Route::post('/tickets/{ticket}/tags', [TicketTagController::class, 'store'])->middleware('throttle:tickets-write')->whereNumber('ticket')->name('tickets.tags.store');
     Route::delete('/tickets/{ticket}/tags/{tag}', [TicketTagController::class, 'destroy'])->middleware('throttle:tickets-write')->whereNumber(['ticket', 'tag'])->name('tickets.tags.destroy');

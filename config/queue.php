@@ -71,7 +71,9 @@ return [
             'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),
             'queue' => env('REDIS_QUEUE', 'default'),
             'retry_after' => (int) env('REDIS_QUEUE_RETRY_AFTER', 90),
-            'block_for' => null,
+            // El trabajador espera en Redis hasta que llega un trabajo en vez de consultar cada 3 s: los avisos en vivo
+            // (RNF-03, menos de 1 s) dependen de que la cola no duerma.
+            'block_for' => (int) env('REDIS_QUEUE_BLOCK_FOR', 5),
             'after_commit' => false,
         ],
 

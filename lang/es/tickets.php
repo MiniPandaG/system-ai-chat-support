@@ -148,6 +148,7 @@ return [
             'customer' => 'Coincide en el cliente',
             'message' => 'Coincide en el mensaje',
         ],
+        'unread' => 'Sin leer',
         'load_more' => 'Cargar más tickets',
         'loading_more' => 'Cargando más tickets…',
         'load_error' => 'No se pudieron cargar más tickets. Inténtalo de nuevo.',
@@ -186,9 +187,25 @@ return [
         'send_reply' => 'Enviar respuesta',
         'send_note' => 'Guardar nota',
         'sending' => 'Enviando…',
+        'outgoing_sending' => 'Enviando…',
+        'outgoing_files' => ':count archivos adjuntos',
+        'failed' => 'No se envió. Tu mensaje sigue en el cuadro de texto.',
+        'retry' => 'Reintentar',
         'closed' => 'Este ticket está cerrado.',
         'reopen' => 'Reabrir',
         'read_only' => 'Tu rol es de observador: puedes leer la conversación, pero no responder ni dejar notas.',
+    ],
+
+    'typing' => [
+        'one' => ':name está escribiendo…',
+        'two' => ':first y :second están escribiendo…',
+        'many' => 'Varias personas están escribiendo…',
+        'someone' => 'Alguien está escribiendo…',
+    ],
+
+    'seen' => [
+        'label' => 'Visto por :names',
+        'more' => 'Visto por :names y :count más',
     ],
 
     'note' => [
@@ -209,6 +226,9 @@ return [
         'list_label' => 'Archivos adjuntos',
         'download' => 'Descargar :name',
         'drop' => 'Suelta los archivos para adjuntarlos',
+        'offline' => 'Sin conexión en vivo: el resultado de la revisión no aparece solo.',
+        'refresh' => 'Actualizar',
+        'refreshing' => 'Actualizando…',
         'status' => [
             'pending' => 'Revisando con el antivirus…',
             'infected' => 'Bloqueado: contenía una amenaza',

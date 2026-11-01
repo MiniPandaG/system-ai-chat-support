@@ -7,6 +7,7 @@ namespace App\Jobs;
 use App\Attachments\AttachmentStatus;
 use App\Attachments\Scanner;
 use App\Attachments\ScannerUnavailable;
+use App\Broadcasting\LiveUpdates;
 use App\Enums\AuditEvent;
 use App\Models\TicketAttachment;
 use App\Services\AuditLogger;
@@ -56,6 +57,7 @@ class ScanAttachment implements ShouldQueue
         if ($stream === null) {
             // El archivo no está en el disco: no hay nada que entregar ni que revisar.
             $attachment->forceFill(['status' => AttachmentStatus::Failed, 'scanned_at' => now()])->save();
+            $this->announce($attachment);
 
             return;
         }
@@ -68,6 +70,7 @@ class ScanAttachment implements ShouldQueue
 
         if ($result->clean) {
             $attachment->forceFill(['status' => AttachmentStatus::Clean, 'scanned_at' => now()])->save();
+            $this->announce($attachment);
 
             return;
         }
@@ -80,6 +83,7 @@ class ScanAttachment implements ShouldQueue
             'scanned_at' => now(),
             'path' => null,
         ])->save();
+        $this->announce($attachment);
 
         $audit->record(AuditEvent::TicketAttachmentInfected, $attachment->uploaded_by, [
             'ticket_id' => $attachment->ticket_id,
@@ -93,6 +97,13 @@ class ScanAttachment implements ShouldQueue
 
         if ($attachment !== null && $attachment->status === AttachmentStatus::Pending) {
             $attachment->forceFill(['status' => AttachmentStatus::Failed])->save();
+            $this->announce($attachment);
         }
+    }
+
+    /** Quien tiene el ticket abierto ve el resultado de la revisión sin tener que preguntar cada pocos segundos. */
+    private function announce(TicketAttachment $attachment): void
+    {
+        LiveUpdates::ticketById($attachment->tenant_id, $attachment->ticket_id);
     }
 }

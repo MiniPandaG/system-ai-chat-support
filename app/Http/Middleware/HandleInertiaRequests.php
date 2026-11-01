@@ -30,7 +30,7 @@ class HandleInertiaRequests extends Middleware
     }
 
     /**
-     * @return array{user: array{name: string, email: string, role: string|null}, tenant: array{name: string, logo_url: string|null, theme: array<string, string>|null}|null, inbox: array{unassigned: int|null}, can: array{tickets: bool, team: bool, branding: bool, plan: bool}}|null
+     * @return array{user: array{id: int, name: string, email: string, role: string|null}, tenant: array{id: int, name: string, logo_url: string|null, theme: array<string, string>|null}|null, inbox: array{unassigned: int|null}, can: array{tickets: bool, team: bool, branding: bool, plan: bool}}|null
      */
     private function authenticated(Request $request): ?array
     {
@@ -45,8 +45,8 @@ class HandleInertiaRequests extends Middleware
         $canSeeTickets = Gate::forUser($user)->allows('viewAny', Ticket::class);
 
         return [
-            'user' => ['name' => $user->name, 'email' => $user->email, 'role' => $user->role?->value],
-            'tenant' => $tenant === null ? null : ['name' => $tenant->name, 'logo_url' => $this->logoUrl(), 'theme' => $this->theme()],
+            'user' => ['id' => $user->id, 'name' => $user->name, 'email' => $user->email, 'role' => $user->role?->value],
+            'tenant' => $tenant === null ? null : ['id' => $tenant->id, 'name' => $tenant->name, 'logo_url' => $this->logoUrl(), 'theme' => $this->theme()],
             // El número que acompaña a «Bandeja» en la barra lateral: tickets pendientes que nadie atiende.
             'inbox' => ['unassigned' => $canSeeTickets ? app(Inbox::class)->unassigned($user) : null],
             'can' => [

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Broadcasting\LiveUpdates;
 use App\Enums\AuditEvent;
 use App\Models\Customer;
 use App\Models\Tenant;
@@ -66,6 +67,8 @@ class CreateTicket
             if ($ticket->assigned_to !== null) {
                 $this->audit->record(AuditEvent::TicketAssigned, $creator->id, ['ticket_id' => $ticket->id, 'to' => $ticket->assigned_to]);
             }
+
+            LiveUpdates::inbox($ticket);
 
             return $ticket;
         });
