@@ -34,7 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->prependToPriorityList(before: SetTenantContext::class, prepend: EnsureUserIsActive::class);
         $middleware->alias(['two-factor.required' => EnsureTwoFactorForAdmins::class]);
         $middleware->redirectGuestsTo('/login');
-        $middleware->redirectUsersTo('/account');
+        $middleware->redirectUsersTo('/');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Pasar el límite del plan es un resultado esperado, no un error del sistema: no se reporta y se muestra al usuario.

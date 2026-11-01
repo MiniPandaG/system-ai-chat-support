@@ -38,4 +38,7 @@ enum AuditEvent: string
     case BrandingPaletteChanged = 'branding.palette_changed';
     case BrandingPaletteReset = 'branding.palette_reset';
     case PlanAssigned = 'plan.assigned';
+    case TicketCreated = 'ticket.created';
+    case TicketAssigned = 'ticket.assigned';
+    case TicketAttachmentInfected = 'ticket.attachment_infected';
 }

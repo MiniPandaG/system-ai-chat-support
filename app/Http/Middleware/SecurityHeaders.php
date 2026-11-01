@@ -23,7 +23,11 @@ class SecurityHeaders
         $response = $next($request);
 
         $headers = $response->headers;
-        $headers->set('Content-Security-Policy', $this->contentSecurityPolicy($nonce));
+        // Una respuesta que ya trae su propia política (la descarga de un adjunto la lleva más estricta) la conserva.
+        if (! $headers->has('Content-Security-Policy')) {
+            $headers->set('Content-Security-Policy', $this->contentSecurityPolicy($nonce));
+        }
+
         $headers->set('X-Content-Type-Options', 'nosniff');
         $headers->set('X-Frame-Options', 'DENY');
         $headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');

@@ -36,6 +36,16 @@ services:
       redis:
         condition: service_healthy
 
+  # Antivirus de los adjuntos. No arranca con «docker compose up»: descarga las firmas la primera vez y pesa. Para
+  # probar adjuntos en local: docker compose --profile scan up -d clamav. Sin él, los adjuntos se quedan por revisar
+  # y no se pueden descargar (nunca se entregan sin revisar). No expone su puerto fuera de la red de Docker.
+  clamav:
+    image: clamav/clamav:1.4
+    profiles: ["scan"]
+    restart: unless-stopped
+    volumes:
+      - clamav-db:/var/lib/clamav
+
   mailpit:
     image: axllent/mailpit:v1.32.0
     ports:
@@ -95,3 +105,4 @@ volumes:
   node-modules:
   mysql-data:
   redis-data:
+  clamav-db:

@@ -141,6 +141,20 @@ class FortifyServiceProvider extends ServiceProvider
 
         RateLimiter::for('palette-check', fn (Request $request): Limit => Limit::perMinute(120)->by('palette-check:'.$this->accountSubject($request)));
 
+        // Tickets: crear, modificar y buscar clientes, por usuario. Frenan a una sesión robada o a un script, no al uso normal.
+        RateLimiter::for('tickets-create', fn (Request $request): Limit => Limit::perMinute(30)->by('tickets-create:'.$this->accountSubject($request)));
+
+        RateLimiter::for('tickets-write', fn (Request $request): Limit => Limit::perMinute(120)->by('tickets-write:'.$this->accountSubject($request)));
+
+        RateLimiter::for('tickets-message', fn (Request $request): Limit => Limit::perMinute(60)->by('tickets-message:'.$this->accountSubject($request)));
+
+        // Abrir la bandeja o un ticket es lo más frecuente; buscar texto es lo más caro, así que tiene su propio tope.
+        RateLimiter::for('tickets-list', fn (Request $request): Limit => $request->filled('q')
+            ? Limit::perMinute(60)->by('inbox-search:'.$this->accountSubject($request))
+            : Limit::perMinute(300)->by('inbox:'.$this->accountSubject($request)));
+
+        RateLimiter::for('tickets-search', fn (Request $request): Limit => Limit::perMinute(60)->by('tickets-search:'.$this->accountSubject($request)));
+
         RateLimiter::for('login-ip', fn (Request $request): Limit => Limit::perMinute(30)->by((string) $request->ip()));
     }
 

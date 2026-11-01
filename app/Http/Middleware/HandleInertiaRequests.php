@@ -8,7 +8,9 @@ use App\Files\FileStore;
 use App\Models\Plan;
 use App\Models\Tenant;
 use App\Models\TenantBranding;
+use App\Models\Ticket;
 use App\Models\User;
+use App\Tickets\Inbox;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Middleware;
@@ -28,7 +30,7 @@ class HandleInertiaRequests extends Middleware
     }
 
     /**
-     * @return array{user: array{name: string, email: string, role: string|null}, tenant: array{name: string, logo_url: string|null, theme: array<string, string>|null}|null, can: array{team: bool, branding: bool, plan: bool}}|null
+     * @return array{user: array{name: string, email: string, role: string|null}, tenant: array{name: string, logo_url: string|null, theme: array<string, string>|null}|null, inbox: array{unassigned: int|null}, can: array{tickets: bool, team: bool, branding: bool, plan: bool}}|null
      */
     private function authenticated(Request $request): ?array
     {
@@ -40,10 +42,15 @@ class HandleInertiaRequests extends Middleware
 
         $tenant = $user->tenant_id === null ? null : Tenant::query()->find($user->tenant_id);
 
+        $canSeeTickets = Gate::forUser($user)->allows('viewAny', Ticket::class);
+
         return [
             'user' => ['name' => $user->name, 'email' => $user->email, 'role' => $user->role?->value],
             'tenant' => $tenant === null ? null : ['name' => $tenant->name, 'logo_url' => $this->logoUrl(), 'theme' => $this->theme()],
+            // El número que acompaña a «Bandeja» en la barra lateral: tickets pendientes que nadie atiende.
+            'inbox' => ['unassigned' => $canSeeTickets ? app(Inbox::class)->unassigned($user) : null],
             'can' => [
+                'tickets' => $canSeeTickets,
                 'team' => Gate::forUser($user)->allows('viewAny', User::class),
                 'branding' => Gate::forUser($user)->allows('manage', TenantBranding::class),
                 'plan' => Gate::forUser($user)->allows('viewAny', Plan::class),

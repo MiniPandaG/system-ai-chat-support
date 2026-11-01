@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $id
  * @property string $name
  * @property int $plan_id
+ * @property int $last_ticket_number
  */
 #[Fillable(['name'])]
 class Tenant extends Model

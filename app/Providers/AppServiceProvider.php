@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Attachments\ClamAvScanner;
+use App\Attachments\FakeScanner;
+use App\Attachments\Scanner;
 use App\Branding\Palette;
 use App\Models\TenantBranding;
 use App\Models\User;
@@ -16,6 +19,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use LogicException;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,6 +27,21 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->scoped(TenantContext::class);
         $this->app->singleton(TenantJobContext::class);
+
+        $this->app->bind(Scanner::class, function (): Scanner {
+            $driver = config()->string('attachments.scanner');
+
+            return match (true) {
+                $driver === 'clamav' => new ClamAvScanner(
+                    config()->string('attachments.clamav.host'),
+                    config()->integer('attachments.clamav.port'),
+                    config()->integer('attachments.clamav.timeout'),
+                ),
+                // El antivirus de mentira da por limpio casi todo: en producción sería una puerta abierta.
+                $driver === 'fake' && ! $this->app->isProduction() => new FakeScanner,
+                default => throw new LogicException("ATTACHMENT_SCANNER=\"{$driver}\" no es válido en este entorno: usa «clamav»."),
+            };
+        });
     }
 
     public function boot(): void

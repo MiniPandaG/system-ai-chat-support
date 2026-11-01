@@ -8,6 +8,7 @@ use App\Enums\Role;
 use App\Models\Invitation;
 use App\Models\Plan;
 use App\Models\Tenant;
+use App\Models\Ticket;
 use App\Models\User;
 use App\Tenancy\TenantContext;
 use Closure;
@@ -33,13 +34,15 @@ class PlanLimits
     }
 
     /**
-     * Lo que la empresa usa hoy. Los canales, los tickets y los créditos de IA aún no existen como recursos (llegan en
-     * M5, M7 y M11, que enchufarán aquí su medida), así que por ahora son 0.
+     * Lo que la empresa usa hoy. Los canales y los créditos de IA aún no existen como recursos (llegan en M7 y M11,
+     * que enchufarán aquí su medida), así que por ahora son 0. Los tickets son los abiertos en el mes calendario
+     * (hora UTC, la de la aplicación), cualquiera que sea su estado actual.
      */
     public function usage(Tenant $tenant, Limit $limit): int
     {
         return match ($limit) {
             Limit::Agents => $this->agentSeats($tenant),
+            Limit::TicketsPerMonth => $this->ticketsThisMonth($tenant),
             default => 0,
         };
     }
@@ -161,6 +164,11 @@ class PlanLimits
         $breakdown = $this->agentBreakdown($tenant);
 
         return $breakdown['members'] + $breakdown['invitations'];
+    }
+
+    private function ticketsThisMonth(Tenant $tenant): int
+    {
+        return $this->context->run($tenant, fn (): int => Ticket::query()->where('created_at', '>=', now()->startOfMonth())->count());
     }
 
     /**

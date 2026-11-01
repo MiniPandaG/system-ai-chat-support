@@ -3,19 +3,28 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\Auth\AcceptInvitationController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BrandingController;
+use App\Http\Controllers\CustomerSearchController;
 use App\Http\Controllers\FileController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\SecurityController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\TeamController;
+use App\Http\Controllers\TicketController;
+use App\Http\Controllers\TicketMessageController;
+use App\Http\Controllers\TicketNoteController;
+use App\Http\Controllers\TicketTagController;
+use App\Http\Controllers\TicketViewController;
 use Illuminate\Support\Facades\Route;
 
-Route::redirect('/', '/account');
+// La entrada decide a dónde ir según quién sea; sin sesión, el inicio de sesión lo pide después.
+Route::get('/', HomeController::class);
 
 // Registro de una empresa nueva con su administrador. Solo para visitantes y con límite de intentos.
 // Aceptar una invitación: pública (quien llega aún no tiene cuenta) y protegida por el token de un solo uso.
@@ -32,6 +41,24 @@ Route::middleware('guest')->group(function (): void {
 // Cuenta: sesión iniciada, correo verificado y, para administradores de la plataforma, 2FA activo.
 Route::middleware(['auth', 'verified', 'two-factor.required'])->group(function (): void {
     Route::get('/account', AccountController::class)->name('account');
+
+    // Bandeja y tickets: todo el equipo activo los ve; administradores y agentes los crean y modifican (TicketPolicy).
+    // El ticket se resuelve con el filtro automático de empresa, así que uno de otra empresa da 404.
+    Route::get('/tickets', [TicketController::class, 'index'])->middleware('throttle:tickets-list')->name('tickets');
+    Route::get('/tickets/page', [TicketController::class, 'page'])->middleware('throttle:tickets-list')->name('tickets.page');
+    Route::get('/tickets/{ticket}', [TicketController::class, 'show'])->middleware('throttle:tickets-list')->whereNumber('ticket')->name('tickets.show');
+    Route::post('/tickets/views', [TicketViewController::class, 'store'])->middleware('throttle:tickets-write')->name('tickets.views.store');
+    Route::delete('/tickets/views/{view}', [TicketViewController::class, 'destroy'])->middleware('throttle:tickets-write')->whereNumber('view')->name('tickets.views.destroy');
+    Route::post('/tickets', [TicketController::class, 'store'])->middleware('throttle:tickets-create')->name('tickets.store');
+    Route::patch('/tickets/{ticket}', [TicketController::class, 'update'])->middleware('throttle:tickets-write')->whereNumber('ticket')->name('tickets.update');
+    // Dentro del ticket: respuestas al cliente, notas internas (solo equipo) y etiquetas.
+    Route::post('/tickets/{ticket}/messages', [TicketMessageController::class, 'store'])->middleware('throttle:tickets-message')->whereNumber('ticket')->name('tickets.messages.store');
+    Route::post('/tickets/{ticket}/notes', [TicketNoteController::class, 'store'])->middleware('throttle:tickets-message')->whereNumber('ticket')->name('tickets.notes.store');
+    Route::post('/tickets/{ticket}/tags', [TicketTagController::class, 'store'])->middleware('throttle:tickets-write')->whereNumber('ticket')->name('tickets.tags.store');
+    Route::delete('/tickets/{ticket}/tags/{tag}', [TicketTagController::class, 'destroy'])->middleware('throttle:tickets-write')->whereNumber(['ticket', 'tag'])->name('tickets.tags.destroy');
+    // Descarga de un adjunto: URL firmada que caduca, sesión, empresa dueña y solo si el antivirus lo declaró limpio.
+    Route::get('/attachments/{attachment}', [AttachmentController::class, 'download'])->middleware('signed')->where('attachment', '[0-9a-z]{26}')->name('attachments.download');
+    Route::get('/customers/search', CustomerSearchController::class)->middleware('throttle:tickets-search')->name('customers.search');
 
     // Descarga de archivos de la empresa: URL firmada que caduca, sesión y empresa dueña (FileStore::temporaryUrl).
     Route::get('/files/{file}', [FileController::class, 'show'])->middleware('signed')->where('file', '[0-9a-z]{26}')->name('files.show');

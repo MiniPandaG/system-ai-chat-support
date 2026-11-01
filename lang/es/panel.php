@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 return [
     'nav_label' => 'Navegación principal',
+    'inbox' => 'Bandeja',
+    'inbox_unassigned' => ':count sin asignar',
     'account' => 'Mi cuenta',
     'security' => 'Seguridad',
     'team' => 'Equipo',
