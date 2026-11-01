@@ -47,3 +47,8 @@ arch('solo el almacén, la revisión y la conversación usan los adjuntos de tic
 arch('el antivirus de pruebas solo lo conoce el proveedor de servicios')
     ->expect('App\Attachments\FakeScanner')
     ->toOnlyBeUsedIn(['App\Providers\AppServiceProvider']);
+
+// Tiempo real: ningún canal es público. Todo lo que se emite va por canales privados, que exigen autorización.
+arch('ninguna parte de la aplicación usa canales públicos de tiempo real')
+    ->expect('App')
+    ->not->toUse(['Illuminate\Broadcasting\Channel', 'Illuminate\Broadcasting\PresenceChannel']);
