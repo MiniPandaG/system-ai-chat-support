@@ -167,3 +167,56 @@ export function GaugeIcon(props: IconProps) {
         </Icon>
     );
 }
+
+export function InboxIcon(props: IconProps) {
+    return (
+        <Icon {...props}>
+            <path d="M3 13h5l1.5 3h5L16 13h5" />
+            <path d="M5.5 5h13L21 13v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6Z" />
+        </Icon>
+    );
+}
+
+export function PlusIcon(props: IconProps) {
+    return (
+        <Icon {...props}>
+            <path d="M12 5v14" />
+            <path d="M5 12h14" />
+        </Icon>
+    );
+}
+
+export function ArrowLeftIcon(props: IconProps) {
+    return (
+        <Icon {...props}>
+            <path d="M19 12H5" />
+            <path d="m11 6-6 6 6 6" />
+        </Icon>
+    );
+}
+
+export function PaperclipIcon(props: IconProps) {
+    return (
+        <Icon {...props}>
+            <path d="m21 11.5-8.6 8.6a5 5 0 0 1-7.1-7.1l8.6-8.6a3.5 3.5 0 0 1 5 5l-8.6 8.6a2 2 0 0 1-2.8-2.8l7.9-7.9" />
+        </Icon>
+    );
+}
+
+export function FileIcon(props: IconProps) {
+    return (
+        <Icon {...props}>
+            <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z" />
+            <path d="M14 3v5h5" />
+        </Icon>
+    );
+}
+
+export function LockIcon(props: IconProps) {
+    return (
+        <Icon {...props}>
+            <rect x="4" y="11" width="16" height="10" rx="2" />
+            <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+        </Icon>
+    );
+}

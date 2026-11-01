@@ -3,16 +3,18 @@ import { useEffect, useRef, useState } from 'react';
 import type { ComponentType, ReactNode, SVGProps } from 'react';
 import logo from '../../images/logo.png';
 import { Button } from '../components/Button';
-import { GaugeIcon, MenuIcon, PaletteIcon, ShieldIcon, UserIcon, UsersIcon } from '../components/icons';
+import { GaugeIcon, InboxIcon, MenuIcon, PaletteIcon, ShieldIcon, UserIcon, UsersIcon } from '../components/icons';
 import type { SharedProps } from '../types';
 
-export type PanelSection = 'account' | 'team' | 'branding' | 'plan' | 'security';
+export type PanelSection = 'inbox' | 'account' | 'team' | 'branding' | 'plan' | 'security';
 
 interface PanelLayoutProps {
     title: string;
     section: PanelSection;
     /** Para pantallas con tablas: usa más ancho que un formulario. */
     wide?: boolean;
+    /** Para pantallas que reparten todo el alto en paneles con su propio scroll, como la bandeja. */
+    bare?: boolean;
     children: ReactNode;
 }
 
@@ -23,6 +25,7 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
+    { key: 'inbox', href: '/tickets', Icon: InboxIcon },
     { key: 'account', href: '/account', Icon: UserIcon },
     { key: 'team', href: '/settings/team', Icon: UsersIcon },
     { key: 'branding', href: '/settings/branding', Icon: PaletteIcon },
@@ -34,7 +37,7 @@ const navItems: NavItem[] = [
  * Estructura del panel (design/pantallas/estructura-panel.md): navegación lateral de 240 px, solo iconos entre
  * 768 y 1023 px, y menú de hoja inferior desde 360 px. Solo lista las secciones que ya existen.
  */
-export function PanelLayout({ title, section, wide = false, children }: PanelLayoutProps) {
+export function PanelLayout({ title, section, wide = false, bare = false, children }: PanelLayoutProps) {
     const { props } = usePage<SharedProps>();
     const { panel, auth } = props;
     const logout = useForm({});
@@ -66,14 +69,16 @@ export function PanelLayout({ title, section, wide = false, children }: PanelLay
         if (!menuOpen && sheet.open) sheet.close();
     }, [menuOpen]);
 
-    const labels: Record<PanelSection, string> = { account: panel.account, team: panel.team, branding: panel.branding, plan: panel.plan, security: panel.security };
+    const labels: Record<PanelSection, string> = { inbox: panel.inbox, account: panel.account, team: panel.team, branding: panel.branding, plan: panel.plan, security: panel.security };
     // El servidor decide qué secciones ve cada rol; aquí solo se ocultan las que no puede abrir.
     const visibleItems = navItems.filter(
         (item) =>
+            (item.key !== 'inbox' || auth?.can.tickets === true) &&
             (item.key !== 'team' || auth?.can.team === true) &&
             (item.key !== 'branding' || auth?.can.branding === true) &&
             (item.key !== 'plan' || auth?.can.plan === true),
     );
+    const unassigned = auth?.inbox?.unassigned ?? 0;
     const companyName = auth?.tenant?.name ?? panel.platform;
     const roleLabel = auth?.user.role == null ? null : (panel.roles[auth.user.role] ?? null);
 
@@ -96,6 +101,14 @@ export function PanelLayout({ title, section, wide = false, children }: PanelLay
                 >
                     <Icon className="size-5 shrink-0" />
                     <span className="md:sr-only lg:not-sr-only">{labels[key]}</span>
+                    {key === 'inbox' && unassigned > 0 && (
+                        <>
+                            <span aria-hidden="true" className="ml-auto hidden min-w-6 items-center justify-center rounded-full bg-primary px-2 text-xs font-semibold text-primary-foreground lg:inline-flex max-md:inline-flex">
+                                {unassigned}
+                            </span>
+                            <span className="sr-only">{panel.inbox_unassigned.replace(':count', String(unassigned))}</span>
+                        </>
+                    )}
                 </Link>
             );
         });
@@ -103,7 +116,7 @@ export function PanelLayout({ title, section, wide = false, children }: PanelLay
     return (
         <>
             <Head title={title} />
-            <div className="flex min-h-screen bg-background text-text">
+            <div className={`flex bg-background text-text ${bare ? 'h-dvh' : 'min-h-screen'}`}>
                 <aside className="hidden shrink-0 flex-col border-r border-border bg-surface md:flex md:w-16 lg:w-60">
                     <div className="flex h-14 items-center gap-3 border-b border-border px-4">
                         <img src={auth?.tenant?.logo_url ?? logo} alt="" className="size-8 shrink-0 rounded-sm object-contain" />
@@ -114,7 +127,7 @@ export function PanelLayout({ title, section, wide = false, children }: PanelLay
                     </nav>
                 </aside>
 
-                <div className="flex min-w-0 flex-1 flex-col">
+                <div className="flex min-h-0 min-w-0 flex-1 flex-col">
                     <header className="flex h-14 shrink-0 items-center gap-3 border-b border-border bg-surface px-4">
                         <button
                             type="button"
@@ -147,9 +160,13 @@ export function PanelLayout({ title, section, wide = false, children }: PanelLay
                         </div>
                     </header>
 
-                    <main className="flex-1 overflow-y-auto">
-                        <div className={`mx-auto flex w-full flex-col gap-8 px-4 py-8 ${wide ? 'max-w-[64rem]' : 'max-w-[40rem]'}`}>{children}</div>
-                    </main>
+                    {bare ? (
+                        <main className="min-h-0 flex-1 overflow-hidden">{children}</main>
+                    ) : (
+                        <main className="flex-1 overflow-y-auto">
+                            <div className={`mx-auto flex w-full flex-col gap-8 px-4 py-8 ${wide ? 'max-w-[64rem]' : 'max-w-[40rem]'}`}>{children}</div>
+                        </main>
+                    )}
                 </div>
             </div>
 
