@@ -3,7 +3,9 @@ import { useEffect, useRef, useState } from 'react';
 import type { ComponentType, ReactNode, SVGProps } from 'react';
 import logo from '../../images/logo.png';
 import { Button } from '../components/Button';
+import { ConnectionIndicator } from '../components/ConnectionIndicator';
 import { GaugeIcon, InboxIcon, MenuIcon, PaletteIcon, ShieldIcon, UserIcon, UsersIcon } from '../components/icons';
+import { disconnect } from '../realtime/client';
 import type { SharedProps } from '../types';
 
 export type PanelSection = 'inbox' | 'account' | 'team' | 'branding' | 'plan' | 'security';
@@ -141,6 +143,7 @@ export function PanelLayout({ title, section, wide = false, bare = false, childr
                         </button>
                         <h1 className="truncate font-display text-lg font-semibold">{title}</h1>
                         <div className="ml-auto flex items-center gap-3">
+                            {auth?.can.tickets === true && <ConnectionIndicator copy={panel} />}
                             {auth !== null && (
                                 <p className="hidden text-sm text-text-secondary sm:block">
                                     {auth.user.name}
@@ -152,7 +155,8 @@ export function PanelLayout({ title, section, wide = false, bare = false, childr
                                 loading={logout.processing}
                                 loadingLabel={panel.logging_out}
                                 onClick={() => {
-                                    logout.post('/logout');
+                                    // La conexión en vivo es de esta sesión: se cierra para que nadie la herede.
+                                    logout.post('/logout', { onFinish: disconnect });
                                 }}
                             >
                                 {panel.logout}

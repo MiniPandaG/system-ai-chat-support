@@ -6,6 +6,7 @@ import type { AttachmentsCopy, ComposerCopy, TicketStatus } from '../ticketTypes
 import { Alert } from './Alert';
 import { AttachmentPicker } from './AttachmentPicker';
 import { Button } from './Button';
+import type { Outgoing } from './OutgoingBubble';
 import { Radio } from './Radio';
 import { TextAreaField } from './TextAreaField';
 
@@ -16,6 +17,10 @@ interface TicketComposerProps {
     canWrite: boolean;
     copy: ComposerCopy;
     attachmentsCopy: AttachmentsCopy;
+    /** Lo que se está enviando, para mostrarlo en la conversación al instante; nulo cuando ya no hay envío en curso. */
+    onOutgoing: (outgoing: Outgoing | null) => void;
+    /** Se llama al escribir, para avisar al equipo; quien lo recibe decide cada cuánto avisar de verdad. */
+    onTyping?: () => void;
 }
 
 type Mode = 'reply' | 'note';
@@ -28,8 +33,9 @@ const MAX_LENGTH = 10000;
  * es pública. Cada modo guarda su propio borrador: lo escrito como nota nunca pasa a una respuesta al cambiar de modo.
  * Un ticket cerrado muestra un aviso con «Reabrir» en vez de un campo deshabilitado.
  */
-export function TicketComposer({ ticketId, status, canWrite, copy, attachmentsCopy }: TicketComposerProps) {
+export function TicketComposer({ ticketId, status, canWrite, copy, attachmentsCopy, onOutgoing, onTyping }: TicketComposerProps) {
     const [mode, setMode] = useState<Mode>('reply');
+    const [failed, setFailed] = useState(false);
     const [drafts, setDrafts] = useState<Record<Mode, string>>({ reply: '', note: '' });
     const [files, setFiles] = useState<File[]>([]);
     const [dragging, setDragging] = useState(false);
@@ -82,18 +88,34 @@ export function TicketComposer({ ticketId, status, canWrite, copy, attachmentsCo
 
     const change = (next: Mode) => {
         setMode(next);
+        setFailed(false);
         form.clearErrors();
     };
 
+    // El mensaje aparece en la conversación al instante, atenuado. Si el servidor lo rechaza con un error de validación,
+    // el error queda junto al campo; si falla de otra forma (sin red, error del servidor), el texto sigue aquí y se
+    // ofrece reintentar. Nada que no se haya confirmado se da por enviado.
     const send = () => {
         if (empty || form.processing) return;
 
+        let confirmed = false;
+        let rejected = false;
+        setFailed(false);
+        onOutgoing({ kind: isNote ? 'note' : 'reply', body, files: attached.length });
         form.transform(() => (attached.length > 0 ? { body, files: attached } : { body }));
         form.post(`/tickets/${String(ticketId)}/${isNote ? 'notes' : 'messages'}`, {
             preserveScroll: true,
             onSuccess: () => {
+                confirmed = true;
                 setDrafts((current) => ({ ...current, [mode]: '' }));
                 setFiles([]);
+            },
+            onError: () => {
+                rejected = true;
+            },
+            onFinish: () => {
+                onOutgoing(null);
+                if (!confirmed && !rejected) setFailed(true);
             },
         });
     };
@@ -165,6 +187,7 @@ export function TicketComposer({ ticketId, status, canWrite, copy, attachmentsCo
                     onChange={(event) => {
                         const value = event.target.value;
                         setDrafts((current) => ({ ...current, [mode]: value }));
+                        if (value.trim() !== '') onTyping?.();
                     }}
                 />
                 {!isNote && (
@@ -178,6 +201,16 @@ export function TicketComposer({ ticketId, status, canWrite, copy, attachmentsCo
                     />
                 )}
                 {dragging && <p className="text-sm font-medium text-primary">{attachmentsCopy.drop}</p>}
+                {failed && (
+                    <Alert variant="danger">
+                        <span className="flex flex-wrap items-center gap-3">
+                            {copy.failed}
+                            <Button variant="outline" onClick={send}>
+                                {copy.retry}
+                            </Button>
+                        </span>
+                    </Alert>
+                )}
                 <div className="flex justify-end">
                     <Button type="submit" disabled={empty} loading={form.processing} loadingLabel={copy.sending}>
                         {isNote ? copy.send_note : copy.send_reply}

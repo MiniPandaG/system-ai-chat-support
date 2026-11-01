@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ticketsCopy } from '../test-fixtures/tickets';
@@ -8,9 +8,12 @@ import { TicketComposer } from './TicketComposer';
 interface PostOptions {
     preserveScroll?: boolean;
     onSuccess?: () => void;
+    onError?: () => void;
+    onFinish?: () => void;
 }
 
 const { post, patch, transform, clearErrors } = vi.hoisted(() => ({ post: vi.fn(), patch: vi.fn(), transform: vi.fn(), clearErrors: vi.fn() }));
+const onOutgoing = vi.fn();
 let formErrors: Record<string, string> = {};
 let processing = false;
 
@@ -20,13 +23,14 @@ vi.mock('@inertiajs/react', () => ({
 }));
 
 function renderComposer(status: TicketStatus = 'open', canWrite = true) {
-    return render(<TicketComposer ticketId={11} status={status} canWrite={canWrite} copy={ticketsCopy.composer} attachmentsCopy={ticketsCopy.attachments} />);
+    return render(<TicketComposer ticketId={11} status={status} canWrite={canWrite} copy={ticketsCopy.composer} attachmentsCopy={ticketsCopy.attachments} onOutgoing={onOutgoing} />);
 }
 
 describe('TicketComposer', () => {
     beforeEach(() => {
         post.mockReset();
         patch.mockReset();
+        onOutgoing.mockReset();
         transform.mockReset();
         clearErrors.mockReset();
         formErrors = {};
@@ -172,5 +176,150 @@ describe('TicketComposer', () => {
         renderComposer('closed', false);
 
         expect(screen.queryByRole('button', { name: 'Reabrir' })).toBeNull();
+    });
+});
+
+describe('TicketComposer: estados de envío', () => {
+    beforeEach(() => {
+        post.mockReset();
+        onOutgoing.mockReset();
+        transform.mockReset();
+        clearErrors.mockReset();
+        formErrors = {};
+        processing = false;
+    });
+
+    async function sendText(text: string, mode: 'reply' | 'note' = 'reply') {
+        const user = userEvent.setup();
+        renderComposer();
+        if (mode === 'note') await user.click(screen.getByRole('radio', { name: 'Nota interna' }));
+        await user.type(screen.getByLabelText(mode === 'note' ? 'Nota para el equipo' : 'Mensaje para el cliente'), text);
+        await user.click(screen.getByRole('button', { name: mode === 'note' ? 'Guardar nota' : 'Enviar respuesta' }));
+
+        return { user, options: post.mock.calls.at(-1)?.[1] as PostOptions };
+    }
+
+    it('al enviar, la conversación recibe lo que se está enviando al instante', async () => {
+        await sendText('Ya lo revisamos');
+
+        expect(onOutgoing).toHaveBeenCalledWith({ kind: 'reply', body: 'Ya lo revisamos', files: 0 });
+    });
+
+    it('una nota se anuncia como nota', async () => {
+        await sendText('Hablar con facturación', 'note');
+
+        expect(onOutgoing).toHaveBeenCalledWith({ kind: 'note', body: 'Hablar con facturación', files: 0 });
+    });
+
+    it('cuando se confirma, el envío en curso desaparece y no hay aviso de fallo', async () => {
+        const { options } = await sendText('Hola');
+
+        act(() => {
+            options.onSuccess?.();
+            options.onFinish?.();
+        });
+
+        expect(onOutgoing).toHaveBeenLastCalledWith(null);
+        expect(screen.queryByText('No se envió. Tu mensaje sigue en el cuadro de texto.')).toBeNull();
+    });
+
+    it('si falla sin ser un error de validación (sin red, error del servidor), avisa y el texto sigue ahí', async () => {
+        const { options } = await sendText('Hola');
+
+        act(() => {
+            options.onFinish?.();
+        });
+
+        expect(onOutgoing).toHaveBeenLastCalledWith(null);
+        expect(screen.getByRole('alert').textContent).toContain('No se envió. Tu mensaje sigue en el cuadro de texto.');
+        expect(screen.getByLabelText<HTMLTextAreaElement>('Mensaje para el cliente').value).toBe('Hola');
+    });
+
+    it('«Reintentar» vuelve a enviar el mismo texto', async () => {
+        const { user, options } = await sendText('Hola');
+        act(() => {
+            options.onFinish?.();
+        });
+
+        await user.click(screen.getByRole('button', { name: 'Reintentar' }));
+
+        expect(post).toHaveBeenCalledTimes(2);
+        expect(post.mock.calls[1]?.[0]).toBe('/tickets/11/messages');
+        expect(onOutgoing).toHaveBeenLastCalledWith({ kind: 'reply', body: 'Hola', files: 0 });
+        expect(screen.queryByRole('alert')).toBeNull();
+    });
+
+    it('si el servidor lo rechaza con un error de validación, el error queda en el campo y no se ofrece reintentar', async () => {
+        const { options } = await sendText('Hola');
+
+        act(() => {
+            options.onError?.();
+            options.onFinish?.();
+        });
+
+        expect(onOutgoing).toHaveBeenLastCalledWith(null);
+        expect(screen.queryByRole('button', { name: 'Reintentar' })).toBeNull();
+    });
+
+    it('cambiar de modo quita el aviso de fallo', async () => {
+        const { user, options } = await sendText('Hola');
+        act(() => {
+            options.onFinish?.();
+        });
+        expect(screen.getByRole('button', { name: 'Reintentar' })).toBeTruthy();
+
+        await user.click(screen.getByRole('radio', { name: 'Nota interna' }));
+
+        expect(screen.queryByRole('button', { name: 'Reintentar' })).toBeNull();
+    });
+});
+
+describe('TicketComposer: avisar que se escribe', () => {
+    const onTyping = vi.fn();
+
+    beforeEach(() => {
+        onTyping.mockReset();
+        formErrors = {};
+        processing = false;
+    });
+
+    function renderTyping(canWrite = true) {
+        return render(<TicketComposer ticketId={11} status="open" canWrite={canWrite} copy={ticketsCopy.composer} attachmentsCopy={ticketsCopy.attachments} onOutgoing={vi.fn()} onTyping={onTyping} />);
+    }
+
+    it('cada tecla con texto avisa, y el límite lo pone quien recibe el aviso', async () => {
+        const user = userEvent.setup();
+        renderTyping();
+
+        await user.type(screen.getByLabelText('Mensaje para el cliente'), 'Hola');
+
+        expect(onTyping).toHaveBeenCalledTimes(4);
+    });
+
+    it('borrar todo el texto no avisa', async () => {
+        const user = userEvent.setup();
+        renderTyping();
+        await user.type(screen.getByLabelText('Mensaje para el cliente'), 'a');
+        onTyping.mockReset();
+
+        await user.clear(screen.getByLabelText('Mensaje para el cliente'));
+
+        expect(onTyping).not.toHaveBeenCalled();
+    });
+
+    it('escribir solo espacios no avisa', async () => {
+        const user = userEvent.setup();
+        renderTyping();
+
+        await user.type(screen.getByLabelText('Mensaje para el cliente'), '   ');
+
+        expect(onTyping).not.toHaveBeenCalled();
+    });
+
+    it('un observador no tiene dónde escribir, así que nunca avisa', () => {
+        renderTyping(false);
+
+        expect(screen.queryByLabelText('Mensaje para el cliente')).toBeNull();
+        expect(onTyping).not.toHaveBeenCalled();
     });
 });

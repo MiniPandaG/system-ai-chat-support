@@ -1,16 +1,20 @@
-import { act, render } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { agentMessage, assignees, customerMessage, ticketDetail, ticketsCopy } from '../test-fixtures/tickets';
 import type { AttachmentStatus, TicketDetailData } from '../ticketTypes';
 import { TicketDetail } from './TicketDetail';
 
-const { reload } = vi.hoisted(() => ({ reload: vi.fn() }));
+const { reload, post } = vi.hoisted(() => ({ reload: vi.fn(), post: vi.fn() }));
+let connection = 'connected';
 
 vi.mock('@inertiajs/react', () => ({
     usePage: () => ({ props: { errors: {} } }),
     router: { patch: vi.fn(), post: vi.fn(), delete: vi.fn(), reload },
-    useForm: () => ({ errors: {}, processing: false, progress: null, clearErrors: vi.fn(), transform: vi.fn(), post: vi.fn() }),
+    useForm: () => ({ errors: {}, processing: false, progress: null, clearErrors: vi.fn(), transform: vi.fn(), post }),
 }));
+
+vi.mock('../realtime/hooks', () => ({ useConnectionState: () => connection, useChannel: vi.fn() }));
 
 function ticketWith(status: AttachmentStatus | null): TicketDetailData {
     const attachments = status === null ? [] : [{ id: 'a1', name: 'informe.pdf', size: 100, status, url: status === 'clean' ? 'https://app.test/a1' : null }];
@@ -24,75 +28,93 @@ function renderDetail(ticket: TicketDetailData) {
 
 describe('TicketDetail: adjuntos por revisar', () => {
     beforeEach(() => {
-        vi.useFakeTimers();
         reload.mockReset();
+        post.mockReset();
+        connection = 'connected';
     });
 
     afterEach(() => {
         vi.useRealTimers();
     });
 
-    it('con un archivo por revisar consulta cada pocos segundos solo lo que cambió', () => {
+    it('ya no consulta cada pocos segundos: el servidor avisa cuando la revisión termina', () => {
+        vi.useFakeTimers();
         renderDetail(ticketWith('pending'));
 
         act(() => {
-            vi.advanceTimersByTime(3000);
+            vi.advanceTimersByTime(120000);
         });
-        expect(reload).toHaveBeenCalledTimes(1);
-        expect(reload).toHaveBeenCalledWith({ only: ['selected'] });
 
-        act(() => {
-            vi.advanceTimersByTime(6000);
-        });
-        expect(reload).toHaveBeenCalledTimes(3);
+        expect(reload).not.toHaveBeenCalled();
     });
 
-    it('se detiene después de unos intentos: no consulta para siempre', () => {
+    it('con conexión en vivo no muestra ningún aviso de actualización', () => {
         renderDetail(ticketWith('pending'));
 
-        act(() => {
-            vi.advanceTimersByTime(3000 * 60);
-        });
-
-        expect(reload).toHaveBeenCalledTimes(20);
+        expect(screen.queryByRole('button', { name: 'Actualizar' })).toBeNull();
     });
 
-    it('sin archivos por revisar no consulta nada', () => {
+    it('sin conexión en vivo y con un archivo por revisar ofrece actualizar a mano', () => {
+        connection = 'unavailable';
+        renderDetail(ticketWith('pending'));
+
+        expect(screen.getByText('Sin conexión en vivo: el resultado de la revisión no aparece solo.')).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Actualizar' })).toBeTruthy();
+    });
+
+    it('«Actualizar» vuelve a pedir solo el ticket y avisa mientras trabaja', async () => {
+        connection = 'disconnected';
+        const user = userEvent.setup();
+        renderDetail(ticketWith('pending'));
+
+        await user.click(screen.getByRole('button', { name: 'Actualizar' }));
+
+        expect(reload).toHaveBeenCalledWith(expect.objectContaining({ only: ['selected'] }));
+        const options = reload.mock.calls[0]?.[0] as { onFinish: () => void };
+        expect(screen.getByRole<HTMLButtonElement>('button', { name: /Actualizar/ }).disabled).toBe(true);
+        expect(screen.getByText('Actualizando…')).toBeTruthy();
+
+        act(() => {
+            options.onFinish();
+        });
+        expect(screen.getByRole<HTMLButtonElement>('button', { name: 'Actualizar' }).disabled).toBe(false);
+        expect(screen.queryByText('Actualizando…')).toBeNull();
+    });
+
+    it('sin archivos por revisar no hay aviso aunque no haya conexión', () => {
+        connection = 'unavailable';
         for (const status of ['clean', 'infected', 'failed', null] as const) {
             const { unmount } = renderDetail(ticketWith(status));
 
-            act(() => {
-                vi.advanceTimersByTime(30000);
-            });
+            expect(screen.queryByRole('button', { name: 'Actualizar' })).toBeNull();
             unmount();
         }
+    });
+});
 
-        expect(reload).not.toHaveBeenCalled();
+describe('TicketDetail: lo que se está enviando', () => {
+    beforeEach(() => {
+        post.mockReset();
+        connection = 'connected';
     });
 
-    it('deja de consultar al cerrar el ticket', () => {
-        const { unmount } = renderDetail(ticketWith('pending'));
-        unmount();
+    it('al enviar una respuesta aparece enseguida en la conversación como «Enviando…» y se va al terminar', async () => {
+        const user = userEvent.setup();
+        renderDetail(ticketWith(null));
 
+        await user.type(screen.getByLabelText('Mensaje para el cliente'), 'Estamos en ello');
+        await user.click(screen.getByRole('button', { name: 'Enviar respuesta' }));
+
+        const log = screen.getByRole('log');
+        const pending = Array.from(log.querySelectorAll('article[aria-busy="true"]'));
+        expect(pending).toHaveLength(1);
+        expect(pending[0]?.textContent).toContain('Estamos en ello');
+        expect(pending[0]?.textContent).toContain('Enviando…');
+
+        const options = post.mock.calls[0]?.[1] as { onFinish: () => void };
         act(() => {
-            vi.advanceTimersByTime(30000);
+            options.onFinish();
         });
-
-        expect(reload).not.toHaveBeenCalled();
-    });
-
-    it('cuando el archivo ya salió limpio, deja de consultar', () => {
-        const { rerender } = renderDetail(ticketWith('pending'));
-        act(() => {
-            vi.advanceTimersByTime(3000);
-        });
-        expect(reload).toHaveBeenCalledTimes(1);
-
-        rerender(<TicketDetail ticket={ticketWith('clean')} assignees={assignees} tagOptions={[]} copy={ticketsCopy} canUpdate />);
-        act(() => {
-            vi.advanceTimersByTime(30000);
-        });
-
-        expect(reload).toHaveBeenCalledTimes(1);
+        expect(log.querySelectorAll('article[aria-busy="true"]')).toHaveLength(0);
     });
 });

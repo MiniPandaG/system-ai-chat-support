@@ -4,6 +4,9 @@ export interface PanelCopy {
     security: string;
     inbox: string;
     inbox_unassigned: string;
+    live_on: string;
+    live_connecting: string;
+    live_off: string;
     team: string;
     branding: string;
     plan: string;
@@ -16,9 +19,9 @@ export interface PanelCopy {
 }
 
 export interface AuthenticatedUser {
-    user: { name: string; email: string; role: string | null };
+    user: { id: number; name: string; email: string; role: string | null };
     /** theme: variables CSS de la empresa para el panel (solo el primario y su texto, ya validados); null con la paleta por defecto. */
-    tenant: { name: string; logo_url: string | null; theme: Record<string, string> | null } | null;
+    tenant: { id: number; name: string; logo_url: string | null; theme: Record<string, string> | null } | null;
     /** Tickets pendientes que nadie atiende; null para quien no ve la bandeja. */
     inbox?: { unassigned: number | null };
     can: { tickets: boolean; team: boolean; branding: boolean; plan: boolean };

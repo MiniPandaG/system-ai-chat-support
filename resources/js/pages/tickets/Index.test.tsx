@@ -25,6 +25,9 @@ const panel = {
     nav_label: 'Navegación principal',
     inbox: 'Bandeja',
     inbox_unassigned: ':count sin asignar',
+    live_on: 'En vivo',
+    live_connecting: 'Conectando…',
+    live_off: 'Sin conexión en vivo',
     account: 'Mi cuenta',
     security: 'Seguridad',
     team: 'Equipo',
@@ -44,8 +47,8 @@ function setShared(flashStatus: string | null = null) {
         flash: { status: flashStatus, recovery_codes: null },
         panel,
         auth: {
-            user: { name: 'Ana Torres', email: 'ana@empresa-ejemplo.com', role: 'agent' },
-            tenant: { name: 'Soporte Ejemplo SAS', logo_url: null, theme: null },
+            user: { id: 1, name: 'Ana Torres', email: 'ana@empresa-ejemplo.com', role: 'agent' },
+            tenant: { id: 1, name: 'Soporte Ejemplo SAS', logo_url: null, theme: null },
             can: { tickets: true, team: false, branding: false, plan: false },
         },
     };

@@ -72,6 +72,9 @@ describe('Plan', () => {
                 security: 'Seguridad',
                 inbox: 'Bandeja',
                 inbox_unassigned: ':count sin asignar',
+                live_on: 'En vivo',
+                live_connecting: 'Conectando…',
+                live_off: 'Sin conexión en vivo',
                 team: 'Equipo',
                 branding: 'Marca',
                 plan: 'Plan',
@@ -83,8 +86,8 @@ describe('Plan', () => {
                 roles: { admin: 'Administrador' },
             },
             auth: {
-                user: { name: 'Ana', email: 'ana@empresa-ejemplo.com', role: 'admin' },
-                tenant: { name: 'Soporte Ejemplo SAS', logo_url: null, theme: null },
+                user: { id: 1, name: 'Ana', email: 'ana@empresa-ejemplo.com', role: 'admin' },
+                tenant: { id: 1, name: 'Soporte Ejemplo SAS', logo_url: null, theme: null },
                 can: { tickets: true, team: true, branding: true, plan: true },
             },
         };

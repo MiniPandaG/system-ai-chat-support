@@ -46,12 +46,16 @@ export function TicketRow({ ticket, copy, selected, query = '' }: TicketRowProps
                 </span>
                 <span className="flex min-w-0 flex-1 flex-col gap-1">
                     <span className="flex items-baseline justify-between gap-2">
-                        <span className="truncate font-medium">{customer}</span>
+                        <span className={`flex min-w-0 items-center gap-2 ${ticket.unread ? 'font-semibold text-text' : 'font-medium'}`}>
+                            {ticket.unread && <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-primary" />}
+                            <span className="truncate">{customer}</span>
+                            {ticket.unread && <span className="sr-only">{copy.inbox.unread}</span>}
+                        </span>
                         <time dateTime={ticket.last_message_at} title={ticket.last_message_label} className="shrink-0 text-xs text-text-tertiary">
                             {relative ?? ticket.last_message_label}
                         </time>
                     </span>
-                    <span className="truncate text-text-secondary">
+                    <span className={`truncate ${ticket.unread ? 'text-text' : 'text-text-secondary'}`}>
                         <span className="font-mono text-xs text-text-tertiary">#{ticket.number}</span> {ticket.subject}
                     </span>
                     {ticket.match !== null && <span className="truncate text-xs text-text-tertiary">{copy.inbox.match[ticket.match]}</span>}

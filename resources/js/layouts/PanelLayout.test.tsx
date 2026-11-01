@@ -2,10 +2,20 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { disconnect } from '../realtime/client';
 import type { SharedProps } from '../types';
 import { PanelLayout } from './PanelLayout';
 
 const post = vi.fn();
+
+vi.mock('../realtime/client', () => ({
+    disconnect: vi.fn(),
+    connect: vi.fn(),
+    listen: vi.fn(() => () => undefined),
+    getConnectionState: () => 'disconnected',
+    onConnectionState: () => () => undefined,
+}));
+
 let shared: Partial<SharedProps> = {};
 
 vi.mock('@inertiajs/react', () => ({
@@ -25,6 +35,9 @@ const panel: SharedProps['panel'] = {
     security: 'Seguridad',
     inbox: 'Bandeja',
     inbox_unassigned: ':count sin asignar',
+    live_on: 'En vivo',
+    live_connecting: 'Conectando…',
+    live_off: 'Sin conexión en vivo',
     team: 'Equipo',
     branding: 'Marca',
     plan: 'Plan',
@@ -39,9 +52,10 @@ const panel: SharedProps['panel'] = {
 describe('PanelLayout', () => {
     beforeEach(() => {
         post.mockClear();
+        vi.mocked(disconnect).mockClear();
         shared = {
             panel,
-            auth: { user: { name: 'Ana Torres', email: 'ana@empresa-ejemplo.com', role: 'admin' }, tenant: { name: 'Soporte Ejemplo SAS', logo_url: null, theme: null }, can: { tickets: true, team: true, branding: true, plan: true } },
+            auth: { user: { id: 1, name: 'Ana Torres', email: 'ana@empresa-ejemplo.com', role: 'admin' }, tenant: { id: 1, name: 'Soporte Ejemplo SAS', logo_url: null, theme: null }, can: { tickets: true, team: true, branding: true, plan: true } },
         };
     });
 
@@ -67,7 +81,7 @@ describe('PanelLayout', () => {
         expect(screen.getAllByRole('link', { name: 'Equipo', hidden: true }).length).toBeGreaterThan(0);
         unmount();
 
-        shared = { panel, auth: { user: { name: 'Luis', email: 'luis@empresa-ejemplo.com', role: 'agent' }, tenant: { name: 'Soporte Ejemplo SAS', logo_url: null, theme: null }, can: { tickets: true, team: false, branding: false, plan: false } } };
+        shared = { panel, auth: { user: { id: 1, name: 'Luis', email: 'luis@empresa-ejemplo.com', role: 'agent' }, tenant: { id: 1, name: 'Soporte Ejemplo SAS', logo_url: null, theme: null }, can: { tickets: true, team: false, branding: false, plan: false } } };
         render(
             <PanelLayout title="Mi cuenta" section="account">
                 <p>x</p>
@@ -91,7 +105,7 @@ describe('PanelLayout', () => {
     });
 
     it('el personal de la plataforma ve «Plataforma» y ningún rol de empresa', () => {
-        shared = { panel, auth: { user: { name: 'Admin Plataforma', email: 'admin@pandacore.net', role: null }, tenant: null, can: { tickets: false, team: false, branding: false, plan: false } } };
+        shared = { panel, auth: { user: { id: 1, name: 'Admin Plataforma', email: 'admin@pandacore.net', role: null }, tenant: null, can: { tickets: false, team: false, branding: false, plan: false } } };
 
         render(
             <PanelLayout title="Mi cuenta" section="account">
@@ -113,7 +127,40 @@ describe('PanelLayout', () => {
 
         await user.click(screen.getByRole('button', { name: 'Cerrar sesión' }));
 
-        expect(post).toHaveBeenCalledWith('/logout');
+        expect(post).toHaveBeenCalledWith('/logout', expect.anything());
+    });
+
+    it('al terminar de cerrar sesión se corta la conexión en vivo', async () => {
+        const user = userEvent.setup();
+        render(
+            <PanelLayout title="Mi cuenta" section="account">
+                <p>x</p>
+            </PanelLayout>,
+        );
+
+        await user.click(screen.getByRole('button', { name: 'Cerrar sesión' }));
+        const options = post.mock.calls[0]?.[1] as { onFinish: () => void };
+        options.onFinish();
+
+        expect(disconnect).toHaveBeenCalledTimes(1);
+    });
+
+    it('muestra el indicador de conexión solo a quien ve la bandeja', () => {
+        const { unmount } = render(
+            <PanelLayout title="Mi cuenta" section="account">
+                <p>x</p>
+            </PanelLayout>,
+        );
+        expect(screen.getByRole('img', { name: 'Sin conexión en vivo' })).toBeTruthy();
+        unmount();
+
+        shared = { panel, auth: { user: { id: 1, name: 'Admin Plataforma', email: 'admin@pandacore.net', role: null }, tenant: null, can: { tickets: false, team: false, branding: false, plan: false } } };
+        render(
+            <PanelLayout title="Mi cuenta" section="account">
+                <p>x</p>
+            </PanelLayout>,
+        );
+        expect(screen.queryByRole('img', { name: 'Sin conexión en vivo' })).toBeNull();
     });
 
     it('el botón de menú abre la hoja de navegación y cerrarla la oculta', async () => {
@@ -138,8 +185,8 @@ describe('PanelLayout', () => {
         shared = {
             panel,
             auth: {
-                user: { name: 'Ana', email: 'ana@empresa-ejemplo.com', role: 'admin' },
-                tenant: { name: 'Soporte Ejemplo SAS', logo_url: null, theme: { '--color-primary': '#2164DA', '--color-primary-foreground': '#F6F1EA' } },
+                user: { id: 1, name: 'Ana', email: 'ana@empresa-ejemplo.com', role: 'admin' },
+                tenant: { id: 1, name: 'Soporte Ejemplo SAS', logo_url: null, theme: { '--color-primary': '#2164DA', '--color-primary-foreground': '#F6F1EA' } },
                 can: { tickets: true, team: true, branding: true, plan: true },
             },
         };
@@ -182,7 +229,7 @@ describe('PanelLayout', () => {
         expect(screen.getAllByRole('link', { name: 'Plan', hidden: true }).length).toBeGreaterThan(0);
         unmount();
 
-        shared = { panel, auth: { user: { name: 'Luis', email: 'luis@empresa-ejemplo.com', role: 'agent' }, tenant: { name: 'Soporte Ejemplo SAS', logo_url: null, theme: null }, can: { tickets: true, team: false, branding: false, plan: false } } };
+        shared = { panel, auth: { user: { id: 1, name: 'Luis', email: 'luis@empresa-ejemplo.com', role: 'agent' }, tenant: { id: 1, name: 'Soporte Ejemplo SAS', logo_url: null, theme: null }, can: { tickets: true, team: false, branding: false, plan: false } } };
         render(
             <PanelLayout title="Mi cuenta" section="account">
                 <p>x</p>
@@ -203,7 +250,7 @@ describe('PanelLayout', () => {
         expect(links[0]?.textContent).toBe('Bandeja');
         unmount();
 
-        shared = { panel, auth: { user: { name: 'Admin Plataforma', email: 'admin@pandacore.net', role: null }, tenant: null, can: { tickets: false, team: false, branding: false, plan: false } } };
+        shared = { panel, auth: { user: { id: 1, name: 'Admin Plataforma', email: 'admin@pandacore.net', role: null }, tenant: null, can: { tickets: false, team: false, branding: false, plan: false } } };
         render(
             <PanelLayout title="Mi cuenta" section="account">
                 <p>x</p>

@@ -77,3 +77,35 @@ describe('TicketRow', () => {
         expect(screen.getByText('Cliente sin nombre')).toBeTruthy();
     });
 });
+
+describe('TicketRow: sin leer', () => {
+    function renderUnread(unread: boolean) {
+        return render(
+            <ul>
+                <TicketRow ticket={{ ...pick(ticketRows, 0), unread }} copy={ticketsCopy} selected={false} />
+            </ul>,
+        );
+    }
+
+    it('un ticket sin leer lleva un punto y lo dice con palabras, no solo con color', () => {
+        const { container } = renderUnread(true);
+
+        expect(container.querySelector('.bg-primary.rounded-full')).not.toBeNull();
+        expect(screen.getByText('Sin leer').className).toContain('sr-only');
+        expect(screen.getByRole('link').textContent).toContain('Sin leer');
+    });
+
+    it('el nombre del cliente se destaca en negrita cuando hay algo sin leer', () => {
+        renderUnread(true);
+
+        expect(screen.getByText('Marisol Quintero').parentElement?.className).toContain('font-semibold');
+    });
+
+    it('un ticket leído no lleva punto ni texto de más', () => {
+        const { container } = renderUnread(false);
+
+        expect(container.querySelector('.bg-primary.rounded-full')).toBeNull();
+        expect(screen.queryByText('Sin leer')).toBeNull();
+        expect(screen.getByText('Marisol Quintero').parentElement?.className).not.toContain('font-semibold');
+    });
+});

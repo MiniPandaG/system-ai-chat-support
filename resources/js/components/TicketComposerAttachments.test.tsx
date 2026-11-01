@@ -23,7 +23,7 @@ function pdf(name = 'contrato.pdf', modified = 1): File {
 }
 
 function renderComposer() {
-    return render(<TicketComposer ticketId={11} status="open" canWrite copy={ticketsCopy.composer} attachmentsCopy={ticketsCopy.attachments} />);
+    return render(<TicketComposer ticketId={11} status="open" canWrite copy={ticketsCopy.composer} attachmentsCopy={ticketsCopy.attachments} onOutgoing={vi.fn()} />);
 }
 
 function fileInput(container: HTMLElement): HTMLInputElement {
@@ -171,7 +171,7 @@ describe('TicketComposer: adjuntos', () => {
 
         processing = true;
         progress = { percentage: 60 };
-        rerender(<TicketComposer ticketId={11} status="open" canWrite copy={ticketsCopy.composer} attachmentsCopy={ticketsCopy.attachments} />);
+        rerender(<TicketComposer ticketId={11} status="open" canWrite copy={ticketsCopy.composer} attachmentsCopy={ticketsCopy.attachments} onOutgoing={vi.fn()} />);
 
         expect(screen.getByRole('progressbar', { name: 'Subiendo archivos… 60 %' })).toBeTruthy();
     });

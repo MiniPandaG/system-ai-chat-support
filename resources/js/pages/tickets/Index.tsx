@@ -9,6 +9,7 @@ import { NewTicketDialog } from '../../components/NewTicketDialog';
 import { TicketDetail } from '../../components/TicketDetail';
 import { TicketList, TicketListSkeleton } from '../../components/TicketList';
 import { inboxParams, inboxQuery, isFiltered } from '../../lib/inbox';
+import { useLiveRefresh } from '../../realtime/useLiveRefresh';
 import { PanelLayout } from '../../layouts/PanelLayout';
 import type { Assignee, InboxCounts, InboxFilters, SavedView, TagData, TicketDetailData, TicketRowData, TicketsCopy } from '../../ticketTypes';
 import type { SharedProps } from '../../types';
@@ -46,6 +47,9 @@ export default function Index({ copy, tickets, next_cursor, total, filters, coun
     const query = inboxQuery(filters);
     const filtered = isFiltered(filters);
     const text = copy.inbox;
+
+    // Los canales privados de la empresa y del ticket abierto avisan de cambios; la lista y el ticket se vuelven a pedir.
+    useLiveRefresh(props.auth?.tenant?.id ?? null, selected?.id ?? null);
 
     useEffect(() => {
         if (props.flash.status === null) return;

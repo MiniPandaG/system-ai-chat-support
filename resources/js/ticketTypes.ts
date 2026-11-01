@@ -13,6 +13,8 @@ export interface TicketRowData {
     last_message_label: string;
     /** Con una búsqueda: en qué campo coincidió el ticket. */
     match: 'number' | 'subject' | 'customer' | 'message' | null;
+    /** Alguien que no eres tú escribió después de la última vez que la abriste. */
+    unread: boolean;
 }
 
 export type AttachmentStatus = 'pending' | 'clean' | 'infected' | 'failed';
@@ -70,6 +72,9 @@ export interface TicketDetailData {
     created_label: string;
     tags: TagData[];
     thread: ThreadEntry[];
+    /** Compañeros que ya vieron lo último (hasta 5) y cuántos más hay. */
+    seen_by: string[];
+    seen_more: number;
 }
 
 export interface Assignee {
@@ -118,6 +123,10 @@ export interface ComposerCopy {
     send_reply: string;
     send_note: string;
     sending: string;
+    outgoing_sending: string;
+    outgoing_files: string;
+    failed: string;
+    retry: string;
     closed: string;
     reopen: string;
     read_only: string;
@@ -136,6 +145,9 @@ export interface AttachmentsCopy {
     list_label: string;
     download: string;
     drop: string;
+    offline: string;
+    refresh: string;
+    refreshing: string;
     status: Record<'pending' | 'infected' | 'failed', string>;
 }
 
@@ -214,6 +226,7 @@ export interface InboxCopy {
     count_many: string;
     empty_filtered: string;
     match: Record<'number' | 'subject' | 'customer' | 'message', string>;
+    unread: string;
     load_more: string;
     loading_more: string;
     load_error: string;
@@ -257,6 +270,8 @@ export interface TicketsCopy {
     assignee_inactive: string;
     new: NewTicketCopy;
     composer: ComposerCopy;
+    typing: { one: string; two: string; many: string; someone: string };
+    seen: { label: string; more: string };
     note: { label: string; aria: string };
     tags: TagsCopy;
     attachments: AttachmentsCopy;

@@ -2,13 +2,21 @@ import { router, usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 import type { Assignee, TagData, TicketDetailData, TicketPriority, TicketsCopy, TicketStatus } from '../ticketTypes';
 import type { SharedProps } from '../types';
+import { createTypingSender, postTyping } from '../lib/typing';
+import { useConnectionState } from '../realtime/hooks';
+import { useTypists } from '../realtime/useTypists';
 import { Alert } from './Alert';
+import { Button } from './Button';
 import { MessageBubble } from './MessageBubble';
 import { NoteBubble } from './NoteBubble';
+import { OutgoingBubble } from './OutgoingBubble';
+import type { Outgoing } from './OutgoingBubble';
+import { SeenBy } from './SeenBy';
 import { SelectField } from './SelectField';
 import { TicketComposer } from './TicketComposer';
 import { PriorityBadge, StatusBadge } from './TicketBadges';
 import { TicketTags } from './TicketTags';
+import { TypingIndicator } from './TypingIndicator';
 
 interface TicketDetailProps {
     ticket: TicketDetailData;
@@ -21,10 +29,6 @@ interface TicketDetailProps {
 const statuses: TicketStatus[] = ['open', 'waiting_customer', 'resolved', 'closed'];
 const priorities: TicketPriority[] = ['low', 'normal', 'high', 'urgent'];
 
-/** Cada cuánto y cuántas veces se consulta si un adjunto ya se revisó. */
-const REVIEW_POLL_MS = 3000;
-const REVIEW_POLL_LIMIT = 20;
-
 /**
  * Cabecera del ticket, su conversación y el compositor (design/pantallas/vista-ticket-conversacion.md). La
  * conversación mezcla mensajes y notas internas por hora de creación; el compositor conserva lo escrito aunque se
@@ -33,39 +37,39 @@ const REVIEW_POLL_LIMIT = 20;
 export function TicketDetail({ ticket, assignees, tagOptions, copy, canUpdate }: TicketDetailProps) {
     const bodyRef = useRef<HTMLDivElement>(null);
     const threadRef = useRef<HTMLDivElement>(null);
+    const { props } = usePage<SharedProps>();
+    const [outgoing, setOutgoing] = useState<Outgoing | null>(null);
+    const [refreshing, setRefreshing] = useState(false);
+    const connection = useConnectionState();
+    // El componente se vuelve a montar al cambiar de ticket, así que el limitador de señales empieza de cero con cada uno.
+    const [sendTyping] = useState(() => createTypingSender(() => {
+        postTyping(ticket.id);
+    }));
+    const typists = useTypists(props.auth?.tenant?.id ?? null, ticket.id, props.auth?.user.id ?? null);
+    const typingPeople = typists.map((id) => assignees.find((person) => person.id === id)?.name ?? null);
     const entries = ticket.thread.length;
 
-    // Al abrir el ticket y cuando llega algo nuevo se muestra el final; el foco no se mueve. En pantallas angostas
-    // se desplaza todo el cuerpo y en anchas solo la conversación, así que se prueba con ambos.
+    // Al abrir el ticket y cuando llega algo nuevo (o se está enviando algo) se muestra el final; el foco no se mueve.
+    // En pantallas angostas se desplaza todo el cuerpo y en anchas solo la conversación, así que se prueba con ambos.
+    const sending = outgoing !== null;
     useEffect(() => {
         for (const element of [bodyRef.current, threadRef.current]) {
             if (element !== null) element.scrollTop = element.scrollHeight;
         }
-    }, [ticket.id, entries]);
+    }, [ticket.id, entries, sending]);
 
-    // Un archivo recién subido está «por revisar» unos segundos; mientras tanto se consulta si ya salió limpio. No es
-    // tiempo real (llega en M6): son pocos intentos espaciados y luego se detiene.
+    // Un archivo recién subido está «por revisar» unos segundos y el servidor avisa cuando termina. Si no hay conexión en
+    // vivo ese aviso no llega, y se ofrece actualizar a mano en vez de consultar sin parar.
     const reviewing = ticket.thread.some((entry) => entry.kind === 'message' && entry.attachments.some((attachment) => attachment.status === 'pending'));
-
-    useEffect(() => {
-        if (!reviewing) return;
-
-        let attempts = 0;
-        const timer = window.setInterval(() => {
-            attempts += 1;
-            if (attempts > REVIEW_POLL_LIMIT) {
-                window.clearInterval(timer);
-
-                return;
-            }
-
-            router.reload({ only: ['selected'] });
-        }, REVIEW_POLL_MS);
-
-        return () => {
-            window.clearInterval(timer);
-        };
-    }, [reviewing, ticket.id]);
+    const refresh = () => {
+        setRefreshing(true);
+        router.reload({
+            only: ['selected'],
+            onFinish: () => {
+                setRefreshing(false);
+            },
+        });
+    };
 
     const customer = ticket.customer.name ?? copy.no_customer;
 
@@ -116,11 +120,28 @@ export function TicketDetail({ ticket, assignees, tagOptions, copy, canUpdate }:
                                 />
                             ),
                         )}
+                        {outgoing !== null && <OutgoingBubble outgoing={outgoing} copy={copy.composer} />}
+                        <SeenBy names={ticket.seen_by} more={ticket.seen_more} copy={copy.seen} />
+                        {reviewing && connection !== 'connected' && (
+                            <Alert variant="info">
+                                <span className="flex flex-wrap items-center gap-3">
+                                    {copy.attachments.offline}
+                                    <Button variant="outline" loading={refreshing} loadingLabel={copy.attachments.refreshing} onClick={refresh}>
+                                        {copy.attachments.refresh}
+                                    </Button>
+                                </span>
+                            </Alert>
+                        )}
                     </div>
                 </div>
             </div>
 
-            <TicketComposer ticketId={ticket.id} status={ticket.status} canWrite={canUpdate} copy={copy.composer} attachmentsCopy={copy.attachments} />
+            <div className="border-t border-border bg-surface px-4 pt-1">
+                <div className="mx-auto max-w-[44rem]">
+                    <TypingIndicator people={typingPeople} copy={copy.typing} />
+                </div>
+            </div>
+            <TicketComposer ticketId={ticket.id} status={ticket.status} canWrite={canUpdate} copy={copy.composer} attachmentsCopy={copy.attachments} onOutgoing={setOutgoing} onTyping={sendTyping} />
         </section>
     );
 }
