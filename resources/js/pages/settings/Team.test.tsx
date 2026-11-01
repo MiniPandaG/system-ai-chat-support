@@ -113,6 +113,8 @@ describe('Team', () => {
                 nav_label: 'Navegación principal',
                 account: 'Mi cuenta',
                 security: 'Seguridad',
+                inbox: 'Bandeja',
+                inbox_unassigned: ':count sin asignar',
                 team: 'Equipo',
                 branding: 'Marca',
                 plan: 'Plan',
@@ -123,7 +125,7 @@ describe('Team', () => {
                 logging_out: 'Cerrando sesión…',
                 roles: { admin: 'Administrador' },
             },
-            auth: { user: { name: 'Ana Torres', email: 'ana@empresa-ejemplo.com', role: 'admin' }, tenant: { name: 'Soporte Ejemplo SAS', logo_url: null, theme: null }, can: { team: true, branding: true, plan: true } },
+            auth: { user: { name: 'Ana Torres', email: 'ana@empresa-ejemplo.com', role: 'admin' }, tenant: { name: 'Soporte Ejemplo SAS', logo_url: null, theme: null }, can: { tickets: true, team: true, branding: true, plan: true } },
         };
     });
 

@@ -196,7 +196,7 @@ it('limita a tres intentos por hora con el mismo correo, aunque cambie la direcc
 });
 
 it('quien ya tiene sesión no puede volver a registrar', function (): void {
-    $this->actingAs(User::factory()->create())->get('/register')->assertRedirect('/account');
+    $this->actingAs(User::factory()->create())->get('/register')->assertRedirect('/');
 });
 
 it('la sesión del nuevo administrador es una sesión nueva', function (): void {

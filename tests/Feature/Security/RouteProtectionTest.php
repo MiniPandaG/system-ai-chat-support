@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Route;
  * @var list<string>
  */
 const PUBLIC_ROUTES = [
-    '/',        // redirige a /account, que sí exige sesión
+    '/',        // redirige a la bandeja o a la cuenta, que sí exigen sesión
     'up',       // chequeo de salud sin datos
     'login',    // inicio de sesión
     'logout',   // cierra la sesión actual; sin sesión no hace nada

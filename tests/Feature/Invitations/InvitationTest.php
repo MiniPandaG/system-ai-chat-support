@@ -384,7 +384,7 @@ describe('aceptar', function (): void {
     it('quien ya tiene sesión es llevado a su cuenta en vez de ver la invitación', function (): void {
         $token = openInvitation(inviteAdmin());
 
-        $this->actingAs(User::factory()->create())->get('/invitations/'.$token)->assertRedirect('/account');
+        $this->actingAs(User::factory()->create())->get('/invitations/'.$token)->assertRedirect('/');
     });
 
     it('limita los intentos por dirección', function (): void {

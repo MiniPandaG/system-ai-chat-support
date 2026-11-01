@@ -43,7 +43,7 @@ it('un administrador ve su plan con cada límite, su tope y su uso', function ()
         ->has('limits', 4)
         ->where('limits.0', ['key' => 'agents', 'monthly' => false, 'measured' => true, 'limit' => 5, 'used' => 1, 'remaining' => 4, 'over' => false])
         ->where('limits.1.key', 'channels')->where('limits.1.limit', 3)->where('limits.1.measured', false)
-        ->where('limits.2.key', 'tickets_per_month')->where('limits.2.limit', 1000)->where('limits.2.monthly', true)
+        ->where('limits.2.key', 'tickets_per_month')->where('limits.2.limit', 1000)->where('limits.2.monthly', true)->where('limits.2.measured', true)->where('limits.2.used', 0)
         ->where('limits.3.key', 'ai_credits')->where('limits.3.limit', 500)->where('limits.3.monthly', true));
 });
 

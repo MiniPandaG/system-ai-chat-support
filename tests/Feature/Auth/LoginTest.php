@@ -28,7 +28,7 @@ it('inicia sesión con credenciales correctas y regenera la sesión', function (
     $before = session()->getId();
 
     $this->post('/login', ['email' => $user->email, 'password' => $password])
-        ->assertRedirect('/account');
+        ->assertRedirect('/');
 
     $this->assertAuthenticatedAs($user);
     expect(session()->getId())->not->toBe($before);
@@ -41,7 +41,7 @@ it('actualiza al iniciar sesión un hash Argon2id hecho con parámetros más dé
 
     expect(Hash::needsRehash($user->password))->toBeTrue();
 
-    $this->post('/login', ['email' => $user->email, 'password' => $password])->assertRedirect('/account');
+    $this->post('/login', ['email' => $user->email, 'password' => $password])->assertRedirect('/');
 
     $updated = $user->fresh()?->password;
     expect($updated)->toStartWith('$argon2id$')->not->toBe($weak)
@@ -89,7 +89,7 @@ it('bloquea el acceso tras cinco intentos fallidos y lo libera a los diez minuto
 
     $this->travel(11)->minutes();
 
-    $this->post('/login', ['email' => $user->email, 'password' => $password])->assertRedirect('/account');
+    $this->post('/login', ['email' => $user->email, 'password' => $password])->assertRedirect('/');
     $this->assertAuthenticatedAs($user);
 });
 
@@ -102,7 +102,7 @@ it('el bloqueo de una cuenta no afecta a otra', function (): void {
         $this->post('/login', ['email' => $victim->email, 'password' => Str::random(24)]);
     }
 
-    $this->post('/login', ['email' => $other->email, 'password' => $password])->assertRedirect('/account');
+    $this->post('/login', ['email' => $other->email, 'password' => $password])->assertRedirect('/');
 });
 
 it('cierra la sesión y la invalida', function (): void {
@@ -117,7 +117,7 @@ it('redirige a los invitados al inicio de sesión y a los autenticados a su cuen
     $this->get('/account')->assertRedirect('/login');
     $this->get('/')->assertRedirect('/account');
 
-    $this->actingAs(User::factory()->create())->get('/login')->assertRedirect('/account');
+    $this->actingAs(User::factory()->create())->get('/login')->assertRedirect('/');
 });
 
 it('registra cada evento de autenticación una sola vez y sin datos sensibles', function (): void {

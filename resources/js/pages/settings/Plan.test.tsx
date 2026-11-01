@@ -70,6 +70,8 @@ describe('Plan', () => {
                 nav_label: 'Navegación principal',
                 account: 'Mi cuenta',
                 security: 'Seguridad',
+                inbox: 'Bandeja',
+                inbox_unassigned: ':count sin asignar',
                 team: 'Equipo',
                 branding: 'Marca',
                 plan: 'Plan',
@@ -83,7 +85,7 @@ describe('Plan', () => {
             auth: {
                 user: { name: 'Ana', email: 'ana@empresa-ejemplo.com', role: 'admin' },
                 tenant: { name: 'Soporte Ejemplo SAS', logo_url: null, theme: null },
-                can: { team: true, branding: true, plan: true },
+                can: { tickets: true, team: true, branding: true, plan: true },
             },
         };
     });

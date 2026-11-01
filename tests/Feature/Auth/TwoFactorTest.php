@@ -187,7 +187,7 @@ it('el código TOTP correcto abre la sesión y la regenera', function (): void {
     $this->post('/login', ['email' => $user->email, 'password' => $password]);
     $before = session()->getId();
 
-    $this->post('/two-factor-challenge', ['code' => otpFor($user, 1)])->assertRedirect('/account');
+    $this->post('/two-factor-challenge', ['code' => otpFor($user, 1)])->assertRedirect('/');
 
     $this->assertAuthenticatedAs($user);
     expect(session()->getId())->not->toBe($before);
@@ -212,7 +212,7 @@ it('un código TOTP ya usado no sirve una segunda vez', function (): void {
     $otp = otpFor($user, 1);
 
     $this->post('/login', ['email' => $user->email, 'password' => $password]);
-    $this->post('/two-factor-challenge', ['code' => $otp])->assertRedirect('/account');
+    $this->post('/two-factor-challenge', ['code' => $otp])->assertRedirect('/');
     $this->post('/logout');
 
     $this->post('/login', ['email' => $user->email, 'password' => $password]);
@@ -242,7 +242,7 @@ it('tres intentos de código bloquean la cuenta diez minutos, aunque el siguient
 
     $this->travel(11)->minutes();
     $this->post('/login', ['email' => $user->email, 'password' => $password]);
-    $this->post('/two-factor-challenge', ['code' => otpFor($user, 1)])->assertRedirect('/account');
+    $this->post('/two-factor-challenge', ['code' => otpFor($user, 1)])->assertRedirect('/');
 });
 
 it('un código de recuperación entra una sola vez, con o sin guion y en minúsculas', function (): void {
@@ -252,7 +252,7 @@ it('un código de recuperación entra una sola vez, con o sin guion y en minúsc
     $code = $codes[0];
 
     $this->post('/login', ['email' => $user->email, 'password' => $password]);
-    $this->post('/two-factor-challenge', ['recovery_code' => strtolower(str_replace('-', '', $code))])->assertRedirect('/account');
+    $this->post('/two-factor-challenge', ['recovery_code' => strtolower(str_replace('-', '', $code))])->assertRedirect('/');
 
     $this->assertAuthenticatedAs($user);
     expect(RecoveryCodes::remaining($user->fresh()))->toBe(9);
@@ -276,7 +276,7 @@ it('los otros códigos de recuperación siguen sirviendo después de gastar uno'
     $this->post('/logout');
 
     $this->post('/login', ['email' => $user->email, 'password' => $password]);
-    $this->post('/two-factor-challenge', ['recovery_code' => $codes[1]])->assertRedirect('/account');
+    $this->post('/two-factor-challenge', ['recovery_code' => $codes[1]])->assertRedirect('/');
     expect(RecoveryCodes::remaining($user->fresh()))->toBe(8);
 });
 
@@ -295,7 +295,7 @@ it('regenerar los códigos invalida los anteriores y entrega diez nuevos', funct
     auth()->logout();
     $this->post('/login', ['email' => $user->email, 'password' => $password]);
     $this->post('/two-factor-challenge', ['recovery_code' => $old[0]])->assertSessionHasErrors('recovery_code');
-    $this->post('/two-factor-challenge', ['recovery_code' => $new[0]])->assertRedirect('/account');
+    $this->post('/two-factor-challenge', ['recovery_code' => $new[0]])->assertRedirect('/');
 });
 
 it('no se pueden generar códigos sin 2FA activo', function (): void {

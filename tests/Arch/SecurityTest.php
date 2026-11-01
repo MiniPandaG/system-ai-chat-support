@@ -17,3 +17,33 @@ arch('no se usan algoritmos débiles para seguridad')
 arch('todo el código de la aplicación declara strict_types')
     ->expect('App')
     ->toUseStrictTypes();
+
+// Las notas internas son solo del equipo. Si algún día un canal pensado para el cliente (widget, correo, API pública)
+// necesita leer mensajes, no debe poder tocar este modelo: añadir una clase a esta lista exige que una persona lo revise.
+arch('solo la conversación del equipo y la acción que las crea usan las notas internas')
+    ->expect('App\Models\TicketNote')
+    ->toOnlyBeUsedIn([
+        'App\Models\Ticket',
+        'App\Actions\AddTicketNote',
+        'App\Tickets\Thread',
+        'Database\Factories\TicketNoteFactory',
+    ]);
+
+// Un archivo de un ticket solo se guarda con AttachmentStore y solo se marca limpio con la revisión del antivirus.
+arch('solo el almacén, la revisión y la conversación usan los adjuntos de tickets')
+    ->expect('App\Models\TicketAttachment')
+    ->toOnlyBeUsedIn([
+        'App\Models\TicketMessage',
+        'App\Attachments\AttachmentStore',
+        'App\Actions\AddTicketMessage',
+        'App\Jobs\ScanAttachment',
+        'App\Console\Commands\RescanAttachments',
+        'App\Http\Controllers\AttachmentController',
+        'App\Tickets\Thread',
+        'Database\Factories\TicketAttachmentFactory',
+    ]);
+
+// El antivirus de mentira da por limpio casi todo: solo el proveedor de servicios decide si se usa, y no en producción.
+arch('el antivirus de pruebas solo lo conoce el proveedor de servicios')
+    ->expect('App\Attachments\FakeScanner')
+    ->toOnlyBeUsedIn(['App\Providers\AppServiceProvider']);

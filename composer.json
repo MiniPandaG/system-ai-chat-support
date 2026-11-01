@@ -33,6 +33,7 @@
     },
     "scripts": {
         "test": [
+            "Composer\\Config::disableProcessTimeout",
             "@php artisan config:clear --ansi",
             "pest"
         ],
