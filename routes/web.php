@@ -22,6 +22,7 @@ use App\Http\Controllers\TicketNoteController;
 use App\Http\Controllers\TicketTagController;
 use App\Http\Controllers\TicketTypingController;
 use App\Http\Controllers\TicketViewController;
+use App\Http\Controllers\WidgetSettingsController;
 use Illuminate\Support\Facades\Route;
 
 // La entrada decide a dónde ir según quién sea; sin sesión, el inicio de sesión lo pide después.
@@ -82,6 +83,12 @@ Route::middleware(['auth', 'verified', 'two-factor.required'])->group(function (
     Route::post('/settings/branding/palette/check', [BrandingController::class, 'checkPalette'])->middleware('throttle:palette-check')->name('branding.palette.check');
     Route::post('/settings/branding/logo', [BrandingController::class, 'storeLogo'])->name('branding.logo.store');
     Route::delete('/settings/branding/logo', [BrandingController::class, 'destroyLogo'])->name('branding.logo.destroy');
+
+    // Chat web: código para incrustar y sitios permitidos, solo administradores (WidgetOriginPolicy).
+    Route::get('/settings/widget', [WidgetSettingsController::class, 'show'])->name('widget.settings');
+    Route::put('/settings/widget/appearance', [WidgetSettingsController::class, 'updateAppearance'])->middleware('throttle:widget-settings')->name('widget.appearance.update');
+    Route::post('/settings/widget/origins', [WidgetSettingsController::class, 'store'])->middleware('throttle:widget-settings')->name('widget.origins.store');
+    Route::delete('/settings/widget/origins/{origin}', [WidgetSettingsController::class, 'destroy'])->middleware('throttle:widget-settings')->whereNumber('origin')->name('widget.origins.destroy');
 
     // Invitaciones: la invitación se resuelve con el filtro automático, así que una de otra empresa da 404.
     Route::post('/settings/team/invitations', [InvitationController::class, 'store'])->name('team.invitations.store');

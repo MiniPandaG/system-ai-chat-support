@@ -41,8 +41,8 @@ class PlanController extends Controller
             $items[] = [
                 'key' => $limit->value,
                 'monthly' => $limit->isMonthly(),
-                // Se miden los puestos de agente y los tickets del mes; los canales y la IA llegan con sus módulos.
-                'measured' => $limit === Limit::Agents || $limit === Limit::TicketsPerMonth,
+                // Se miden los puestos de agente, los tickets del mes y los canales; la IA llega con su módulo.
+                'measured' => $limit === Limit::Agents || $limit === Limit::TicketsPerMonth || $limit === Limit::Channels,
                 ...$snapshot[$limit->value],
             ];
         }

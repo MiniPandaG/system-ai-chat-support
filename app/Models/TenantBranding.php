@@ -6,6 +6,8 @@ namespace App\Models;
 
 use App\Branding\Palette;
 use App\Models\Concerns\BelongsToTenant;
+use App\Widget\WidgetCorner;
+use App\Widget\WidgetMode;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -16,6 +18,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $logo_file_id
  * @property array<string, string>|null $colors
  * @property array<string, string>|null $foregrounds
+ * @property WidgetMode $widget_mode
+ * @property WidgetCorner $widget_corner
  */
 class TenantBranding extends Model
 {
@@ -28,7 +32,7 @@ class TenantBranding extends Model
      */
     protected function casts(): array
     {
-        return ['colors' => 'array', 'foregrounds' => 'array'];
+        return ['colors' => 'array', 'foregrounds' => 'array', 'widget_mode' => WidgetMode::class, 'widget_corner' => WidgetCorner::class];
     }
 
     /**
@@ -47,6 +51,17 @@ class TenantBranding extends Model
     public function panelVariables(): array
     {
         return Palette::panelVariables($this->colors, $this->foregrounds);
+    }
+
+    /**
+     * Variables CSS que el widget aplica: cada color que la empresa cambió con su texto ya calculado. Lo demás lo ponen
+     * los tokens del sistema.
+     *
+     * @return array<string, string>
+     */
+    public function widgetVariables(): array
+    {
+        return Palette::widgetVariables($this->colors, $this->foregrounds);
     }
 
     /**

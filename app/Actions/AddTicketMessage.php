@@ -76,6 +76,7 @@ class AddTicketMessage
         }
 
         LiveUpdates::both($ticket);
+        LiveUpdates::visitor($ticket);
 
         return $message;
     }

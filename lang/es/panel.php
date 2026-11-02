@@ -13,6 +13,7 @@ return [
     'security' => 'Seguridad',
     'team' => 'Equipo',
     'branding' => 'Marca',
+    'widget' => 'Chat web',
     'plan' => 'Plan',
     'platform' => 'Plataforma',
     'open_menu' => 'Abrir menú',

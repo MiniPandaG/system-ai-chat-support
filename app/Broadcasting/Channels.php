@@ -22,4 +22,10 @@ final class Channels
     {
         return "tenant.{$tenantId}.tickets.{$ticketId}";
     }
+
+    /** La conversación de un visitante del widget: solo su propio navegador, con el token de su sesión, puede entrar. */
+    public static function widget(int $tenantId, string $sessionId): string
+    {
+        return "tenant.{$tenantId}.widget.{$sessionId}";
+    }
 }

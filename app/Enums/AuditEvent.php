@@ -41,4 +41,7 @@ enum AuditEvent: string
     case TicketCreated = 'ticket.created';
     case TicketAssigned = 'ticket.assigned';
     case TicketAttachmentInfected = 'ticket.attachment_infected';
+    case WidgetOriginAdded = 'widget.origin_added';
+    case WidgetOriginRemoved = 'widget.origin_removed';
+    case WidgetAppearanceChanged = 'widget.appearance_changed';
 }

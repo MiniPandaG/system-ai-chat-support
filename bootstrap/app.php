@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Middleware\AuthenticateWidgetSession;
 use App\Http\Middleware\EnsureTwoFactorForAdmins;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -15,12 +16,16 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Support\Facades\Route;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
+        then: function (): void {
+            Route::middleware('widget')->prefix('widget')->group(base_path('routes/widget.php'));
+        },
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append(SecurityHeaders::class);
@@ -33,7 +38,12 @@ return Application::configure(basePath: dirname(__DIR__))
         // La empresa debe estar en contexto antes de resolver modelos de la ruta, o el filtro automático no la vería.
         $middleware->prependToPriorityList(before: SubstituteBindings::class, prepend: SetTenantContext::class);
         $middleware->prependToPriorityList(before: SetTenantContext::class, prepend: EnsureUserIsActive::class);
-        $middleware->alias(['two-factor.required' => EnsureTwoFactorForAdmins::class]);
+        $middleware->alias([
+            'two-factor.required' => EnsureTwoFactorForAdmins::class,
+            'widget.session' => AuthenticateWidgetSession::class,
+        ]);
+        // La API del widget no usa cookies, sesión ni CSRF: el visitante se identifica con un token (ver routes/widget.php).
+        $middleware->group('widget', [SubstituteBindings::class]);
         $middleware->redirectGuestsTo('/login');
         $middleware->redirectUsersTo('/');
     })

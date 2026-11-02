@@ -45,6 +45,10 @@ class UpdateTicket
             LiveUpdates::both($ticket);
         }
 
+        if ($ticket->wasChanged('status')) {
+            LiveUpdates::visitor($ticket);
+        }
+
         if ($ticket->assigned_to !== $previousAssignee) {
             $this->audit->record(AuditEvent::TicketAssigned, $actor->id, [
                 'ticket_id' => $ticket->id,

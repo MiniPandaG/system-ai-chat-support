@@ -7,8 +7,11 @@ namespace App\Broadcasting;
 use App\Events\InboxChanged;
 use App\Events\TicketChanged;
 use App\Events\TicketTyping;
+use App\Events\WidgetChanged;
 use App\Models\Ticket;
 use App\Models\User;
+use App\Models\WidgetSession;
+use App\Tickets\Channel;
 
 /**
  * Único lugar desde donde se avisa a los navegadores de un cambio. Los avisos salen después de confirmar la
@@ -38,6 +41,21 @@ final class LiveUpdates
     public static function inbox(Ticket $ticket): void
     {
         InboxChanged::dispatch($ticket->tenant_id, $ticket->id);
+    }
+
+    /**
+     * Si el ticket nació en el widget, avisa al navegador del visitante de que su conversación cambió (una respuesta, un
+     * cambio de estado). Las notas internas y las etiquetas no pasan por aquí: no son del cliente.
+     */
+    public static function visitor(Ticket $ticket): void
+    {
+        if ($ticket->channel !== Channel::Widget) {
+            return;
+        }
+
+        foreach (WidgetSession::query()->where('ticket_id', $ticket->id)->get(['id']) as $session) {
+            WidgetChanged::dispatch($ticket->tenant_id, $session->id);
+        }
     }
 
     /** Cambió el ticket y también lo que la bandeja muestra de él. */

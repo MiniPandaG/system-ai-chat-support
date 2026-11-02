@@ -10,6 +10,7 @@ use App\Models\Plan;
 use App\Models\Tenant;
 use App\Models\Ticket;
 use App\Models\User;
+use App\Models\WidgetOrigin;
 use App\Tenancy\TenantContext;
 use Closure;
 use Illuminate\Support\Facades\DB;
@@ -43,6 +44,7 @@ class PlanLimits
         return match ($limit) {
             Limit::Agents => $this->agentSeats($tenant),
             Limit::TicketsPerMonth => $this->ticketsThisMonth($tenant),
+            Limit::Channels => $this->activeChannels($tenant),
             default => 0,
         };
     }
@@ -164,6 +166,15 @@ class PlanLimits
         $breakdown = $this->agentBreakdown($tenant);
 
         return $breakdown['members'] + $breakdown['invitations'];
+    }
+
+    /**
+     * Canales activos: hoy solo el chat web, que cuenta como uno mientras la empresa tenga al menos un sitio permitido.
+     * El correo (M8) y la API (M9) sumarán el suyo aquí.
+     */
+    private function activeChannels(Tenant $tenant): int
+    {
+        return $this->context->run($tenant, static fn (): int => WidgetOrigin::query()->exists() ? 1 : 0);
     }
 
     private function ticketsThisMonth(Tenant $tenant): int

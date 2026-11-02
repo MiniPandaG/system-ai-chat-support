@@ -23,6 +23,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $ticket_id
  * @property MessageAuthor $author
  * @property int|null $user_id
+ * @property string|null $widget_session_id
+ * @property string|null $client_id
  * @property string $body
  * @property Carbon $created_at
  */

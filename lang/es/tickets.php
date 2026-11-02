@@ -25,6 +25,7 @@ return [
 
     'channels' => [
         'panel' => 'Panel',
+        'widget' => 'Chat web',
     ],
 
     'status_label' => 'Estado',

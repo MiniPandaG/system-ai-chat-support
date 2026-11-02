@@ -142,13 +142,49 @@ final class Palette
     }
 
     /**
+     * Variables CSS que aplica el widget: cada color que la empresa cambió y, si lleva texto encima, su texto ya
+     * calculado. Un color que no cambió lo pone el sistema de diseño, con su propio texto, en el modo que toque.
+     *
+     * @return array<string, string>
+     */
+    public static function widgetVariables(mixed $colors, mixed $foregrounds): array
+    {
+        if (! is_array($colors)) {
+            return [];
+        }
+
+        $variables = [];
+
+        foreach (BrandColor::cases() as $color) {
+            $hex = self::normalize($colors[$color->value] ?? null);
+            if ($hex === null) {
+                continue;
+            }
+
+            $variables['--color-'.$color->value] = $hex;
+
+            $text = is_array($foregrounds) ? self::normalize($foregrounds[$color->value] ?? null) : null;
+            if ($color->hasForeground() && $text !== null) {
+                $variables['--color-'.$color->value.'-foreground'] = $text;
+            }
+        }
+
+        return $variables;
+    }
+
+    /**
      * Bloque CSS a partir de variables. Vuelve a filtrar: solo nombres de la lista cerrada y valores #RRGGBB, de modo
-     * que nada que no sea un color puede llegar al CSS, venga de donde venga.
+     * que nada que no sea un color puede llegar al CSS, venga de donde venga. El selector es de una lista cerrada
+     * también (nunca viene de una empresa): el del panel y el del widget, que necesita ganarle al modo claro de los tokens.
      *
      * @param  array<array-key, mixed>  $variables
      */
-    public static function css(array $variables): string
+    public static function css(array $variables, string $selector = ':root'): string
     {
+        if (! in_array($selector, [':root', 'html:root[data-theme]'], true)) {
+            return '';
+        }
+
         $allowed = [];
         foreach (BrandColor::keys() as $key) {
             $allowed[] = '--color-'.$key;
@@ -164,7 +200,7 @@ final class Palette
             }
         }
 
-        return $declarations === '' ? '' : ':root{'.$declarations.'}';
+        return $declarations === '' ? '' : $selector.'{'.$declarations.'}';
     }
 
     /**

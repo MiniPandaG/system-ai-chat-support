@@ -11,6 +11,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 class SecurityHeaders
 {
+    /** Atributo de la petición con los orígenes que pueden enmarcar la respuesta; solo lo fija el marco del widget. */
+    public const FRAME_ANCESTORS = 'frame_ancestors';
+
     /**
      * @param  Closure(Request): Response  $next
      */
@@ -29,11 +32,19 @@ class SecurityHeaders
         }
 
         $headers->set('X-Content-Type-Options', 'nosniff');
-        $headers->set('X-Frame-Options', 'DENY');
         $headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=()');
         $headers->set('Cross-Origin-Opener-Policy', 'same-origin');
-        $headers->set('Cross-Origin-Resource-Policy', 'same-origin');
+
+        // Solo el marco del widget puede incrustarse, y solo en los sitios que la empresa permite (frame-ancestors, en la
+        // política de contenido). Todo lo demás sigue sin poder enmarcarse.
+        if (is_array($request->attributes->get(self::FRAME_ANCESTORS))) {
+            $headers->remove('X-Frame-Options');
+            $headers->set('Cross-Origin-Resource-Policy', 'cross-origin');
+        } else {
+            $headers->set('X-Frame-Options', 'DENY');
+            $headers->set('Cross-Origin-Resource-Policy', 'same-origin');
+        }
 
         if ($request->isSecure() && config()->boolean('security.hsts.enabled')) {
             $maxAge = config()->integer('security.hsts.max_age');
@@ -61,7 +72,7 @@ class SecurityHeaders
             'object-src' => ["'none'"],
             'base-uri' => ["'self'"],
             'form-action' => ["'self'"],
-            'frame-ancestors' => ["'none'"],
+            'frame-ancestors' => $this->frameAncestors($request),
         ];
 
         if (app()->isProduction()) {
@@ -73,6 +84,25 @@ class SecurityHeaders
             array_keys($directives),
             $directives,
         ));
+    }
+
+    /**
+     * Quién puede enmarcar la respuesta: nadie, salvo el marco del widget, que declara los sitios de la empresa. Sin ningún
+     * sitio permitido sigue siendo nadie.
+     *
+     * @return list<string>
+     */
+    private function frameAncestors(Request $request): array
+    {
+        $allowed = $request->attributes->get(self::FRAME_ANCESTORS);
+
+        if (! is_array($allowed)) {
+            return ["'none'"];
+        }
+
+        $origins = array_values(array_filter($allowed, static fn (mixed $origin): bool => is_string($origin) && $origin !== ''));
+
+        return $origins === [] ? ["'none'"] : $origins;
     }
 
     /**
