@@ -9,6 +9,7 @@ export interface PanelCopy {
     live_off: string;
     team: string;
     branding: string;
+    widget: string;
     plan: string;
     platform: string;
     open_menu: string;
@@ -24,7 +25,7 @@ export interface AuthenticatedUser {
     tenant: { id: number; name: string; logo_url: string | null; theme: Record<string, string> | null } | null;
     /** Tickets pendientes que nadie atiende; null para quien no ve la bandeja. */
     inbox?: { unassigned: number | null };
-    can: { tickets: boolean; team: boolean; branding: boolean; plan: boolean };
+    can: { tickets: boolean; team: boolean; branding: boolean; plan: boolean; widget: boolean };
 }
 
 export interface SharedProps {

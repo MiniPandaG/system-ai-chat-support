@@ -77,6 +77,7 @@ describe('Plan', () => {
                 live_off: 'Sin conexión en vivo',
                 team: 'Equipo',
                 branding: 'Marca',
+                widget: 'Chat web',
                 plan: 'Plan',
                 platform: 'Plataforma',
                 open_menu: 'Abrir menú',
@@ -88,7 +89,7 @@ describe('Plan', () => {
             auth: {
                 user: { id: 1, name: 'Ana', email: 'ana@empresa-ejemplo.com', role: 'admin' },
                 tenant: { id: 1, name: 'Soporte Ejemplo SAS', logo_url: null, theme: null },
-                can: { tickets: true, team: true, branding: true, plan: true },
+                can: { tickets: true, team: true, branding: true, plan: true, widget: true },
             },
         };
     });

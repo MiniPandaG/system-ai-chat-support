@@ -12,7 +12,29 @@ interface Subscription {
     users: number;
 }
 
-const AUTH_ENDPOINT = '/broadcasting/auth';
+/** Cómo se autoriza un canal: a qué dirección se pide la firma y con qué cabeceras. */
+export interface ChannelAuth {
+    endpoint: string;
+    headers: () => Record<string, string>;
+}
+
+/** El valor de la cookie de CSRF que Laravel entrega; se reenvía en cada autorización de canal. */
+export function xsrfToken(): string {
+    const entry = document.cookie.split('; ').find((cookie) => cookie.startsWith('XSRF-TOKEN='));
+
+    return entry === undefined ? '' : decodeURIComponent(entry.slice('XSRF-TOKEN='.length));
+}
+
+// Por defecto, la sesión del panel. El widget del visitante la reemplaza antes de conectar (no tiene cookies).
+let channelAuth: ChannelAuth = {
+    endpoint: '/broadcasting/auth',
+    headers: () => ({ 'X-XSRF-TOKEN': xsrfToken(), 'X-Requested-With': 'XMLHttpRequest', Accept: 'application/json' }),
+};
+
+/** Cambia cómo se autorizan los canales. Debe llamarse antes de la primera conexión: el endpoint se fija al conectar. */
+export function configureChannelAuth(next: ChannelAuth): void {
+    channelAuth = next;
+}
 
 let pusher: Pusher | null = null;
 let state: ConnectionState = 'disconnected';
@@ -26,13 +48,6 @@ function setState(next: ConnectionState): void {
     stateListeners.forEach((listener) => {
         listener();
     });
-}
-
-/** El valor de la cookie de CSRF que Laravel entrega; se reenvía en cada autorización de canal. */
-export function xsrfToken(): string {
-    const entry = document.cookie.split('; ').find((cookie) => cookie.startsWith('XSRF-TOKEN='));
-
-    return entry === undefined ? '' : decodeURIComponent(entry.slice('XSRF-TOKEN='.length));
 }
 
 function mapState(current: string): ConnectionState {
@@ -78,8 +93,8 @@ export function connect(): void {
         disableStats: true,
         channelAuthorization: {
             transport: 'ajax',
-            endpoint: AUTH_ENDPOINT,
-            headersProvider: () => ({ 'X-XSRF-TOKEN': xsrfToken(), 'X-Requested-With': 'XMLHttpRequest', Accept: 'application/json' }),
+            endpoint: channelAuth.endpoint,
+            headersProvider: () => channelAuth.headers(),
         },
     });
 

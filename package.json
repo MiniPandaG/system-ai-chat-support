@@ -9,9 +9,9 @@
     },
     "scripts": {
         "dev": "vite",
-        "build": "tsc --noEmit && vite build",
+        "build": "tsc --noEmit && vite build && vite build --config vite.widget.config.ts",
         "typecheck": "tsc --noEmit",
-        "lint": "eslint resources/js vite.config.ts vitest.config.ts",
+        "lint": "eslint resources/js vite.config.ts vite.widget.config.ts vitest.config.ts",
         "test": "vitest run",
         "qa": "pnpm typecheck && pnpm lint && pnpm test && pnpm audit"
     },

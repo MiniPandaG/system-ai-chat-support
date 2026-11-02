@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tienda de ejemplo — página de prueba del chat</title>
+    <style>
+        /* CSS hostil a propósito: si el widget heredara algo del sitio, aquí se vería. */
+        * { font-family: "Comic Sans MS", cursive !important; color: #0a0 !important; letter-spacing: 3px !important; }
+        button, textarea, input { background: #ff0 !important; border: 4px dotted red !important; border-radius: 0 !important; }
+        iframe { filter: none; }
+        body { margin: 0; padding: 24px; background: #fffbe6; }
+        main { max-width: 640px; margin: 0 auto; }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Tienda de ejemplo</h1>
+        <p>Esta página simula el sitio de una empresa. El chat flota abajo; su aspecto no debe cambiar por el CSS de esta página.</p>
+        <p id="estado"></p>
+        <p>Dirección de esta página: <code id="origen"></code></p>
+        <p style="height: 1400px">Contenido de relleno de la página para comprobar que el botón sigue flotando al desplazarse.</p>
+    </main>
+    <script>
+        // Parámetros: ?key=LLAVE_DEL_WIDGET&app=http://127.0.0.1:8080
+        var params = new URLSearchParams(location.search);
+        var key = params.get('key');
+        var app = params.get('app') || 'http://127.0.0.1:8080';
+        document.getElementById('origen').textContent = location.origin;
+
+        if (!key) {
+            document.getElementById('estado').textContent = 'Falta la llave: abre esta página con ?key=LLAVE_DEL_WIDGET';
+        } else {
+            var script = document.createElement('script');
+            script.src = app + '/widget.js';
+            script.async = true;
+            script.dataset.key = key;
+            document.body.appendChild(script);
+            document.getElementById('estado').textContent = 'Cargando el chat desde ' + app + '…';
+        }
+    </script>
+</body>
+</html>

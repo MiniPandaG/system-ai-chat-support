@@ -1,0 +1,44 @@
+@import '@fontsource/space-grotesk/latin-600.css';
+@import '@fontsource/work-sans/latin-400.css';
+@import '@fontsource/work-sans/latin-500.css';
+@import '@fontsource/work-sans/latin-600.css';
+
+@import 'tailwindcss' source(none);
+@import '../tokens/tokens.css';
+
+@config '../../tailwind.config.js';
+@source '../js/widget';
+@source '../js/components/Button.tsx';
+@source '../js/components/Alert.tsx';
+@source '../js/components/icons.tsx';
+
+/*
+  El widget vive dentro de un iframe en un sitio ajeno. No declara color-scheme: si difiriera del de la página que lo
+  incrusta, el navegador pintaría un fondo opaco alrededor del botón. Todo color viene de los tokens, declarados aquí
+  dentro: nada se hereda del sitio anfitrión.
+*/
+@layer base {
+    html,
+    body {
+        margin: 0;
+        height: 100%;
+        background: transparent;
+    }
+
+    #widget-root {
+        height: 100%;
+    }
+
+    body {
+        color: var(--color-text);
+        font-family: var(--font-body);
+        font-size: var(--text-base-size);
+        line-height: var(--text-base-lh);
+        -webkit-font-smoothing: antialiased;
+    }
+
+    :focus-visible {
+        outline: 2px solid var(--color-focus-ring);
+        outline-offset: 2px;
+    }
+}

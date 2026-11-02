@@ -4,11 +4,11 @@ import type { ComponentType, ReactNode, SVGProps } from 'react';
 import logo from '../../images/logo.png';
 import { Button } from '../components/Button';
 import { ConnectionIndicator } from '../components/ConnectionIndicator';
-import { GaugeIcon, InboxIcon, MenuIcon, PaletteIcon, ShieldIcon, UserIcon, UsersIcon } from '../components/icons';
+import { ChatIcon, GaugeIcon, InboxIcon, MenuIcon, PaletteIcon, ShieldIcon, UserIcon, UsersIcon } from '../components/icons';
 import { disconnect } from '../realtime/client';
 import type { SharedProps } from '../types';
 
-export type PanelSection = 'inbox' | 'account' | 'team' | 'branding' | 'plan' | 'security';
+export type PanelSection = 'inbox' | 'account' | 'team' | 'branding' | 'widget' | 'plan' | 'security';
 
 interface PanelLayoutProps {
     title: string;
@@ -31,6 +31,7 @@ const navItems: NavItem[] = [
     { key: 'account', href: '/account', Icon: UserIcon },
     { key: 'team', href: '/settings/team', Icon: UsersIcon },
     { key: 'branding', href: '/settings/branding', Icon: PaletteIcon },
+    { key: 'widget', href: '/settings/widget', Icon: ChatIcon },
     { key: 'plan', href: '/settings/plan', Icon: GaugeIcon },
     { key: 'security', href: '/settings/security', Icon: ShieldIcon },
 ];
@@ -71,13 +72,14 @@ export function PanelLayout({ title, section, wide = false, bare = false, childr
         if (!menuOpen && sheet.open) sheet.close();
     }, [menuOpen]);
 
-    const labels: Record<PanelSection, string> = { inbox: panel.inbox, account: panel.account, team: panel.team, branding: panel.branding, plan: panel.plan, security: panel.security };
+    const labels: Record<PanelSection, string> = { inbox: panel.inbox, account: panel.account, team: panel.team, branding: panel.branding, widget: panel.widget, plan: panel.plan, security: panel.security };
     // El servidor decide qué secciones ve cada rol; aquí solo se ocultan las que no puede abrir.
     const visibleItems = navItems.filter(
         (item) =>
             (item.key !== 'inbox' || auth?.can.tickets === true) &&
             (item.key !== 'team' || auth?.can.team === true) &&
             (item.key !== 'branding' || auth?.can.branding === true) &&
+            (item.key !== 'widget' || auth?.can.widget === true) &&
             (item.key !== 'plan' || auth?.can.plan === true),
     );
     const unassigned = auth?.inbox?.unassigned ?? 0;

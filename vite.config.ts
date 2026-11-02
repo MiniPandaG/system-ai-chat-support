@@ -6,7 +6,8 @@ import { defineConfig } from 'vite';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.tsx'],
+            // El widget es una aplicación aparte que se sirve dentro de un iframe: tiene su propia hoja y su propio arranque.
+            input: ['resources/css/app.css', 'resources/js/app.tsx', 'resources/css/widget.css', 'resources/js/widget/main.tsx'],
             refresh: true,
         }),
         react(),

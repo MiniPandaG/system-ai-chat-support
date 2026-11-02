@@ -1,9 +1,10 @@
-import type { ButtonHTMLAttributes } from 'react';
+import type { ComponentProps } from 'react';
 
 type Variant = 'primary' | 'outline' | 'text' | 'danger';
 type Size = 'md' | 'lg';
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+// ComponentProps incluye `ref`: en React 19 un componente de función lo recibe como una propiedad más.
+interface ButtonProps extends ComponentProps<'button'> {
     variant?: Variant;
     size?: Size;
     loading?: boolean;

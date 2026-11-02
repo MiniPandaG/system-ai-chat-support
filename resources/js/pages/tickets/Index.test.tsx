@@ -32,6 +32,7 @@ const panel = {
     security: 'Seguridad',
     team: 'Equipo',
     branding: 'Marca',
+    widget: 'Chat web',
     plan: 'Plan',
     platform: 'Plataforma',
     open_menu: 'Abrir menú',
@@ -49,7 +50,7 @@ function setShared(flashStatus: string | null = null) {
         auth: {
             user: { id: 1, name: 'Ana Torres', email: 'ana@empresa-ejemplo.com', role: 'agent' },
             tenant: { id: 1, name: 'Soporte Ejemplo SAS', logo_url: null, theme: null },
-            can: { tickets: true, team: false, branding: false, plan: false },
+            can: { tickets: true, team: false, branding: false, plan: false, widget: false },
         },
     };
 }

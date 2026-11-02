@@ -6,7 +6,7 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-    { ignores: ['public/build/**', 'vendor/**', 'node_modules/**', 'storage/**', 'eslint.config.js'] },
+    { ignores: ['public/build/**', 'public/widget.js', 'vendor/**', 'node_modules/**', 'storage/**', 'eslint.config.js'] },
     eslint.configs.recommended,
     tseslint.configs.strictTypeChecked,
     tseslint.configs.stylisticTypeChecked,
@@ -14,7 +14,7 @@ export default tseslint.config(
     reactHooks.configs.flat.recommended,
     jsxA11y.flatConfigs.recommended,
     {
-        files: ['resources/js/**/*.{ts,tsx}', 'vite.config.ts', 'vitest.config.ts'],
+        files: ['resources/js/**/*.{ts,tsx}', 'vite.config.ts', 'vite.widget.config.ts', 'vitest.config.ts'],
         languageOptions: {
             globals: { ...globals.browser },
             parserOptions: {

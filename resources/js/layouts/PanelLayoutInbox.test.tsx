@@ -28,6 +28,7 @@ const panel: SharedProps['panel'] = {
     live_off: 'Sin conexión en vivo',
     team: 'Equipo',
     branding: 'Marca',
+    widget: 'Chat web',
     plan: 'Plan',
     platform: 'Plataforma',
     open_menu: 'Abrir menú',
@@ -43,7 +44,7 @@ function setAuth(unassigned: number | null | undefined) {
         auth: {
             user: { id: 1, name: 'Ana Torres', email: 'ana@empresa-ejemplo.com', role: 'agent' },
             tenant: { id: 1, name: 'Soporte Ejemplo SAS', logo_url: null, theme: null },
-            can: { tickets: true, team: false, branding: false, plan: false },
+            can: { tickets: true, team: false, branding: false, plan: false, widget: false },
             ...(unassigned === undefined ? {} : { inbox: { unassigned } }),
         },
     };
