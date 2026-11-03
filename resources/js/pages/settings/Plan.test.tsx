@@ -78,6 +78,7 @@ describe('Plan', () => {
                 team: 'Equipo',
                 branding: 'Marca',
                 widget: 'Chat web',
+                api_keys: 'Llaves de API',
                 plan: 'Plan',
                 platform: 'Plataforma',
                 open_menu: 'Abrir menú',
@@ -89,7 +90,7 @@ describe('Plan', () => {
             auth: {
                 user: { id: 1, name: 'Ana', email: 'ana@empresa-ejemplo.com', role: 'admin' },
                 tenant: { id: 1, name: 'Soporte Ejemplo SAS', logo_url: null, theme: null },
-                can: { tickets: true, team: true, branding: true, plan: true, widget: true },
+                can: { tickets: true, team: true, branding: true, plan: true, widget: true, api_keys: true },
             },
         };
     });

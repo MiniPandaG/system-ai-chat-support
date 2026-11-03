@@ -343,6 +343,7 @@ describe('límite por persona', function (): void {
         $busy = ticketStaff($tenant);
         $other = ticketStaff($tenant);
         $ticket = makeTicket($tenant);
+        RateLimiter::clear('attachments:'.$busy->id);
         foreach (range(1, 60) as $ignored) {
             RateLimiter::hit('attachments:'.$busy->id, 3600);
         }

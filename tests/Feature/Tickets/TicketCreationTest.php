@@ -132,7 +132,7 @@ it('asigna el ticket a un agente activo de la empresa y lo audita sin datos pers
     $assigned = AuditLog::query()->where('event', AuditEvent::TicketAssigned->value)->latest('id')->firstOrFail();
 
     expect($ticket->assigned_to)->toBe($assignee->id)
-        ->and($created->context)->toEqual(['ticket_id' => $ticket->id, 'number' => 1])
+        ->and($created->context)->toEqual(['ticket_id' => $ticket->id, 'number' => 1, 'via' => 'panel'])
         ->and($assigned->context)->toEqual(['ticket_id' => $ticket->id, 'to' => $assignee->id])
         ->and($created->user_id)->toBe($creator->id)
         ->and((string) json_encode($created->context).(string) json_encode($assigned->context))->not->toContain('marisol')->not->toContain('Marisol')->not->toContain('contraseña');
