@@ -122,6 +122,7 @@ describe('Team', () => {
                 branding: 'Marca',
                 widget: 'Chat web',
                 api_keys: 'Llaves de API',
+                knowledge: 'Base de conocimiento',
                 plan: 'Plan',
                 platform: 'Plataforma',
                 open_menu: 'Abrir menú',
@@ -130,7 +131,7 @@ describe('Team', () => {
                 logging_out: 'Cerrando sesión…',
                 roles: { admin: 'Administrador' },
             },
-            auth: { user: { id: 1, name: 'Ana Torres', email: 'ana@empresa-ejemplo.com', role: 'admin' }, tenant: { id: 1, name: 'Soporte Ejemplo SAS', logo_url: null, theme: null }, can: { tickets: true, team: true, branding: true, plan: true, widget: true, api_keys: true } },
+            auth: { user: { id: 1, name: 'Ana Torres', email: 'ana@empresa-ejemplo.com', role: 'admin' }, tenant: { id: 1, name: 'Soporte Ejemplo SAS', logo_url: null, theme: null }, can: { tickets: true, team: true, branding: true, plan: true, widget: true, api_keys: true, knowledge: true } },
         };
     });
 

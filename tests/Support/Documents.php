@@ -18,6 +18,51 @@ class Documents
     }
 
     /**
+     * Un PDF válido con una página por cada texto (solo ASCII), para probar la lectura del texto de verdad.
+     *
+     * @param  list<string>  $pages
+     * @param  bool  $compress  Con el contenido de cada página comprimido (FlateDecode), como lo guardan casi todos los programas.
+     */
+    public static function textPdf(array $pages, bool $compress = false): string
+    {
+        $objects = [
+            1 => '<< /Type /Catalog /Pages 2 0 R >>',
+            2 => '<< /Type /Pages /Kids ['.implode(' ', array_map(fn (int $i): string => (4 + 2 * $i).' 0 R', array_keys($pages))).'] /Count '.count($pages).' >>',
+            3 => '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+        ];
+
+        foreach (array_values($pages) as $index => $text) {
+            $stream = 'BT /F1 12 Tf 72 720 Td ('.str_replace(['\\', '(', ')'], ['\\\\', '\\(', '\\)'], $text).') Tj ET';
+            $objects[4 + 2 * $index] = '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents '.(5 + 2 * $index).' 0 R /Resources << /Font << /F1 3 0 R >> >> >>';
+            $filter = '';
+
+            if ($compress) {
+                $stream = (string) gzcompress($stream);
+                $filter = ' /Filter /FlateDecode';
+            }
+
+            $objects[5 + 2 * $index] = '<< /Length '.strlen($stream).$filter." >>\nstream\n{$stream}\nendstream";
+        }
+
+        $pdf = "%PDF-1.4\n";
+        $offsets = [];
+
+        foreach ($objects as $number => $body) {
+            $offsets[$number] = strlen($pdf);
+            $pdf .= "{$number} 0 obj\n{$body}\nendobj\n";
+        }
+
+        $xref = strlen($pdf);
+        $pdf .= "xref\n0 ".(count($objects) + 1)."\n0000000000 65535 f \n";
+
+        foreach ($offsets as $offset) {
+            $pdf .= sprintf("%010d 00000 n \n", $offset);
+        }
+
+        return $pdf."trailer\n<< /Size ".(count($objects) + 1)." /Root 1 0 R >>\nstartxref\n{$xref}\n%%EOF\n";
+    }
+
+    /**
      * @param  array<string, string>  $entries  Nombre de la entrada → contenido.
      */
     public static function zip(array $entries): string
