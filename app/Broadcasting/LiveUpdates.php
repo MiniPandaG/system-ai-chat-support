@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Broadcasting;
 
 use App\Events\InboxChanged;
+use App\Events\KnowledgeChanged;
 use App\Events\TicketChanged;
 use App\Events\TicketTyping;
 use App\Events\WidgetChanged;
+use App\Knowledge\SourceKind;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Models\WidgetSession;
@@ -29,6 +31,12 @@ final class LiveUpdates
     public static function ticketById(int $tenantId, int $ticketId): void
     {
         TicketChanged::dispatch($tenantId, $ticketId);
+    }
+
+    /** Un artículo o un documento de la base de conocimiento cambió de estado (lo revisó el antivirus, se leyó su texto, se indexó o falló). */
+    public static function knowledge(int $tenantId, SourceKind $kind, int $id): void
+    {
+        KnowledgeChanged::dispatch($tenantId, $kind, $id);
     }
 
     /** Una persona del equipo está escribiendo en el ticket (señal pasajera: no se guarda ni se reintenta). */

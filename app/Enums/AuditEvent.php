@@ -47,4 +47,14 @@ enum AuditEvent: string
     case ApiKeyCreated = 'api_key.created';
     case ApiKeyRotated = 'api_key.rotated';
     case ApiKeyRevoked = 'api_key.revoked';
+    case KnowledgeArticleCreated = 'knowledge.article_created';
+    case KnowledgeArticlePublished = 'knowledge.article_published';
+    case KnowledgeArticleUnpublished = 'knowledge.article_unpublished';
+    case KnowledgeArticleDeleted = 'knowledge.article_deleted';
+    case KnowledgeDocumentUploaded = 'knowledge.document_uploaded';
+    case KnowledgeDocumentPublished = 'knowledge.document_published';
+    case KnowledgeDocumentUnpublished = 'knowledge.document_unpublished';
+    case KnowledgeDocumentDeleted = 'knowledge.document_deleted';
+    case KnowledgeDocumentBlocked = 'knowledge.document_blocked';
+    case KnowledgeContextChanged = 'knowledge.context_changed';
 }

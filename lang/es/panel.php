@@ -6,6 +6,7 @@ return [
     'nav_label' => 'Navegación principal',
     'inbox' => 'Bandeja',
     'inbox_unassigned' => ':count sin asignar',
+    'knowledge' => 'Base de conocimiento',
     'live_on' => 'En vivo',
     'live_connecting' => 'Conectando…',
     'live_off' => 'Sin conexión en vivo',

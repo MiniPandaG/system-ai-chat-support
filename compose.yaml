@@ -59,6 +59,29 @@ services:
     volumes:
       - clamav-db:/var/lib/clamav
 
+  # Base de conocimiento (M10): la base vectorial y el modelo de embeddings. Ninguno publica puertos: solo la aplicación y los
+  # trabajos los alcanzan, por la red de Docker. No arrancan con «docker compose up» (el modelo pesa y se descarga la primera
+  # vez); en local: docker compose --profile knowledge up -d qdrant embeddings
+  # Sin ellos, lo publicado queda con «error de indexación» y la búsqueda de prueba avisa de que no está disponible.
+  qdrant:
+    image: qdrant/qdrant:v1.19.2
+    profiles: ["knowledge"]
+    restart: unless-stopped
+    environment:
+      QDRANT__SERVICE__API_KEY: ${QDRANT_API_KEY:?define QDRANT_API_KEY en .env}
+    volumes:
+      - qdrant-data:/qdrant/storage
+
+  # Text Embeddings Inference sirve un modelo abierto y multilingüe (MIT) fijado por versión exacta. El texto de las empresas
+  # no sale de la plataforma. No tiene autenticación: por eso no publica puertos.
+  embeddings:
+    image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.9.4
+    profiles: ["knowledge"]
+    restart: unless-stopped
+    command: ["--model-id", "intfloat/multilingual-e5-small", "--revision", "614241f622f53c4eeff9890bdc4f31cfecc418b3", "--port", "80", "--max-batch-tokens", "4096", "--tokenization-workers", "2", "--max-client-batch-size", "32"]
+    volumes:
+      - embeddings-data:/data
+
   # Lee el buzón de soporte (IMAP) y entrega las respuestas de los clientes a sus tickets. No arranca con «docker compose up»:
   # necesita un servidor IMAP (MAILBOX_IMAP_HOST). En local, junto con el buzón de pruebas de abajo:
   #   docker compose --profile mail up -d greenmail mailbox
@@ -147,3 +170,5 @@ volumes:
   mysql-data:
   redis-data:
   clamav-db:
+  qdrant-data:
+  embeddings-data:

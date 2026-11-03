@@ -20,6 +20,10 @@ return [
         'attachment_corrupt' => 'No pudimos leer este archivo. Prueba con otro.',
         'attachment_text_invalid' => 'Este archivo de texto contiene datos que no son texto. Guárdalo de nuevo como texto plano.',
         'attachment_office_invalid' => 'No pudimos leer este documento de Office. Ábrelo y guárdalo de nuevo.',
+        'knowledge_type' => 'Solo se admiten documentos PDF, TXT o Markdown.',
+        'knowledge_corrupt' => 'No pudimos leer este PDF. Prueba con otro archivo.',
+        'knowledge_text_invalid' => 'Este archivo de texto contiene datos que no son texto. Guárdalo de nuevo como texto plano.',
+        'knowledge_text_encoding' => 'Este archivo de texto no está en UTF-8. Guárdalo de nuevo con esa codificación.',
         'attachment_office_macros' => 'Los documentos con macros o con contenido no admitido no se pueden adjuntar. Guárdalo sin macros.',
     ],
 ];

@@ -10,6 +10,7 @@
         "laravel/fortify": "^1.41",
         "laravel/framework": "^13.17",
         "laravel/reverb": "^1.12",
+        "smalot/pdfparser": "^2.13",
         "webklex/php-imap": "^6.2"
     },
     "require-dev": {

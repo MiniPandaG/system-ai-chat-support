@@ -23,6 +23,12 @@ final class Channels
         return "tenant.{$tenantId}.tickets.{$ticketId}";
     }
 
+    /** La base de conocimiento de una empresa: avisos de que un documento cambió de estado. */
+    public static function knowledge(int $tenantId): string
+    {
+        return "tenant.{$tenantId}.knowledge";
+    }
+
     /** La conversación de un visitante del widget: solo su propio navegador, con el token de su sesión, puede entrar. */
     public static function widget(int $tenantId, string $sessionId): string
     {

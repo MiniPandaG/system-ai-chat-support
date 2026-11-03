@@ -146,6 +146,12 @@ class FortifyServiceProvider extends ServiceProvider
 
         RateLimiter::for('tickets-write', fn (Request $request): Limit => Limit::perMinute(120)->by('tickets-write:'.$this->accountSubject($request)));
 
+        // Base de conocimiento: leer y escribir por persona. El autoguardado de un borrador envía una petición cada 10 s.
+        RateLimiter::for('knowledge-read', fn (Request $request): Limit => Limit::perMinute(120)->by('knowledge-read:'.$this->accountSubject($request)));
+        // La búsqueda de prueba embebe la pregunta con el modelo de la plataforma: cuesta cómputo, así que tiene su propio tope.
+        RateLimiter::for('knowledge-search', fn (Request $request): Limit => Limit::perMinute(30)->by('knowledge-search:'.$this->accountSubject($request)));
+        RateLimiter::for('knowledge-write', fn (Request $request): Limit => Limit::perMinute(60)->by('knowledge-write:'.$this->accountSubject($request)));
+
         // «Escribiendo»: una señal cada 2 segundos y 30 por minuto, por persona y ticket (la ruta pasa por el límite antes de
         // resolver el ticket, así que se usa el valor de la dirección tal cual).
         RateLimiter::for('tickets-typing', function (Request $request): array {

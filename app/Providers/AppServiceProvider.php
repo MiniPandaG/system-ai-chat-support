@@ -8,6 +8,12 @@ use App\Attachments\ClamAvScanner;
 use App\Attachments\FakeScanner;
 use App\Attachments\Scanner;
 use App\Branding\Palette;
+use App\Knowledge\Vector\Embedder;
+use App\Knowledge\Vector\FakeEmbedder;
+use App\Knowledge\Vector\FakeIndex;
+use App\Knowledge\Vector\QdrantIndex;
+use App\Knowledge\Vector\TeiEmbedder;
+use App\Knowledge\Vector\VectorIndex;
 use App\Mail\Inbound\ImapMailboxReader;
 use App\Mail\Inbound\MailboxReader;
 use App\Mail\Inbound\NullMailboxReader;
@@ -17,6 +23,7 @@ use App\Tenancy\TenantContext;
 use App\Tenancy\TenantJobContext;
 use Illuminate\Contracts\View\View as ViewContract;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
@@ -48,6 +55,41 @@ class AppServiceProvider extends ServiceProvider
                 'password' => is_string($settings['password'] ?? null) ? $settings['password'] : null,
                 'folder' => is_string($settings['folder'] ?? null) ? $settings['folder'] : 'INBOX',
             ]);
+        });
+
+        // El índice vectorial es uno solo por proceso: así el de pruebas guarda lo que se le pone entre una llamada y otra.
+        $this->app->singleton(VectorIndex::class, function (): VectorIndex {
+            $driver = config()->string('knowledge.index.driver');
+
+            return match (true) {
+                $driver === 'qdrant' => new QdrantIndex(
+                    $this->app->make(HttpFactory::class),
+                    config()->string('knowledge.index.url'),
+                    config()->string('knowledge.index.api_key'),
+                    config()->integer('knowledge.index.timeout'),
+                ),
+                // El índice de mentira vive en memoria y no cuida nada: en producción sería perder todo el conocimiento.
+                $driver === 'fake' && ! $this->app->isProduction() => new FakeIndex,
+                default => throw new LogicException("KNOWLEDGE_INDEX=\"{$driver}\" no es válido en este entorno: usa «qdrant»."),
+            };
+        });
+
+        $this->app->bind(Embedder::class, function (): Embedder {
+            $driver = config()->string('knowledge.embeddings.driver');
+
+            return match (true) {
+                $driver === 'tei' => new TeiEmbedder(
+                    $this->app->make(HttpFactory::class),
+                    config()->string('knowledge.embeddings.url'),
+                    config()->integer('knowledge.embeddings.dimensions'),
+                    config()->integer('knowledge.embeddings.batch'),
+                    config()->integer('knowledge.embeddings.timeout'),
+                    config()->string('knowledge.embeddings.prefix_query'),
+                    config()->string('knowledge.embeddings.prefix_passage'),
+                ),
+                $driver === 'fake' && ! $this->app->isProduction() => new FakeEmbedder,
+                default => throw new LogicException("KNOWLEDGE_EMBEDDER=\"{$driver}\" no es válido en este entorno: usa «tei».\n"),
+            };
         });
 
         $this->app->bind(Scanner::class, function (): Scanner {

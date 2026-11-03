@@ -13,6 +13,10 @@ use App\Http\Controllers\CustomerSearchController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InvitationController;
+use App\Http\Controllers\KnowledgeContextController;
+use App\Http\Controllers\KnowledgeController;
+use App\Http\Controllers\KnowledgeDocumentController;
+use App\Http\Controllers\KnowledgeSearchController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\SecurityController;
@@ -64,6 +68,34 @@ Route::middleware(['auth', 'verified', 'two-factor.required'])->group(function (
     // Descarga de un adjunto: URL firmada que caduca, sesión, empresa dueña y solo si el antivirus lo declaró limpio.
     Route::get('/attachments/{attachment}', [AttachmentController::class, 'download'])->middleware('signed')->where('attachment', '[0-9a-z]{26}')->name('attachments.download');
     Route::get('/customers/search', CustomerSearchController::class)->middleware('throttle:tickets-search')->name('customers.search');
+
+    // Base de conocimiento: administradores y agentes la leen, solo administradores la escriben (KbArticlePolicy).
+    // El artículo se resuelve con el filtro automático de empresa, así que uno de otra empresa da 404.
+    // Probar la búsqueda: JSON, solo del conocimiento publicado de la empresa de quien pregunta.
+    Route::get('/knowledge/search', KnowledgeSearchController::class)->middleware('throttle:knowledge-search')->name('knowledge.search');
+    Route::get('/knowledge', [KnowledgeController::class, 'index'])->middleware('throttle:knowledge-read')->name('knowledge');
+    Route::get('/knowledge/articles/create', [KnowledgeController::class, 'create'])->middleware('throttle:knowledge-read')->name('knowledge.create');
+    Route::get('/knowledge/articles/{article}', [KnowledgeController::class, 'show'])->middleware('throttle:knowledge-read')->whereNumber('article')->name('knowledge.show');
+    Route::post('/knowledge/articles', [KnowledgeController::class, 'store'])->middleware('throttle:knowledge-write')->name('knowledge.store');
+    Route::put('/knowledge/articles/{article}', [KnowledgeController::class, 'update'])->middleware('throttle:knowledge-write')->whereNumber('article')->name('knowledge.update');
+    Route::post('/knowledge/articles/{article}/publish', [KnowledgeController::class, 'publish'])->middleware('throttle:knowledge-write')->whereNumber('article')->name('knowledge.publish');
+    Route::post('/knowledge/articles/{article}/unpublish', [KnowledgeController::class, 'unpublish'])->middleware('throttle:knowledge-write')->whereNumber('article')->name('knowledge.unpublish');
+    Route::post('/knowledge/articles/{article}/reindex', [KnowledgeController::class, 'reindex'])->middleware('throttle:knowledge-write')->whereNumber('article')->name('knowledge.reindex');
+    Route::delete('/knowledge/articles/{article}', [KnowledgeController::class, 'destroy'])->middleware('throttle:knowledge-write')->whereNumber('article')->name('knowledge.destroy');
+
+    // Contexto de la empresa: administradores y agentes lo leen, solo administradores lo escriben (KbContextPolicy).
+    Route::get('/knowledge/context', [KnowledgeContextController::class, 'show'])->middleware('throttle:knowledge-read')->name('knowledge.context');
+    Route::put('/knowledge/context', [KnowledgeContextController::class, 'update'])->middleware('throttle:knowledge-write')->name('knowledge.context.update');
+
+    // Documentos de la base de conocimiento: se suben, pasan el antivirus, se lee su texto y una persona lo revisa antes de publicar.
+    Route::get('/knowledge/documents', [KnowledgeDocumentController::class, 'index'])->middleware('throttle:knowledge-read')->name('knowledge.documents');
+    Route::get('/knowledge/documents/{document}', [KnowledgeDocumentController::class, 'show'])->middleware('throttle:knowledge-read')->whereNumber('document')->name('knowledge.documents.show');
+    Route::post('/knowledge/documents', [KnowledgeDocumentController::class, 'store'])->middleware('throttle:knowledge-write')->name('knowledge.documents.store');
+    Route::put('/knowledge/documents/{document}', [KnowledgeDocumentController::class, 'update'])->middleware('throttle:knowledge-write')->whereNumber('document')->name('knowledge.documents.update');
+    Route::post('/knowledge/documents/{document}/publish', [KnowledgeDocumentController::class, 'publish'])->middleware('throttle:knowledge-write')->whereNumber('document')->name('knowledge.documents.publish');
+    Route::post('/knowledge/documents/{document}/unpublish', [KnowledgeDocumentController::class, 'unpublish'])->middleware('throttle:knowledge-write')->whereNumber('document')->name('knowledge.documents.unpublish');
+    Route::post('/knowledge/documents/{document}/reindex', [KnowledgeDocumentController::class, 'reindex'])->middleware('throttle:knowledge-write')->whereNumber('document')->name('knowledge.documents.reindex');
+    Route::delete('/knowledge/documents/{document}', [KnowledgeDocumentController::class, 'destroy'])->middleware('throttle:knowledge-write')->whereNumber('document')->name('knowledge.documents.destroy');
 
     // Descarga de archivos de la empresa: URL firmada que caduca, sesión y empresa dueña (FileStore::temporaryUrl).
     Route::get('/files/{file}', [FileController::class, 'show'])->middleware('signed')->where('file', '[0-9a-z]{26}')->name('files.show');
