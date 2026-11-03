@@ -26,18 +26,6 @@ function brandFrame(Tenant $tenant): TestResponse
     return test()->get('/widget/frame?key='.$tenant->widget_key.'&parent='.urlencode('https://tienda-ejemplo.com'))->assertOk();
 }
 
-/** Guarda una paleta como lo hace la pantalla de marca: solo los colores cambiados y los textos calculados. */
-function brandPalette(Tenant $tenant, array $colors): void
-{
-    $stored = Palette::forStorage($colors);
-    app(TenantContext::class)->run($tenant, function () use ($stored): void {
-        $branding = TenantBranding::current();
-        $branding->colors = $stored['colors'];
-        $branding->foregrounds = $stored['foregrounds'];
-        $branding->save();
-    });
-}
-
 describe('los colores en el widget', function (): void {
     it('con la paleta por defecto no añade estilos de empresa', function (): void {
         $tenant = widgetTenant();

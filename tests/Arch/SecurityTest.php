@@ -39,6 +39,7 @@ arch('solo el almacén, la revisión y la conversación usan los adjuntos de tic
         'App\Jobs\ScanAttachment',
         'App\Console\Commands\RescanAttachments',
         'App\Http\Controllers\AttachmentController',
+        'App\Mail\Inbound\InboundMailProcessor',
         'App\Tickets\Thread',
         'Database\Factories\TicketAttachmentFactory',
     ]);

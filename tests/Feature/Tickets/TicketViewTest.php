@@ -70,10 +70,10 @@ describe('guardar una vista', function (): void {
     it('guarda solo valores ya normalizados: los desconocidos nunca llegan a la tabla', function (): void {
         $tenant = ticketTenant();
 
-        $this->actingAs(ticketStaff($tenant))->post('/tickets/views', ['name' => 'Limpia', 'status' => ['open'], 'sql' => 'DROP TABLE tickets', 'tenant_id' => 999, 'user_id' => 999, 'filters' => ['evil' => true]])->assertRedirect();
+        $this->actingAs(ticketStaff($tenant))->post('/tickets/views', ['name' => 'Limpia', 'status' => ['open'], 'sql' => 'DROP TABLE tickets', 'tenant_id' => 987654321, 'user_id' => 987654321, 'filters' => ['evil' => true]])->assertRedirect();
 
         $view = viewsOf($tenant)->sole();
-        expect($view->filters)->toBe(['status' => ['open']])->and($view->tenant_id)->toBe($tenant->id)->and($view->user_id)->not->toBe(999);
+        expect($view->filters)->toBe(['status' => ['open']])->and($view->tenant_id)->toBe($tenant->id)->and($view->user_id)->not->toBe(987654321);
     });
 
     it('valida el nombre', function (mixed $name): void {

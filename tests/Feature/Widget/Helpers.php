@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 require_once __DIR__.'/../Tickets/Helpers.php';
 
+use App\Branding\Palette;
 use App\Enums\Role;
 use App\Models\Customer;
 use App\Models\Tenant;
+use App\Models\TenantBranding;
 use App\Models\Ticket;
 use App\Models\TicketMessage;
 use App\Models\User;
@@ -113,4 +115,16 @@ function widgetCustomerOf(Tenant $tenant, Ticket $ticket): Customer
 function widgetAdmin(?Tenant $tenant = null): User
 {
     return ticketStaff($tenant ?? widgetTenant(enabled: false), Role::Admin);
+}
+
+/** Guarda una paleta como lo hace la pantalla de marca: solo los colores cambiados y los textos calculados. */
+function brandPalette(Tenant $tenant, array $colors): void
+{
+    $stored = Palette::forStorage($colors);
+    app(TenantContext::class)->run($tenant, function () use ($stored): void {
+        $branding = TenantBranding::current();
+        $branding->colors = $stored['colors'];
+        $branding->foregrounds = $stored['foregrounds'];
+        $branding->save();
+    });
 }
