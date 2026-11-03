@@ -22,7 +22,8 @@
         "@inertiajs/react": "^3.10.0",
         "pusher-js": "8.6.0",
         "react": "^19.3.1",
-        "react-dom": "^19.3.1"
+        "react-dom": "^19.3.1",
+        "react-markdown": "10.1.0"
     },
     "pnpm": {
         "overrides": {

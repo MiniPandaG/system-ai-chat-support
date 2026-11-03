@@ -11,6 +11,7 @@ export interface PanelCopy {
     branding: string;
     widget: string;
     api_keys: string;
+    knowledge: string;
     plan: string;
     platform: string;
     open_menu: string;
@@ -26,7 +27,7 @@ export interface AuthenticatedUser {
     tenant: { id: number; name: string; logo_url: string | null; theme: Record<string, string> | null } | null;
     /** Tickets pendientes que nadie atiende; null para quien no ve la bandeja. */
     inbox?: { unassigned: number | null };
-    can: { tickets: boolean; team: boolean; branding: boolean; plan: boolean; widget: boolean; api_keys: boolean };
+    can: { tickets: boolean; team: boolean; branding: boolean; plan: boolean; widget: boolean; api_keys: boolean; knowledge: boolean };
 }
 
 export interface SharedProps {

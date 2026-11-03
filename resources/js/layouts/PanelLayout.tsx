@@ -4,11 +4,11 @@ import type { ComponentType, ReactNode, SVGProps } from 'react';
 import logo from '../../images/logo.png';
 import { Button } from '../components/Button';
 import { ConnectionIndicator } from '../components/ConnectionIndicator';
-import { ChatIcon, GaugeIcon, KeyIcon, InboxIcon, MenuIcon, PaletteIcon, ShieldIcon, UserIcon, UsersIcon } from '../components/icons';
+import { BookIcon, ChatIcon, GaugeIcon, KeyIcon, InboxIcon, MenuIcon, PaletteIcon, ShieldIcon, UserIcon, UsersIcon } from '../components/icons';
 import { disconnect } from '../realtime/client';
 import type { SharedProps } from '../types';
 
-export type PanelSection = 'inbox' | 'account' | 'team' | 'branding' | 'widget' | 'api_keys' | 'plan' | 'security';
+export type PanelSection = 'inbox' | 'knowledge' | 'account' | 'team' | 'branding' | 'widget' | 'api_keys' | 'plan' | 'security';
 
 interface PanelLayoutProps {
     title: string;
@@ -28,6 +28,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
     { key: 'inbox', href: '/tickets', Icon: InboxIcon },
+    { key: 'knowledge', href: '/knowledge', Icon: BookIcon },
     { key: 'account', href: '/account', Icon: UserIcon },
     { key: 'team', href: '/settings/team', Icon: UsersIcon },
     { key: 'branding', href: '/settings/branding', Icon: PaletteIcon },
@@ -73,11 +74,12 @@ export function PanelLayout({ title, section, wide = false, bare = false, childr
         if (!menuOpen && sheet.open) sheet.close();
     }, [menuOpen]);
 
-    const labels: Record<PanelSection, string> = { inbox: panel.inbox, account: panel.account, team: panel.team, branding: panel.branding, widget: panel.widget, api_keys: panel.api_keys, plan: panel.plan, security: panel.security };
+    const labels: Record<PanelSection, string> = { inbox: panel.inbox, knowledge: panel.knowledge, account: panel.account, team: panel.team, branding: panel.branding, widget: panel.widget, api_keys: panel.api_keys, plan: panel.plan, security: panel.security };
     // El servidor decide qué secciones ve cada rol; aquí solo se ocultan las que no puede abrir.
     const visibleItems = navItems.filter(
         (item) =>
             (item.key !== 'inbox' || auth?.can.tickets === true) &&
+            (item.key !== 'knowledge' || auth?.can.knowledge === true) &&
             (item.key !== 'team' || auth?.can.team === true) &&
             (item.key !== 'branding' || auth?.can.branding === true) &&
             (item.key !== 'widget' || auth?.can.widget === true) &&

@@ -230,3 +230,12 @@ export function KeyIcon(props: IconProps) {
         </Icon>
     );
 }
+
+export function BookIcon(props: IconProps) {
+    return (
+        <Icon {...props}>
+            <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5Z" />
+            <path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H20" />
+        </Icon>
+    );
+}
