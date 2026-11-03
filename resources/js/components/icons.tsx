@@ -220,3 +220,13 @@ export function LockIcon(props: IconProps) {
         </Icon>
     );
 }
+
+export function KeyIcon(props: IconProps) {
+    return (
+        <Icon {...props}>
+            <circle cx="8" cy="15" r="4" />
+            <path d="M11 12l9-9" />
+            <path d="M16 7l3 3" />
+        </Icon>
+    );
+}
