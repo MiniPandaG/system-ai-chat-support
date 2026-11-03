@@ -9,6 +9,7 @@ use App\Attachments\AttachmentStore;
 use App\Broadcasting\LiveUpdates;
 use App\Files\FileRejected;
 use App\Jobs\ScanAttachment;
+use App\Mail\Outbox;
 use App\Models\Ticket;
 use App\Models\TicketAttachment;
 use App\Models\TicketMessage;
@@ -28,7 +29,10 @@ class AddTicketMessage
 {
     use LocksOpenTicket;
 
-    public function __construct(private readonly AttachmentStore $attachments) {}
+    public function __construct(
+        private readonly AttachmentStore $attachments,
+        private readonly Outbox $outbox,
+    ) {}
 
     /**
      * @param  list<UploadedFile>  $files
@@ -77,6 +81,8 @@ class AddTicketMessage
 
         LiveUpdates::both($ticket);
         LiveUpdates::visitor($ticket);
+        // Si el cliente dejó su correo, también se le avisa por ahí.
+        $this->outbox->reply($message);
 
         return $message;
     }

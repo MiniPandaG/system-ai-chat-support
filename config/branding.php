@@ -21,6 +21,18 @@ return [
         'info' => '#2E6FB0',
     ],
 
+    /*
+    | El correo es siempre claro y no puede leer variables CSS: estos son los valores del modo claro de tokens.css ya
+    | resueltos (fondo, superficie, texto) y el texto secundario y el borde que resultan de mezclarlos.
+    */
+    'email' => [
+        'background' => '#FFFFFF',
+        'surface' => '#F7F4EF',
+        'text' => '#221B14',
+        'muted' => '#69645F',
+        'border' => '#E4E0DB',
+    ],
+
     /* Texto que se pone sobre un color: el sistema elige el de más contraste. Nunca blanco ni negro puro. */
     'foreground_light' => '#F6F1EA',
     'foreground_dark' => '#1D1208',

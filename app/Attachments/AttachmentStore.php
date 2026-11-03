@@ -75,6 +75,21 @@ class AttachmentStore
     }
 
     /**
+     * Comprueba un archivo que trae un canal (un correo entrante): igual que `prepare`, pero sin persona a quien cobrar el
+     * límite por hora (cada canal pone el suyo) y de uno en uno, para que un archivo malo no pierda a los demás.
+     *
+     * @throws FileRejected
+     */
+    public function prepareFromChannel(UploadedFile $upload): PreparedAttachment
+    {
+        try {
+            return $this->inspect($upload);
+        } catch (FileRejected $rejected) {
+            throw new FileRejected('«'.$this->displayName($upload).'»: '.$rejected->getMessage(), previous: $rejected);
+        }
+    }
+
+    /**
      * Guarda un archivo ya comprobado en el disco privado y crea su fila, «por revisar».
      *
      * @throws Throwable

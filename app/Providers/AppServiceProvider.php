@@ -8,6 +8,9 @@ use App\Attachments\ClamAvScanner;
 use App\Attachments\FakeScanner;
 use App\Attachments\Scanner;
 use App\Branding\Palette;
+use App\Mail\Inbound\ImapMailboxReader;
+use App\Mail\Inbound\MailboxReader;
+use App\Mail\Inbound\NullMailboxReader;
 use App\Models\TenantBranding;
 use App\Models\User;
 use App\Tenancy\TenantContext;
@@ -27,6 +30,25 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->scoped(TenantContext::class);
         $this->app->singleton(TenantJobContext::class);
+
+        // El buzón de soporte: sin servidor IMAP configurado no se lee nada.
+        $this->app->bind(MailboxReader::class, function (): MailboxReader {
+            $settings = config()->array('mailbox.imap');
+
+            if (! is_string($settings['host'] ?? null) || $settings['host'] === '') {
+                return new NullMailboxReader;
+            }
+
+            return new ImapMailboxReader([
+                'host' => $settings['host'],
+                'port' => is_int($settings['port'] ?? null) ? $settings['port'] : 993,
+                'encryption' => is_string($settings['encryption'] ?? null) ? $settings['encryption'] : null,
+                'validate_cert' => (bool) ($settings['validate_cert'] ?? true),
+                'username' => is_string($settings['username'] ?? null) ? $settings['username'] : null,
+                'password' => is_string($settings['password'] ?? null) ? $settings['password'] : null,
+                'folder' => is_string($settings['folder'] ?? null) ? $settings['folder'] : 'INBOX',
+            ]);
+        });
 
         $this->app->bind(Scanner::class, function (): Scanner {
             $driver = config()->string('attachments.scanner');

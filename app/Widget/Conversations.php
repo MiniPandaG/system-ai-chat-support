@@ -6,6 +6,7 @@ namespace App\Widget;
 
 use App\Broadcasting\Channels;
 use App\Broadcasting\LiveUpdates;
+use App\Mail\Outbox;
 use App\Models\Customer;
 use App\Models\Tenant;
 use App\Models\Ticket;
@@ -34,6 +35,7 @@ class Conversations
     public function __construct(
         private readonly PlanLimits $limits,
         private readonly TenantContext $context,
+        private readonly Outbox $outbox,
     ) {}
 
     /**
@@ -74,6 +76,12 @@ class Conversations
             $customer = Customer::query()->findOrFail($session->customer_id);
             $this->applyContact($customer, $name, $email);
             $customer->save();
+
+            // Dejar el correo después de escribir también pide la confirmación (una sola por ticket).
+            $ticket = $session->ticket_id === null ? null : Ticket::query()->find($session->ticket_id);
+            if ($ticket !== null && $customer->email !== null) {
+                $this->outbox->received($ticket);
+            }
         });
     }
 
@@ -234,6 +242,7 @@ class Conversations
         }
 
         $this->announce($sent->message);
+        $this->confirmReception($sent);
 
         return $sent;
     }
@@ -303,6 +312,16 @@ class Conversations
         $cap = $session->created_at->copy()->addDays(config()->integer('widget.session.max_days'));
 
         $session->forceFill(['last_seen_at' => now(), 'expires_at' => $idle->lessThan($cap) ? $idle : $cap])->save();
+    }
+
+    /** Si quien escribe dejó su correo, se le confirma por correo que su mensaje llegó. */
+    private function confirmReception(Sent $sent): void
+    {
+        $ticket = Ticket::query()->find($sent->message->ticket_id);
+
+        if ($ticket !== null) {
+            $this->outbox->received($ticket);
+        }
     }
 
     /** Avisa al equipo (bandeja y ticket) y a las otras pestañas del mismo visitante. */
