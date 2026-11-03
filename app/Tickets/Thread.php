@@ -31,7 +31,7 @@ class Thread
                 'kind' => 'message',
                 'id' => $message->id,
                 'author' => $message->author->value,
-                'author_name' => $message->author === MessageAuthor::Customer ? $ticket->customer?->name : $message->user?->name,
+                'author_name' => $message->author === MessageAuthor::Customer ? $ticket->customer?->name : ($message->user === null ? __('tickets.integration') : $message->user->name),
                 'body' => $message->body,
                 'attachments' => array_values($message->attachments->map(fn (TicketAttachment $attachment): array => [
                     'id' => $attachment->id,

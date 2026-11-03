@@ -23,9 +23,13 @@ return [
     'conversation' => 'Conversación',
     'no_customer' => 'Cliente sin nombre',
 
+    // Quien responde cuando el mensaje lo escribió un sistema de la empresa por la API y no una persona.
+    'integration' => 'Integración',
+
     'channels' => [
         'panel' => 'Panel',
         'widget' => 'Chat web',
+        'api' => 'API',
     ],
 
     'status_label' => 'Estado',

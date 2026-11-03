@@ -14,6 +14,7 @@ return [
     'team' => 'Equipo',
     'branding' => 'Marca',
     'widget' => 'Chat web',
+    'api_keys' => 'Llaves de API',
     'plan' => 'Plan',
     'platform' => 'Plataforma',
     'open_menu' => 'Abrir menú',

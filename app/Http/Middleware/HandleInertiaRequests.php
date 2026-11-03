@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Middleware;
 
 use App\Files\FileStore;
+use App\Models\ApiKey;
 use App\Models\Plan;
 use App\Models\Tenant;
 use App\Models\TenantBranding;
@@ -31,7 +32,7 @@ class HandleInertiaRequests extends Middleware
     }
 
     /**
-     * @return array{user: array{id: int, name: string, email: string, role: string|null}, tenant: array{id: int, name: string, logo_url: string|null, theme: array<string, string>|null}|null, inbox: array{unassigned: int|null}, can: array{tickets: bool, team: bool, branding: bool, plan: bool, widget: bool}}|null
+     * @return array{user: array{id: int, name: string, email: string, role: string|null}, tenant: array{id: int, name: string, logo_url: string|null, theme: array<string, string>|null}|null, inbox: array{unassigned: int|null}, can: array{tickets: bool, team: bool, branding: bool, plan: bool, widget: bool, api_keys: bool}}|null
      */
     private function authenticated(Request $request): ?array
     {
@@ -56,6 +57,7 @@ class HandleInertiaRequests extends Middleware
                 'branding' => Gate::forUser($user)->allows('manage', TenantBranding::class),
                 'plan' => Gate::forUser($user)->allows('viewAny', Plan::class),
                 'widget' => Gate::forUser($user)->allows('manage', WidgetOrigin::class),
+                'api_keys' => Gate::forUser($user)->allows('manage', ApiKey::class),
             ],
         ];
     }

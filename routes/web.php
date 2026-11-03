@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\ApiDocsController;
+use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\Auth\AcceptInvitationController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -83,6 +85,15 @@ Route::middleware(['auth', 'verified', 'two-factor.required'])->group(function (
     Route::post('/settings/branding/palette/check', [BrandingController::class, 'checkPalette'])->middleware('throttle:palette-check')->name('branding.palette.check');
     Route::post('/settings/branding/logo', [BrandingController::class, 'storeLogo'])->name('branding.logo.store');
     Route::delete('/settings/branding/logo', [BrandingController::class, 'destroyLogo'])->name('branding.logo.destroy');
+
+    // Llaves de API: solo administradores (ApiKeyPolicy). La llave completa se entrega una sola vez.
+    Route::get('/settings/api-keys', [ApiKeyController::class, 'index'])->name('api-keys');
+    Route::post('/settings/api-keys', [ApiKeyController::class, 'store'])->middleware('throttle:api-keys-manage')->name('api-keys.store');
+    Route::post('/settings/api-keys/{apiKey}/rotate', [ApiKeyController::class, 'rotate'])->middleware('throttle:api-keys-manage')->whereNumber('apiKey')->name('api-keys.rotate');
+    Route::delete('/settings/api-keys/{apiKey}', [ApiKeyController::class, 'destroy'])->middleware('throttle:api-keys-manage')->whereNumber('apiKey')->name('api-keys.destroy');
+
+    // Documentación interactiva de la API, solo administradores (ApiKeyPolicy).
+    Route::get('/settings/api-docs', ApiDocsController::class)->name('api-docs');
 
     // Chat web: código para incrustar y sitios permitidos, solo administradores (WidgetOriginPolicy).
     Route::get('/settings/widget', [WidgetSettingsController::class, 'show'])->name('widget.settings');

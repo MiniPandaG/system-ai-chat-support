@@ -23,7 +23,7 @@ class UpdateTicket
     /**
      * @param  array{status?: TicketStatus, priority?: TicketPriority, assigned_to?: int|null}  $changes  Ya validado: quien atiende pertenece a la empresa y es administrador o agente activo.
      */
-    public function __invoke(User $actor, Ticket $ticket, array $changes): Ticket
+    public function __invoke(?User $actor, Ticket $ticket, array $changes): Ticket
     {
         $previousAssignee = $ticket->assigned_to;
 
@@ -50,7 +50,7 @@ class UpdateTicket
         }
 
         if ($ticket->assigned_to !== $previousAssignee) {
-            $this->audit->record(AuditEvent::TicketAssigned, $actor->id, [
+            $this->audit->record(AuditEvent::TicketAssigned, $actor?->id, [
                 'ticket_id' => $ticket->id,
                 'from' => $previousAssignee,
                 'to' => $ticket->assigned_to,

@@ -21,7 +21,7 @@ use App\Tickets\TicketPriority;
 use App\Tickets\TicketStatus;
 
 /**
- * Abre un ticket desde el panel con su primer mensaje. Todo ocurre con la fila de la empresa bloqueada: así el límite
+ * Abre un ticket con su primer mensaje, desde el panel (una persona) o por la API (sin persona: lo abre una llave de la empresa). Todo ocurre con la fila de la empresa bloqueada: así el límite
  * del plan se comprueba sin que otra petición se cuele y el número de ticket sale sin huecos ni repetidos.
  */
 class CreateTicket
@@ -36,9 +36,9 @@ class CreateTicket
      *
      * @throws LimitReached
      */
-    public function __invoke(User $creator, Tenant $tenant, array $data): Ticket
+    public function __invoke(?User $creator, Tenant $tenant, array $data, Channel $channel = Channel::Panel): Ticket
     {
-        return $this->limits->exclusively($tenant, function (Tenant $locked) use ($creator, $data): Ticket {
+        return $this->limits->exclusively($tenant, function (Tenant $locked) use ($creator, $data, $channel): Ticket {
             $this->limits->ensure($locked, Limit::TicketsPerMonth);
 
             $customer = $data['customer_id'] === null
@@ -53,19 +53,19 @@ class CreateTicket
                 'customer_id' => $customer->id,
                 'status' => TicketStatus::Open,
                 'priority' => $data['priority'],
-                'channel' => Channel::Panel,
+                'channel' => $channel,
                 'assigned_to' => $data['assigned_to'],
-                'created_by' => $creator->id,
+                'created_by' => $creator?->id,
                 'last_message_at' => now(),
             ])->save();
 
             $message = new TicketMessage(['body' => $data['description']]);
-            $message->forceFill(['ticket_id' => $ticket->id, 'author' => MessageAuthor::Customer, 'user_id' => $creator->id])->save();
+            $message->forceFill(['ticket_id' => $ticket->id, 'author' => MessageAuthor::Customer, 'user_id' => $creator?->id])->save();
 
-            $this->audit->record(AuditEvent::TicketCreated, $creator->id, ['ticket_id' => $ticket->id, 'number' => $ticket->number]);
+            $this->audit->record(AuditEvent::TicketCreated, $creator?->id, ['ticket_id' => $ticket->id, 'number' => $ticket->number, 'via' => $channel->value]);
 
             if ($ticket->assigned_to !== null) {
-                $this->audit->record(AuditEvent::TicketAssigned, $creator->id, ['ticket_id' => $ticket->id, 'to' => $ticket->assigned_to]);
+                $this->audit->record(AuditEvent::TicketAssigned, $creator?->id, ['ticket_id' => $ticket->id, 'to' => $ticket->assigned_to]);
             }
 
             LiveUpdates::inbox($ticket);

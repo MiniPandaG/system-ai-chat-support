@@ -44,4 +44,7 @@ enum AuditEvent: string
     case WidgetOriginAdded = 'widget.origin_added';
     case WidgetOriginRemoved = 'widget.origin_removed';
     case WidgetAppearanceChanged = 'widget.appearance_changed';
+    case ApiKeyCreated = 'api_key.created';
+    case ApiKeyRotated = 'api_key.rotated';
+    case ApiKeyRevoked = 'api_key.revoked';
 }
