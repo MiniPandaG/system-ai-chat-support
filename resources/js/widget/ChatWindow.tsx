@@ -3,6 +3,7 @@ import { Alert } from '../components/Alert';
 import { Button } from '../components/Button';
 import { XIcon } from '../components/icons';
 import { ContactPrompt } from './ContactPrompt';
+import { SurveyPrompt } from './SurveyPrompt';
 import type { Chat } from './useChat';
 import { visibleMessages } from './useChat';
 import type { WidgetConfig } from './types';
@@ -29,6 +30,7 @@ export function ChatWindow({ config, chat, began, fullscreen, onBegin, onClose }
     const logRef = useRef<HTMLDivElement>(null);
     const [contactDismissed, setContactDismissed] = useState(false);
     const [contactNoticeDone, setContactNoticeDone] = useState(false);
+    const [surveyDismissed, setSurveyDismissed] = useState(false);
     const contactNotice = chat.contactSaved && !contactNoticeDone;
     const { confirmed, pending } = visibleMessages(chat);
     const total = confirmed.length + pending.length;
@@ -127,6 +129,17 @@ export function ChatWindow({ config, chat, began, fullscreen, onBegin, onClose }
                             ))}
                             {ended && <Alert variant="info">{copy.ended}</Alert>}
                             {contactNotice && <Alert variant="success">{copy.contact_saved}</Alert>}
+                            {ended && chat.conversation?.survey.pending === true && !surveyDismissed && (
+                                <SurveyPrompt
+                                    copy={copy}
+                                    error={chat.surveyError}
+                                    onAnswer={chat.answerSurvey}
+                                    onDismiss={() => {
+                                        setSurveyDismissed(true);
+                                    }}
+                                />
+                            )}
+                            {chat.surveyAnswered && <Alert variant="success">{copy.survey_thanks}</Alert>}
                             {offerContact && (
                                 <ContactPrompt
                                     copy={copy}

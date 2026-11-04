@@ -41,6 +41,21 @@ export interface WidgetCopy {
     contact_save: string;
     contact_dismiss: string;
     contact_saved: string;
+    survey_title: string;
+    survey_help: string;
+    survey_score: string;
+    survey_scale_1: string;
+    survey_scale_2: string;
+    survey_scale_3: string;
+    survey_scale_4: string;
+    survey_scale_5: string;
+    survey_comment: string;
+    survey_send: string;
+    survey_sending: string;
+    survey_dismiss: string;
+    survey_thanks: string;
+    survey_error: string;
+    survey_score_required: string;
     characters_left: string;
     too_long: string;
 }
@@ -60,6 +75,8 @@ export interface Conversation {
     ticket: { status: string; ended: boolean } | null;
     messages: WidgetMessage[];
     contact: { has_email: boolean };
+    /** Hay una encuesta de satisfacción por contestar. */
+    survey: { pending: boolean };
 }
 
 /**

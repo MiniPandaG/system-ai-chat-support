@@ -248,3 +248,47 @@ export function SparkIcon(props: IconProps) {
         </Icon>
     );
 }
+
+export function ChartIcon(props: IconProps) {
+    return (
+        <Icon {...props}>
+            <path d="M4 20V10" />
+            <path d="M10 20V4" />
+            <path d="M16 20v-8" />
+            <path d="M22 20H2" />
+        </Icon>
+    );
+}
+
+export function SmileIcon(props: IconProps) {
+    return (
+        <Icon {...props}>
+            <circle cx="12" cy="12" r="9" />
+            <path d="M8.5 14.5c.9 1.2 2 1.8 3.5 1.8s2.6-.6 3.5-1.8" />
+            <path d="M9 9.5h.01" />
+            <path d="M15 9.5h.01" />
+        </Icon>
+    );
+}
+
+export function MehIcon(props: IconProps) {
+    return (
+        <Icon {...props}>
+            <circle cx="12" cy="12" r="9" />
+            <path d="M8.5 15.5h7" />
+            <path d="M9 9.5h.01" />
+            <path d="M15 9.5h.01" />
+        </Icon>
+    );
+}
+
+export function FrownIcon(props: IconProps) {
+    return (
+        <Icon {...props}>
+            <circle cx="12" cy="12" r="9" />
+            <path d="M8.5 16.5c.9-1.2 2-1.8 3.5-1.8s2.6.6 3.5 1.8" />
+            <path d="M9 9.5h.01" />
+            <path d="M15 9.5h.01" />
+        </Icon>
+    );
+}

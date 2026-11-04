@@ -96,3 +96,7 @@ export function fetchConversation(token: string): Promise<Conversation> {
 export function saveEmail(token: string, email: string): Promise<{ saved: boolean }> {
     return request<{ saved: boolean }>('contact', { method: 'POST', token, body: { email } });
 }
+
+export function answerSurvey(token: string, score: number, comment: string): Promise<{ answered: boolean }> {
+    return request<{ answered: boolean }>('survey', { method: 'POST', token, body: { score, comment } });
+}

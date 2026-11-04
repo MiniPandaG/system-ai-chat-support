@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useChannel, useConnectionState } from '../realtime/hooks';
-import { ApiError, fetchConversation, NetworkError, saveEmail, sendMessage, SessionExpiredError } from './api';
+import { answerSurvey as sendSurvey, ApiError, fetchConversation, NetworkError, saveEmail, sendMessage, SessionExpiredError } from './api';
 import { readStored, removeStored, writeStored } from './storage';
 import type { Conversation, OutgoingMessage, WidgetMessage } from './types';
 
@@ -55,6 +55,10 @@ export interface Chat {
     retry: (clientId: string) => void;
     reload: () => void;
     saveContact: (email: string) => Promise<boolean>;
+    /** La encuesta ya se contestó desde esta ventana. */
+    surveyAnswered: boolean;
+    surveyError: string | null;
+    answerSurvey: (score: number, comment: string) => Promise<boolean>;
 }
 
 /**
@@ -71,6 +75,8 @@ export function useChat(widgetKey: string): Chat {
     const [online, setOnline] = useState(() => navigator.onLine);
     const [contactSaved, setContactSaved] = useState(false);
     const [contactError, setContactError] = useState<string | null>(null);
+    const [surveyAnswered, setSurveyAnswered] = useState(false);
+    const [surveyError, setSurveyError] = useState<string | null>(null);
     const connection = useConnectionState();
 
     const tokenRef = useRef(token);
@@ -279,9 +285,28 @@ export function useChat(widgetKey: string): Chat {
         }
     }, []);
 
+    const answerSurvey = useCallback(async (score: number, comment: string): Promise<boolean> => {
+        const current = tokenRef.current;
+        if (current === null) return false;
+
+        setSurveyError(null);
+
+        try {
+            await sendSurvey(current, score, comment);
+            setSurveyAnswered(true);
+            setConversation((value) => (value === null ? value : { ...value, survey: { pending: false } }));
+
+            return true;
+        } catch (error) {
+            setSurveyError(error instanceof ApiError ? error.message : '');
+
+            return false;
+        }
+    }, []);
+
     return useMemo(
-        () => ({ started: token !== null || outgoing.length > 0, conversation, outgoing, loading, loadFailed, online, contactSaved, contactError, send, retry, reload, saveContact }),
-        [token, conversation, outgoing, loading, loadFailed, online, contactSaved, contactError, send, retry, reload, saveContact],
+        () => ({ started: token !== null || outgoing.length > 0, conversation, outgoing, loading, loadFailed, online, contactSaved, contactError, send, retry, reload, saveContact, surveyAnswered, surveyError, answerSurvey }),
+        [token, conversation, outgoing, loading, loadFailed, online, contactSaved, contactError, send, retry, reload, saveContact, surveyAnswered, surveyError, answerSurvey],
     );
 }
 
