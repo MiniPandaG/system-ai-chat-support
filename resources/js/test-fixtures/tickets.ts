@@ -74,6 +74,24 @@ export const ticketsCopy: TicketsCopy = {
     },
     typing: { one: ':name está escribiendo…', two: ':first y :second están escribiendo…', many: 'Varias personas están escribiendo…', someone: 'Alguien está escribiendo…' },
     seen: { label: 'Visto por :names', more: 'Visto por :names y :count más' },
+    ai: {
+        title: 'Borrador de la IA',
+        hint: 'El cliente todavía no lo ve. Revísalo antes de enviarlo.',
+        sources: 'Se basó en',
+        approve: 'Enviar tal cual',
+        edit: 'Editar',
+        discard: 'Descartar',
+        send_edited: 'Enviar con mis cambios',
+        cancel_edit: 'Cancelar edición',
+        edit_label: 'Texto que se enviará al cliente',
+        last_run: 'Última intervención de la IA',
+        badge: 'IA',
+        approved_by: 'Aprobada por :name',
+        discard_title: '¿Descartar este borrador?',
+        discard_body: 'No se enviará nada al cliente. Podrás responder tú mismo.',
+        discard_confirm: 'Descartar borrador',
+        discard_cancel: 'Cancelar',
+    },
     note: { label: 'Nota interna — el cliente no la ve', aria: 'Nota interna de :name, :time' },
     tags: {
         label: 'Etiquetas',
@@ -193,6 +211,7 @@ export const customerMessage: TicketMessageData = {
     id: 1,
     author: 'customer',
     author_name: 'Marisol Quintero',
+    approved_by: null,
     body: 'Me dice que mi contraseña es incorrecta.\nYa probé restablecerla.',
     attachments: [],
     created_at: '2026-10-31T15:00:00-05:00',
@@ -204,10 +223,23 @@ export const agentMessage: TicketMessageData = {
     id: 2,
     author: 'agent',
     author_name: 'Ana Torres',
+    approved_by: null,
     body: 'Ya lo estamos revisando.',
     attachments: [],
     created_at: '2026-10-31T15:05:00-05:00',
     created_label: '31 de oct, 3:05 pm',
+};
+
+export const aiMessage: TicketMessageData = {
+    kind: 'message',
+    id: 3,
+    author: 'ai',
+    author_name: 'Asistente virtual',
+    approved_by: 'Ana Torres',
+    body: 'Tienes 30 días para devolverlo.',
+    attachments: [],
+    created_at: '2026-10-31T15:06:00-05:00',
+    created_label: '31 de oct, 3:06 pm',
 };
 
 export const internalNote: TicketNoteData = {
@@ -236,6 +268,7 @@ export const ticketDetail: TicketDetailData = {
     thread: [customerMessage, agentMessage],
     seen_by: [],
     seen_more: 0,
+    ai: null,
 };
 
 export const assignees: Assignee[] = [

@@ -25,6 +25,7 @@ arch('solo la conversación del equipo y la acción que las crea usan las notas 
     ->toOnlyBeUsedIn([
         'App\Models\Ticket',
         'App\Actions\AddTicketNote',
+        'App\Actions\AddAiNote',
         'App\Tickets\Thread',
         'Database\Factories\TicketNoteFactory',
     ]);

@@ -78,7 +78,7 @@ describe('Context (contexto de la empresa)', () => {
                 security: 'Seguridad',
                 inbox: 'Bandeja',
                 inbox_unassigned: ':count sin asignar',
-                knowledge: 'Base de conocimiento',
+                knowledge: 'Base de conocimiento', ai: 'Asistente de IA',
                 live_on: 'En vivo',
                 live_connecting: 'Conectando…',
                 live_off: 'Sin conexión en vivo',
@@ -97,7 +97,7 @@ describe('Context (contexto de la empresa)', () => {
             auth: {
                 user: { id: 1, name: 'Ana', email: 'ana@empresa-ejemplo.com', role: 'admin' },
                 tenant: { id: 1, name: 'Soporte Ejemplo SAS', logo_url: null, theme: null },
-                can: { tickets: true, team: true, branding: true, plan: true, widget: true, api_keys: true, knowledge: true },
+                can: { tickets: true, team: true, branding: true, plan: true, widget: true, api_keys: true, knowledge: true, ai: true },
             },
         };
     });
