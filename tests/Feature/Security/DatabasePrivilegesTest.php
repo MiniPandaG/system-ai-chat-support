@@ -54,7 +54,7 @@ it('el usuario de migraciones puede crear y borrar tablas', function (): void {
 
 it('los dos usuarios solo ven las bases de datos del proyecto', function (): void {
     // performance_schema es de solo lectura y MySQL la muestra a cualquier usuario.
-    $allowed = ['information_schema', 'performance_schema', 'tikarochat', 'tikarochat_test'];
+    $allowed = ['information_schema', 'performance_schema', 'geckochat', 'geckochat_test'];
 
     foreach (['mysql', 'mysql_migrator'] as $connection) {
         $extra = array_diff(firstColumn($connection, 'SHOW DATABASES'), $allowed);

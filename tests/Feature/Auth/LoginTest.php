@@ -115,7 +115,7 @@ it('cierra la sesión y la invalida', function (): void {
 
 it('redirige a los invitados al inicio de sesión y a los autenticados a su cuenta', function (): void {
     $this->get('/account')->assertRedirect('/login');
-    $this->get('/')->assertRedirect('/account');
+    $this->get('/')->assertRedirect('/platform/tenants');
 
     $this->actingAs(User::factory()->create())->get('/login')->assertRedirect('/');
 });

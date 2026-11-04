@@ -105,7 +105,7 @@ it('el correo de verificación está en español y sale por cola', function (): 
     $mail = $notification->toMail($user);
 
     expect($notification)->toBeInstanceOf(ShouldQueue::class)
-        ->and($mail->subject)->toBe('Verifica tu correo en TikaroChat')
+        ->and($mail->subject)->toBe('Verifica tu correo en GeckoChat')
         ->and($mail->actionText)->toBe('Verificar correo')
         ->and($mail->actionUrl)->toContain('/email/verify/'.$user->getKey().'/')
         ->and($mail->actionUrl)->toContain('signature=');

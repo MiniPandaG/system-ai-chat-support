@@ -29,7 +29,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Queue;
 
 beforeEach(function (): void {
-    config(['ai.reply.min_score' => 0.2, 'mail.from.address' => 'soporte@tikarochat.test']);
+    config(['ai.reply.min_score' => 0.2, 'mail.from.address' => 'soporte@geckochat.test']);
 });
 
 describe('lo que se decide antes de llamar al modelo', function (): void {

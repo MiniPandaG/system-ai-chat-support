@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Queue;
 use Tests\Support\FakeMailboxReader;
 
 beforeEach(function (): void {
-    config(['mail.from.address' => 'soporte@tikarochat.test']);
+    config(['mail.from.address' => 'soporte@geckochat.test']);
     Queue::fake();
 });
 
@@ -28,8 +28,8 @@ describe('el comando mail:fetch', function (): void {
     it('entrega cada correo a su ticket y lo marca como leído', function (): void {
         $tenant = widgetTenant();
         $ticket = mailTicket($tenant);
-        $address = 'soporte+t-'.threadToken($tenant, $ticket).'@tikarochat.test';
-        $reader = new FakeMailboxReader([mailFor('<a@x>', $address, 'Primero'), mailFor('<b@x>', $address, 'Segundo'), mailFor('<c@x>', 'soporte@tikarochat.test', 'Perdido')]);
+        $address = 'soporte+t-'.threadToken($tenant, $ticket).'@geckochat.test';
+        $reader = new FakeMailboxReader([mailFor('<a@x>', $address, 'Primero'), mailFor('<b@x>', $address, 'Segundo'), mailFor('<c@x>', 'soporte@geckochat.test', 'Perdido')]);
         $this->app->instance(MailboxReader::class, $reader);
 
         $this->artisan('mail:fetch')->expectsOutput('Correos leídos: 3 (aceptados 2, rechazados 1).')->assertSuccessful();
@@ -46,7 +46,7 @@ describe('el comando mail:fetch', function (): void {
     });
 
     it('con un servidor configurado usa el lector IMAP', function (): void {
-        config(['mailbox.imap.host' => 'imap.tikarochat.test', 'mailbox.imap.username' => 'soporte', 'mailbox.imap.password' => 'x']);
+        config(['mailbox.imap.host' => 'imap.geckochat.test', 'mailbox.imap.username' => 'soporte', 'mailbox.imap.password' => 'x']);
 
         expect(app(MailboxReader::class))->toBeInstanceOf(ImapMailboxReader::class);
     });
@@ -54,7 +54,7 @@ describe('el comando mail:fetch', function (): void {
     it('un correo que falla se reintenta y, pasado el tope, se descarta con su motivo sin bloquear a los demás', function (): void {
         $tenant = widgetTenant();
         $ticket = mailTicket($tenant);
-        $address = 'soporte+t-'.threadToken($tenant, $ticket).'@tikarochat.test';
+        $address = 'soporte+t-'.threadToken($tenant, $ticket).'@geckochat.test';
         $broken = new InboundMail(new stdClass, '<roto@x>', 'marisol@cliente-ejemplo.com', $address, '', [], 100, fn (): InboundBody => throw new RuntimeException('clave-secreta del buzón'));
         $reader = new FakeMailboxReader([$broken, mailFor('<ok@x>', $address, 'Sí entra')]);
         $this->app->instance(MailboxReader::class, $reader);
@@ -95,7 +95,7 @@ describe('el lector IMAP', function (): void {
 
     it('fuera de local no lee sin cifrar', function (): void {
         app()->detectEnvironment(fn (): string => 'production');
-        $reader = new ImapMailboxReader(['host' => 'imap.tikarochat.test', 'port' => 143, 'encryption' => null, 'validate_cert' => true, 'username' => 'soporte', 'password' => 'clave-que-no-debe-salir', 'folder' => 'INBOX']);
+        $reader = new ImapMailboxReader(['host' => 'imap.geckochat.test', 'port' => 143, 'encryption' => null, 'validate_cert' => true, 'username' => 'soporte', 'password' => 'clave-que-no-debe-salir', 'folder' => 'INBOX']);
 
         try {
             $reader->unread(10);

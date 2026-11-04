@@ -93,7 +93,7 @@ it('un administrador invita: queda la invitación, con solo el hash del token, y
 it('el correo de invitación está en español y apunta al enlace con el token', function (): void {
     $mail = (new InvitationNotification('abc123', 'Soporte Ejemplo SAS', Role::Agent))->toMail(new AnonymousNotifiable);
 
-    expect($mail->subject)->toBe('Te invitaron a Soporte Ejemplo SAS en TikaroChat')
+    expect($mail->subject)->toBe('Te invitaron a Soporte Ejemplo SAS en GeckoChat')
         ->and($mail->actionUrl)->toEndWith('/invitations/abc123')
         ->and(implode(' ', $mail->introLines))->toContain('Agente');
 });
@@ -344,7 +344,7 @@ describe('aceptar', function (): void {
         User::factory()->create(['email' => 'existente@empresa-ejemplo.com']);
 
         $this->post('/invitations/'.$token, ['name' => 'Ana', 'password' => invitedPassword(), 'password_confirmation' => invitedPassword()])
-            ->assertSessionHasErrors(['token' => 'Este correo ya tiene una cuenta en TikaroChat. Inicia sesión o pide que te inviten con otro correo.']);
+            ->assertSessionHasErrors(['token' => 'Este correo ya tiene una cuenta en GeckoChat. Inicia sesión o pide que te inviten con otro correo.']);
 
         expect(User::query()->where('email', 'existente@empresa-ejemplo.com')->count())->toBe(1)
             ->and(invitationFor($tenant, 'existente@empresa-ejemplo.com')?->accepted_at)->toBeNull();

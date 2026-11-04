@@ -63,7 +63,7 @@ it('envía HSTS solo sobre HTTPS', function (): void {
 });
 
 it('en producción añade upgrade-insecure-requests y nunca abre orígenes de desarrollo', function (): void {
-    $publicPath = sys_get_temp_dir().'/tikarochat-hot-'.bin2hex(random_bytes(4));
+    $publicPath = sys_get_temp_dir().'/geckochat-hot-'.bin2hex(random_bytes(4));
     File::ensureDirectoryExists($publicPath);
     File::put($publicPath.'/hot', 'http://127.0.0.1:5173');
     $this->app->usePublicPath($publicPath);
@@ -82,7 +82,7 @@ it('en producción añade upgrade-insecure-requests y nunca abre orígenes de de
 });
 
 it('en local solo abre el servidor de Vite mientras está encendido', function (): void {
-    $publicPath = sys_get_temp_dir().'/tikarochat-hot-'.bin2hex(random_bytes(4));
+    $publicPath = sys_get_temp_dir().'/geckochat-hot-'.bin2hex(random_bytes(4));
     File::ensureDirectoryExists($publicPath);
     $this->app->usePublicPath($publicPath);
     $this->app['env'] = 'local';

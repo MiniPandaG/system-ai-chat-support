@@ -185,7 +185,7 @@ function sendReply(object $test, User $agent, Ticket $ticket, array $payload): T
  */
 function useTemporaryAttachmentDisk(): void
 {
-    $root = sys_get_temp_dir().'/tikaro-attachments-'.Str::lower(Str::random(10));
+    $root = sys_get_temp_dir().'/gecko-attachments-'.Str::lower(Str::random(10));
     config(['filesystems.disks.attachments_test' => ['driver' => 'local', 'root' => $root, 'throw' => false], 'files.disk' => 'attachments_test']);
     Storage::forgetDisk('attachments_test');
 

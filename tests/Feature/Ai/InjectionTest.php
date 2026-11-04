@@ -21,7 +21,7 @@ use App\Tickets\MessageAuthor;
 
 // La batería de ataques de inyección de instrucciones (RS-14, RIA-05). El modelo de estos ataques es el peor caso: un
 // modelo que se deja convencer y obedece al atacante. Lo que se comprueba no es que el modelo resista, sino que el código
-// de TikaroChat contenga el daño aunque no resista: nada sale sin pasar por el validador, las reglas las aplica el código y
+// de GeckoChat contenga el daño aunque no resista: nada sale sin pasar por el validador, las reglas las aplica el código y
 // la IA no tiene ninguna herramienta con la que hacer algo.
 
 beforeEach(function (): void {

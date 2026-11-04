@@ -106,11 +106,11 @@ const copy = {
 };
 
 const keys = [
-    { id: 1, name: 'prod-backend-01', prefix: 'tk_1_AbCdEfGh', permission: 'write' as const, created_at: '2026-10-01T10:00:00Z', last_used_at: null, expires_at: null, status: 'active' as const },
-    { id: 2, name: 'antigua', prefix: 'tk_1_ZyXwVuTs', permission: 'read' as const, created_at: '2026-09-01T10:00:00Z', last_used_at: '2026-10-02T10:00:00Z', expires_at: '2026-12-01T00:00:00Z', status: 'revoked' as const },
+    { id: 1, name: 'prod-backend-01', prefix: 'gk_1_AbCdEfGh', permission: 'write' as const, created_at: '2026-10-01T10:00:00Z', last_used_at: null, expires_at: null, status: 'active' as const },
+    { id: 2, name: 'antigua', prefix: 'gk_1_ZyXwVuTs', permission: 'read' as const, created_at: '2026-09-01T10:00:00Z', last_used_at: '2026-10-02T10:00:00Z', expires_at: '2026-12-01T00:00:00Z', status: 'revoked' as const },
 ];
 
-const fullKey = `tk_1_${'A'.repeat(40)}`;
+const fullKey = `gk_1_${'A'.repeat(40)}`;
 
 /** userEvent.setup() instala su propio portapapeles: el de la prueba se pone después. */
 function setupUser() {
@@ -169,7 +169,7 @@ describe('ApiKeys (llaves de API)', () => {
         renderPage();
 
         expect(screen.getByText('prod-backend-01')).toBeTruthy();
-        expect(screen.getByText('tk_1_AbCdEfGh···')).toBeTruthy();
+        expect(screen.getByText('gk_1_AbCdEfGh···')).toBeTruthy();
         expect(screen.getByText('Nunca usada')).toBeTruthy();
         expect(screen.getByText('Activa')).toBeTruthy();
         expect(screen.getByText('Revocada')).toBeTruthy();

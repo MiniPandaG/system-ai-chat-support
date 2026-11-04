@@ -242,10 +242,10 @@ describe('configuración', function (): void {
     });
 
     it('la política de contenido permite el WebSocket del mismo sitio', function (): void {
-        $http = $this->get('http://tikaro.test:8080/login')->headers->get('Content-Security-Policy');
-        $https = $this->get('https://tikaro.test/login')->headers->get('Content-Security-Policy');
+        $http = $this->get('http://gecko.test:8080/login')->headers->get('Content-Security-Policy');
+        $https = $this->get('https://gecko.test/login')->headers->get('Content-Security-Policy');
 
-        expect($http)->toContain("connect-src 'self' ws://tikaro.test:8080;")->and($https)->toContain("connect-src 'self' wss://tikaro.test;");
+        expect($http)->toContain("connect-src 'self' ws://gecko.test:8080;")->and($https)->toContain("connect-src 'self' wss://gecko.test;");
     });
 
     it('el ejemplo de entorno trae Reverb sin valores reales', function (): void {

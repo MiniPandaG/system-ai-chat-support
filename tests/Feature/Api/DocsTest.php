@@ -69,7 +69,7 @@ describe('la especificación se publica', function (): void {
             ->and($response->json('security'))->toBe([['bearerAuth' => []]])
             ->and($response->json('components.securitySchemes.bearerAuth.scheme'))->toBe('bearer')
             ->and($response->headers->get('Cache-Control'))->toContain('public');
-        expect($response->getContent())->not->toContain('tk_1_')->not->toContain('password');
+        expect($response->getContent())->not->toContain('gk_1_')->not->toContain('password');
     });
 
     it('tiene un tope de peticiones por dirección', function (): void {
@@ -197,7 +197,7 @@ describe('la pantalla de documentación', function (): void {
         $props = $this->actingAs(widgetAdmin($tenant))->get('/settings/api-docs')->assertOk()->viewData('page')['props'];
 
         expect($props['spec']['openapi'])->toBe('3.1.0')->and($props['base'])->toBe(url('/api/v1'))->and($props['copy']['title'])->toBe('Documentación de la API');
-        expect(preg_match('/tk_\d+_[A-Za-z0-9]{40}/', (string) json_encode($props)))->toBe(0);
+        expect(preg_match('/gk_\d+_[A-Za-z0-9]{40}/', (string) json_encode($props)))->toBe(0);
     });
 
     it('agentes y observadores no la abren', function (): void {

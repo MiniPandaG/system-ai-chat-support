@@ -62,7 +62,7 @@ it('el correo está en español y el enlace es de un solo uso con caducidad de 3
     $user = User::factory()->create(['name' => 'Ada Lovelace']);
     $mail = (new ResetPasswordNotification('el-token'))->toMail($user);
 
-    expect($mail->subject)->toBe('Restablece tu contraseña de TikaroChat')
+    expect($mail->subject)->toBe('Restablece tu contraseña de GeckoChat')
         ->and($mail->greeting)->toBe('Hola, Ada Lovelace.')
         ->and($mail->actionUrl)->toContain('/reset-password/el-token')
         ->and($mail->actionUrl)->toContain('email='.urlencode($user->email))

@@ -50,7 +50,7 @@ const copy = {
 };
 
 function renderDocs() {
-    return render(<ApiDocs copy={copy} spec={miniSpec} base="https://app.tikarochat.test/api/v1" />);
+    return render(<ApiDocs copy={copy} spec={miniSpec} base="https://app.geckochat.test/api/v1" />);
 }
 
 describe('ApiDocs', () => {
@@ -99,7 +99,7 @@ describe('ApiDocs', () => {
         expect(screen.getByRole('heading', { name: /API de prueba/ })).toBeTruthy();
         expect(screen.getByText('API').tagName).toBe('STRONG');
         expect(screen.getByText('código').tagName).toBe('CODE');
-        expect(screen.getByText('https://app.tikarochat.test/api/v1')).toBeTruthy();
+        expect(screen.getByText('https://app.geckochat.test/api/v1')).toBeTruthy();
         expect(screen.getByRole('heading', { name: 'Tickets' })).toBeTruthy();
         expect(screen.getByRole('heading', { name: 'Clientes' })).toBeTruthy();
         expect(screen.queryByRole('heading', { name: 'Vacía' })).toBeNull();
@@ -146,7 +146,7 @@ describe('ApiDocs', () => {
         const send = screen.getByRole<HTMLButtonElement>('button', { name: 'Probar' });
         expect(send.disabled).toBe(true);
 
-        await user.type(screen.getByLabelText('Llave de API'), 'tk_1_secreto');
+        await user.type(screen.getByLabelText('Llave de API'), 'gk_1_secreto');
         await user.type(screen.getByLabelText('En la consulta: status'), 'open');
         await user.click(send);
 
@@ -154,10 +154,10 @@ describe('ApiDocs', () => {
             expect(fetchMock).toHaveBeenCalled();
         });
         const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-        expect(url).toBe('https://app.tikarochat.test/api/v1/tickets?status=open');
+        expect(url).toBe('https://app.geckochat.test/api/v1/tickets?status=open');
         expect(init.method).toBe('GET');
         expect(init.credentials).toBe('omit');
-        expect((init.headers as Record<string, string>).Authorization).toBe('Bearer tk_1_secreto');
+        expect((init.headers as Record<string, string>).Authorization).toBe('Bearer gk_1_secreto');
         expect(init.body).toBeUndefined();
         expect(await screen.findByText('200')).toBeTruthy();
         expect(screen.getByText(/"next_cursor": null/)).toBeTruthy();
@@ -169,7 +169,7 @@ describe('ApiDocs', () => {
         const user = userEvent.setup();
         renderDocs();
         await user.click(screen.getByRole('button', { name: /GET.*\/customers\/\{customer\}/ }));
-        await user.type(screen.getByLabelText('Llave de API'), 'tk_1_x');
+        await user.type(screen.getByLabelText('Llave de API'), 'gk_1_x');
         await user.type(screen.getByLabelText('En la ruta: customer'), '7/../8');
 
         await user.click(screen.getByRole('button', { name: 'Probar' }));
@@ -177,7 +177,7 @@ describe('ApiDocs', () => {
         await waitFor(() => {
             expect(fetchMock).toHaveBeenCalled();
         });
-        expect((fetchMock.mock.calls[0] as [string])[0]).toBe('https://app.tikarochat.test/api/v1/customers/7%2F..%2F8');
+        expect((fetchMock.mock.calls[0] as [string])[0]).toBe('https://app.geckochat.test/api/v1/customers/7%2F..%2F8');
         expect(await screen.findByText('404')).toBeTruthy();
     });
 
@@ -187,7 +187,7 @@ describe('ApiDocs', () => {
         const user = userEvent.setup();
         renderDocs();
         await user.click(screen.getByRole('button', { name: /POST.*\/tickets/ }));
-        await user.type(screen.getByLabelText('Llave de API'), 'tk_1_x');
+        await user.type(screen.getByLabelText('Llave de API'), 'gk_1_x');
 
         await user.click(screen.getByRole('button', { name: 'Probar' }));
 
@@ -206,7 +206,7 @@ describe('ApiDocs', () => {
         const user = userEvent.setup();
         renderDocs();
         await user.click(screen.getByRole('button', { name: /POST.*\/tickets/ }));
-        await user.type(screen.getByLabelText('Llave de API'), 'tk_1_x');
+        await user.type(screen.getByLabelText('Llave de API'), 'gk_1_x');
         const body = screen.getByLabelText('Cuerpo (JSON)');
         await user.clear(body);
         await user.type(body, '{{ no es json');
@@ -222,7 +222,7 @@ describe('ApiDocs', () => {
         const user = userEvent.setup();
         renderDocs();
         await user.click(screen.getByRole('button', { name: /GET.*\/tickets.*Listar/ }));
-        await user.type(screen.getByLabelText('Llave de API'), 'tk_1_x');
+        await user.type(screen.getByLabelText('Llave de API'), 'gk_1_x');
 
         await user.click(screen.getByRole('button', { name: 'Probar' }));
 
@@ -234,7 +234,7 @@ describe('ApiDocs', () => {
         const user = userEvent.setup();
         renderDocs();
 
-        await user.type(screen.getByLabelText('Llave de API'), 'tk_1_secreto-que-no-se-guarda');
+        await user.type(screen.getByLabelText('Llave de API'), 'gk_1_secreto-que-no-se-guarda');
 
         for (const store of [window.localStorage, window.sessionStorage]) {
             for (let index = 0; index < store.length; index += 1) {

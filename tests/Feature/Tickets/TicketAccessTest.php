@@ -73,10 +73,10 @@ it('el ticket abierto pide un identificador numérico', function (): void {
     $this->actingAs(ticketStaff(ticketTenant()))->get('/tickets/abc')->assertNotFound();
 });
 
-it('la entrada del panel lleva al equipo a la bandeja y al personal de la plataforma a su cuenta', function (): void {
+it('la entrada del panel lleva al equipo a la bandeja y al personal de la plataforma a su panel', function (): void {
     $this->actingAs(ticketStaff(ticketTenant()))->get('/')->assertRedirect(route('tickets'));
-    $this->actingAs(User::factory()->create(['is_platform_admin' => true]))->get('/')->assertRedirect(route('account'));
-    $this->get('/')->assertRedirect(route('account'));
+    $this->actingAs(User::factory()->create(['is_platform_admin' => true]))->get('/')->assertRedirect(route('platform.tenants'));
+    $this->get('/')->assertRedirect(route('platform.tenants'));
 });
 
 it('los datos compartidos dicen quién ve la bandeja', function (Role $role, bool $expected): void {

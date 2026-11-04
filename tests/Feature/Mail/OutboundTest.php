@@ -24,7 +24,7 @@ use Tests\Support\Images;
 
 beforeEach(function (): void {
     Mail::fake();
-    config(['mail.from.address' => 'soporte@tikarochat.test']);
+    config(['mail.from.address' => 'soporte@geckochat.test']);
 });
 
 describe('cuando el equipo responde', function (): void {
@@ -41,11 +41,11 @@ describe('cuando el equipo responde', function (): void {
             $mail->assertSeeInHtml('Ya enviamos tu pedido.');
             $mail->assertSeeInText('Llega el viernes.');
 
-            return $mail->hasFrom('soporte@tikarochat.test', 'Tienda Ejemplo')
-                && $mail->hasReplyTo('soporte+t-'.$token.'@tikarochat.test')
+            return $mail->hasFrom('soporte@geckochat.test', 'Tienda Ejemplo')
+                && $mail->hasReplyTo('soporte+t-'.$token.'@geckochat.test')
                 && $mail->kind === MailKind::Reply
                 && str_starts_with($mail->messageId, 't-'.$token.'.')
-                && str_ends_with($mail->messageId, '@tikarochat.test')
+                && str_ends_with($mail->messageId, '@geckochat.test')
                 && $mail->hasSubject('[Ticket #'.$ticket->number.'] '.$ticket->subject);
         });
         $rows = mailRows($tenant);
@@ -339,22 +339,22 @@ describe('Threads', function (): void {
         $a = '7-'.str_repeat('a1', 16);
         $b = '12-'.str_repeat('0f', 16);
 
-        expect(Threads::tokensIn("Soporte <soporte+t-{$a}@tikarochat.test>"))->toBe([['tenant_id' => 7, 'token' => str_repeat('a1', 16)]])
-            ->and(Threads::tokensIn("<t-{$b}.abc123@tikarochat.test> <t-{$a}.zzz@tikarochat.test>"))->toHaveCount(2)
-            ->and(Threads::tokensIn("SOPORTE+T-{$a}@TIKAROCHAT.TEST"))->toHaveCount(1)
+        expect(Threads::tokensIn("Soporte <soporte+t-{$a}@geckochat.test>"))->toBe([['tenant_id' => 7, 'token' => str_repeat('a1', 16)]])
+            ->and(Threads::tokensIn("<t-{$b}.abc123@geckochat.test> <t-{$a}.zzz@geckochat.test>"))->toHaveCount(2)
+            ->and(Threads::tokensIn("SOPORTE+T-{$a}@GECKOCHAT.TEST"))->toHaveCount(1)
             ->and(Threads::tokensIn("soporte+t-{$a}@a.com, soporte+t-{$a}@b.com"))->toHaveCount(1);
     });
 
     it('ignora lo que no tiene la forma exacta', function (string $text): void {
         expect(Threads::tokensIn($text))->toBe([]);
     })->with([
-        'sin mas' => ['soporte@tikarochat.test'],
-        'token corto' => ['soporte+t-7-abc@tikarochat.test'],
-        'token largo' => ['soporte+t-7-'.str_repeat('a', 33).'@tikarochat.test'],
-        'sin empresa' => ['soporte+t-'.str_repeat('a', 32).'@tikarochat.test'],
-        'empresa no numérica' => ['soporte+t-x-'.str_repeat('a', 32).'@tikarochat.test'],
-        'mayusculas no hex' => ['soporte+t-7-'.str_repeat('g', 32).'@tikarochat.test'],
-        'sin separador' => ['soporte t-7-'.str_repeat('a', 32).'@tikarochat.test'],
+        'sin mas' => ['soporte@geckochat.test'],
+        'token corto' => ['soporte+t-7-abc@geckochat.test'],
+        'token largo' => ['soporte+t-7-'.str_repeat('a', 33).'@geckochat.test'],
+        'sin empresa' => ['soporte+t-'.str_repeat('a', 32).'@geckochat.test'],
+        'empresa no numérica' => ['soporte+t-x-'.str_repeat('a', 32).'@geckochat.test'],
+        'mayusculas no hex' => ['soporte+t-7-'.str_repeat('g', 32).'@geckochat.test'],
+        'sin separador' => ['soporte t-7-'.str_repeat('a', 32).'@geckochat.test'],
     ]);
 
     it('el token de otra empresa no encuentra el hilo en esta', function (): void {

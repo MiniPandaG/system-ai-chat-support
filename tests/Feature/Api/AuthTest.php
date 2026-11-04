@@ -22,7 +22,7 @@ describe('quién llama', function (): void {
         $this->travel(31)->days();
 
         $bodies = [];
-        foreach ([null, '', 'basura', 'tk_1_corta', "tk_{$tenant->id}_".str_repeat('a', 40), 'tk_99999999_'.str_repeat('b', 40), $revoked, $expired] as $key) {
+        foreach ([null, '', 'basura', 'gk_1_corta', "gk_{$tenant->id}_".str_repeat('a', 40), 'gk_99999999_'.str_repeat('b', 40), $revoked, $expired] as $key) {
             $response = api($this, 'GET', '/tickets', $key)->assertUnauthorized();
             $bodies[] = $response->json();
             expect($response->headers->get('WWW-Authenticate'))->toBe('Bearer');
@@ -36,7 +36,7 @@ describe('quién llama', function (): void {
         $mine = widgetTenant();
         $theirs = widgetTenant();
         $key = apiKeyFor($mine);
-        $forged = 'tk_'.$theirs->id.substr($key, strlen('tk_'.$mine->id));
+        $forged = 'gk_'.$theirs->id.substr($key, strlen('gk_'.$mine->id));
 
         api($this, 'GET', '/tickets', $forged)->assertUnauthorized();
     });
@@ -91,10 +91,10 @@ describe('quién llama', function (): void {
         $key = apiKeyFor($tenant);
 
         foreach (range(1, 3) as $_) {
-            api($this, 'GET', '/tickets', 'tk_1_'.str_repeat('z', 40))->assertUnauthorized();
+            api($this, 'GET', '/tickets', 'gk_1_'.str_repeat('z', 40))->assertUnauthorized();
         }
 
-        $blocked = api($this, 'GET', '/tickets', 'tk_1_'.str_repeat('z', 40))->assertStatus(429);
+        $blocked = api($this, 'GET', '/tickets', 'gk_1_'.str_repeat('z', 40))->assertStatus(429);
         expect($blocked->json('error.code'))->toBe('rate_limited')->and((int) $blocked->headers->get('Retry-After'))->toBeGreaterThan(0);
         api($this->withServerVariables(['REMOTE_ADDR' => '203.0.113.77']), 'GET', '/tickets', $key)->assertOk();
         $this->travel(61)->seconds();
@@ -107,7 +107,7 @@ describe('quién llama', function (): void {
 
         $response = api($this, 'POST', '/tickets', $key, newApiTicket())->assertCreated();
 
-        $secret = substr($key, strlen('tk_'.$tenant->id.'_'));
+        $secret = substr($key, strlen('gk_'.$tenant->id.'_'));
         expect($response->getContent())->not->toContain($secret)
             ->and(json_encode(DB::table('audit_logs')->get()))->not->toContain($secret)
             ->and(json_encode(DB::table('api_keys')->get()))->not->toContain($secret);

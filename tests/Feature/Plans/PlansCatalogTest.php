@@ -115,7 +115,7 @@ it('el registro ignora cualquier plan o límite que envíe el cliente', function
         ->and(Plan::query()->where('slug', 'inicial')->value('max_agents'))->toBe(2);
 });
 
-it('ningún endpoint de la interfaz recibe un plan ni lo cambia', function (): void {
+it('ningún endpoint de la empresa recibe un plan ni lo cambia', function (): void {
     $tenant = Tenant::factory()->create();
     $admin = User::factory()->forTenant($tenant, Role::Admin)->create();
     $admin->forceFill(['two_factor_secret' => encrypt('S'), 'two_factor_recovery_codes' => encrypt('[]'), 'two_factor_confirmed_at' => now()])->save();
@@ -125,7 +125,7 @@ it('ningún endpoint de la interfaz recibe un plan ni lo cambia', function (): v
 
     expect($tenant->fresh()?->plan_id)->toBe(Plan::default()->id);
 
-    $planRoutes = collect(Route::getRoutes()->getRoutes())->filter(fn ($route): bool => str_contains($route->uri(), 'plan') && $route->uri() !== 'settings/plan')->map(fn ($route): string => $route->uri())->all();
+    $planRoutes = collect(Route::getRoutes()->getRoutes())->filter(fn ($route): bool => str_contains($route->uri(), 'plan') && $route->uri() !== 'settings/plan' && ! str_starts_with($route->uri(), 'platform/'))->map(fn ($route): string => $route->uri())->all();
 
     expect($planRoutes)->toBe([]);
 });

@@ -129,9 +129,9 @@ describe('AcceptInvitation', () => {
     });
 
     it('muestra el error del token que devuelve el servidor', () => {
-        serverErrors = { token: 'Este correo ya tiene una cuenta en TikaroChat.' };
+        serverErrors = { token: 'Este correo ya tiene una cuenta en GeckoChat.' };
         render(<AcceptInvitation copy={copy} token="tok" invitation={invitation} />);
 
-        expect(screen.getByText('Este correo ya tiene una cuenta en TikaroChat.')).toBeTruthy();
+        expect(screen.getByText('Este correo ya tiene una cuenta en GeckoChat.')).toBeTruthy();
     });
 });

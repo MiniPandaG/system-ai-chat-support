@@ -27,7 +27,7 @@ use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\RateLimiter;
 
 beforeEach(function (): void {
-    config(['mail.from.address' => 'soporte@tikarochat.test']);
+    config(['mail.from.address' => 'soporte@geckochat.test']);
     Queue::fake();
     useTemporaryAttachmentDisk();
 });
@@ -43,7 +43,7 @@ function inbound(array $o = []): InboundMail
         handle: new stdClass,
         messageId: $o['id'] ?? '<'.bin2hex(random_bytes(8)).'@cliente.example>',
         from: array_key_exists('from', $o) ? $o['from'] : 'marisol@cliente-ejemplo.com',
-        recipients: $o['to'] ?? 'soporte@tikarochat.test',
+        recipients: $o['to'] ?? 'soporte@geckochat.test',
         references: $o['references'] ?? '',
         headers: $o['headers'] ?? [],
         size: $o['size'] ?? 2048,
@@ -54,7 +54,7 @@ function inbound(array $o = []): InboundMail
 /** Un correo que responde al hilo del ticket por la dirección de respuesta. */
 function replyTo(Tenant $tenant, Ticket $ticket, array $o = []): InboundMail
 {
-    return inbound(['to' => 'Soporte <soporte+t-'.threadToken($tenant, $ticket).'@tikarochat.test>', ...$o]);
+    return inbound(['to' => 'Soporte <soporte+t-'.threadToken($tenant, $ticket).'@geckochat.test>', ...$o]);
 }
 
 function processMail(InboundMail $mail): string
@@ -96,7 +96,7 @@ describe('una respuesta del cliente', function (): void {
         $token = threadToken($tenant, $ticket);
 
         processMail(replyTo($tenant, $ticket, ['text' => 'Por dirección']));
-        processMail(inbound(['references' => "<otro@x.com> <t-{$token}.abc123@tikarochat.test>", 'text' => 'Por referencias']));
+        processMail(inbound(['references' => "<otro@x.com> <t-{$token}.abc123@geckochat.test>", 'text' => 'Por referencias']));
 
         expect(array_slice(bodiesOfTicket($tenant, $ticket), -2))->toBe(['Por dirección', 'Por referencias']);
     });
@@ -111,7 +111,7 @@ describe('una respuesta del cliente', function (): void {
     it('guarda solo lo que escribió: sin la cita del mensaje anterior, sin «>» y sin firma', function (): void {
         $tenant = widgetTenant();
         $ticket = mailTicket($tenant);
-        $text = "Perfecto, gracias.\n\nQuedo atenta.\n-- \nMarisol Quintero\n\nEl lun, 2 nov 2026 a las 10:00, Soporte <soporte@tikarochat.test> escribió:\n> Ya enviamos tu pedido.\n> Llega el viernes.";
+        $text = "Perfecto, gracias.\n\nQuedo atenta.\n-- \nMarisol Quintero\n\nEl lun, 2 nov 2026 a las 10:00, Soporte <soporte@geckochat.test> escribió:\n> Ya enviamos tu pedido.\n> Llega el viernes.";
 
         processMail(replyTo($tenant, $ticket, ['text' => $text]));
 
@@ -213,13 +213,13 @@ describe('lo que no llega a ningún ticket', function (): void {
             ->and(DB::table('mail_messages')->count())->toBe($before)
             ->and(rejectionCount('no_thread'))->toBe(1);
     })->with([
-        'sin token' => ['soporte@tikarochat.test'],
-        'token inventado' => ['soporte+t-1-'.str_repeat('a', 32).'@tikarochat.test'],
-        'empresa inexistente' => ['soporte+t-99999999-'.str_repeat('b', 32).'@tikarochat.test'],
+        'sin token' => ['soporte@geckochat.test'],
+        'token inventado' => ['soporte+t-1-'.str_repeat('a', 32).'@geckochat.test'],
+        'empresa inexistente' => ['soporte+t-99999999-'.str_repeat('b', 32).'@geckochat.test'],
     ]);
 
     it('lo contado no guarda remitente ni asunto', function (): void {
-        processMail(inbound(['from' => 'alguien@secreto.example', 'to' => 'soporte@tikarochat.test']));
+        processMail(inbound(['from' => 'alguien@secreto.example', 'to' => 'soporte@geckochat.test']));
 
         expect(json_encode(DB::table('mail_rejections')->get()))->not->toContain('secreto');
     });
@@ -228,7 +228,7 @@ describe('lo que no llega a ningún ticket', function (): void {
         $tenant = widgetTenant();
         $ticket = mailTicket($tenant);
         $downloaded = false;
-        $mail = new InboundMail(new stdClass, '<grande@x>', 'marisol@cliente-ejemplo.com', 'soporte+t-'.threadToken($tenant, $ticket).'@tikarochat.test', '', [], 60 * 1024 * 1024, function () use (&$downloaded): InboundBody {
+        $mail = new InboundMail(new stdClass, '<grande@x>', 'marisol@cliente-ejemplo.com', 'soporte+t-'.threadToken($tenant, $ticket).'@geckochat.test', '', [], 60 * 1024 * 1024, function () use (&$downloaded): InboundBody {
             $downloaded = true;
 
             return new InboundBody('x', '');
@@ -280,7 +280,7 @@ describe('quién puede escribir en un hilo', function (): void {
         $a = mailTicket($first);
         $hex = explode('-', threadToken($first, $a))[1];
 
-        $outcome = processMail(inbound(['to' => "soporte+t-{$second->id}-{$hex}@tikarochat.test"]));
+        $outcome = processMail(inbound(['to' => "soporte+t-{$second->id}-{$hex}@geckochat.test"]));
 
         expect($outcome)->toBe('no_thread')->and(bodiesOfTicket($first, $a))->toHaveCount(1);
     });
@@ -311,9 +311,9 @@ describe('respuestas automáticas y bucles', function (): void {
 
     it('lo que sale de nuestra propia dirección no vuelve a entrar', function (): void {
         $tenant = widgetTenant();
-        $ticket = mailTicket($tenant, 'soporte@tikarochat.test');
+        $ticket = mailTicket($tenant, 'soporte@geckochat.test');
 
-        expect(processMail(replyTo($tenant, $ticket, ['from' => 'soporte@tikarochat.test'])))->toBe('own_message');
+        expect(processMail(replyTo($tenant, $ticket, ['from' => 'soporte@geckochat.test'])))->toBe('own_message');
     });
 });
 

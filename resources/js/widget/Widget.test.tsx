@@ -258,7 +258,7 @@ describe('Widget', () => {
 
         it('un mensaje en espera sobrevive a cerrar la página y se envía al volver', async () => {
             window.localStorage.setItem(
-                `tikarochat:${WIDGET_KEY}:outbox`,
+                `geckochat:${WIDGET_KEY}:outbox`,
                 JSON.stringify([{ clientId: '22222222-2222-4222-8222-222222222222', body: 'Quedó pendiente', createdAt: '2026-11-01T15:00:00.000Z', status: 'sending', error: null }]),
             );
             const calls = server({ 'POST /widget/api/messages': () => json({ token: TOKEN, message: customerMessage({ client_id: '22222222-2222-4222-8222-222222222222' }) }, 201), 'GET /widget/api/conversation': () => json(conversation()) });
@@ -270,7 +270,7 @@ describe('Widget', () => {
                 expect(calls.some((call) => call.init.method === 'POST')).toBe(true);
             });
             expect(bodyOf(calls.find((call) => call.init.method === 'POST') as { init: RequestInit }).client_id).toBe('22222222-2222-4222-8222-222222222222');
-            expect(window.localStorage.getItem(`tikarochat:${WIDGET_KEY}:outbox`)).toBeNull();
+            expect(window.localStorage.getItem(`geckochat:${WIDGET_KEY}:outbox`)).toBeNull();
         });
 
         it('si el servidor lo rechaza muestra «No se envió.» con el motivo y «Reintentar» lo reenvía con el mismo identificador', async () => {
@@ -511,7 +511,7 @@ describe('Widget', () => {
             const user = userEvent.setup();
             render(<Widget config={widgetConfig} />);
 
-            expect(post).toHaveBeenCalledWith({ source: 'tikarochat-widget', type: 'state', open: false, unread: 0, corner: 'right' }, PARENT_ORIGIN);
+            expect(post).toHaveBeenCalledWith({ source: 'geckochat-widget', type: 'state', open: false, unread: 0, corner: 'right' }, PARENT_ORIGIN);
 
             await openWindow(user);
 
@@ -529,7 +529,7 @@ describe('Widget', () => {
             const dialog = screen.getByRole('dialog');
             expect(dialog.className).toContain('rounded-lg');
 
-            const layout = { source: 'tikarochat-loader', type: 'layout', fullscreen: true };
+            const layout = { source: 'geckochat-loader', type: 'layout', fullscreen: true };
             act(() => {
                 window.dispatchEvent(new MessageEvent('message', { data: layout, origin: 'https://malicioso.example', source: fake as unknown as MessageEventSource }));
                 window.dispatchEvent(new MessageEvent('message', { data: layout, origin: PARENT_ORIGIN, source: window }));

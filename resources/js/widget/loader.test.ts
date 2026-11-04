@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { isWidgetKey, layoutFor, mount, parseState } from './loader';
 
 const KEY = 'AbCdEfGhIjKlMnOpQrStUvWxYz012345';
-const BASE = 'https://app.tikarochat.test';
+const BASE = 'https://app.geckochat.test';
 
 function scriptTag(key: string | null = KEY): HTMLScriptElement {
     const script = document.createElement('script');
@@ -23,7 +23,7 @@ function mountFrame(): HTMLIFrameElement {
     return frame;
 }
 
-const state = { source: 'tikarochat-widget', type: 'state', open: false, corner: 'right', unread: 0 };
+const state = { source: 'geckochat-widget', type: 'state', open: false, corner: 'right', unread: 0 };
 
 describe('parseState', () => {
     it('acepta el mensaje con la forma exacta del marco', () => {
@@ -38,7 +38,7 @@ describe('parseState', () => {
         ['otro tipo', { ...state, type: 'resize' }],
         ['abierto no booleano', { ...state, open: 'true' }],
         ['esquina inventada', { ...state, corner: 'top' }],
-        ['sin esquina', { source: 'tikarochat-widget', type: 'state', open: true }],
+        ['sin esquina', { source: 'geckochat-widget', type: 'state', open: true }],
     ])('descarta %s', (_name, data) => {
         expect(parseState(data)).toBeNull();
     });
@@ -84,7 +84,7 @@ describe('mount', () => {
         vi.restoreAllMocks();
     });
 
-    it('crea un iframe aislado hacia el marco de TikaroChat con la llave y el sitio que lo incrusta', () => {
+    it('crea un iframe aislado hacia el marco de GeckoChat con la llave y el sitio que lo incrusta', () => {
         const frame = mount(scriptTag(), window);
 
         expect(frame).not.toBeNull();
@@ -147,7 +147,7 @@ describe('mount', () => {
 
         frameMessage(frame, { ...state, open: true });
 
-        expect(post).toHaveBeenCalledWith({ source: 'tikarochat-loader', type: 'layout', fullscreen: true }, BASE);
+        expect(post).toHaveBeenCalledWith({ source: 'geckochat-loader', type: 'layout', fullscreen: true }, BASE);
     });
 
     it('ignora mensajes de otro origen, de otra ventana o con otra forma', () => {

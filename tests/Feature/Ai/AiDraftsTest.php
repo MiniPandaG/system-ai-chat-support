@@ -31,7 +31,7 @@ use Illuminate\Testing\TestResponse;
 
 beforeEach(function (): void {
     // El vector de prueba solo compara palabras: su escala de parecido es otra, así que la de confianza se ajusta a ella.
-    config(['ai.reply.min_score' => 0.2, 'ai.confidence.floor' => 0.1, 'ai.confidence.ceil' => 0.3, 'mail.from.address' => 'soporte@tikarochat.test']);
+    config(['ai.reply.min_score' => 0.2, 'ai.confidence.floor' => 0.1, 'ai.confidence.ceil' => 0.3, 'mail.from.address' => 'soporte@geckochat.test']);
     useTemporaryAttachmentDisk();
 });
 
@@ -81,7 +81,7 @@ function aiInboundMail(Tenant $tenant, Ticket $ticket, string $text): InboundMai
         handle: new stdClass,
         messageId: '<'.bin2hex(random_bytes(8)).'@cliente.example>',
         from: 'marisol@cliente-ejemplo.com',
-        recipients: 'Soporte <soporte+t-'.threadToken($tenant, $ticket).'@tikarochat.test>',
+        recipients: 'Soporte <soporte+t-'.threadToken($tenant, $ticket).'@geckochat.test>',
         references: '',
         headers: [],
         size: 2048,

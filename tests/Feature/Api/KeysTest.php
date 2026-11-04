@@ -37,11 +37,11 @@ describe('crear una llave', function (): void {
 
         $first = $this->actingAs($admin)->get('/settings/api-keys')->assertOk()->viewData('page')['props'];
         $plain = $first['created']['value'];
-        expect($plain)->toMatch('/\Atk_'.$tenant->id.'_[A-Za-z0-9]{40}\z/')->and($first['created']['name'])->toBe('prod-backend-01');
+        expect($plain)->toMatch('/\Agk_'.$tenant->id.'_[A-Za-z0-9]{40}\z/')->and($first['created']['name'])->toBe('prod-backend-01');
 
         $key = keysOf($tenant)[0];
         expect($key->key_hash)->toBe(hash('sha256', $plain))
-            ->and($key->prefix)->toBe(substr($plain, 0, strlen('tk_'.$tenant->id.'_') + 6))
+            ->and($key->prefix)->toBe(substr($plain, 0, strlen('gk_'.$tenant->id.'_') + 6))
             ->and($key->permission)->toBe(ApiPermission::Write)
             ->and($key->expires_at?->isFuture())->toBeTrue()
             ->and($key->created_by)->toBe($admin->id);
@@ -49,7 +49,7 @@ describe('crear una llave', function (): void {
         // La segunda vez que se abre la pantalla la llave ya no existe.
         $second = $this->actingAs($admin)->get('/settings/api-keys')->viewData('page')['props'];
         expect($second['created'])->toBeNull()->and(json_encode($second))->not->toContain($plain);
-        expect(json_encode(DB::table('api_keys')->get()))->not->toContain(substr($plain, strlen('tk_'.$tenant->id.'_') + 6));
+        expect(json_encode(DB::table('api_keys')->get()))->not->toContain(substr($plain, strlen('gk_'.$tenant->id.'_') + 6));
     });
 
     it('la lista solo trae el prefijo, el acceso, las fechas y el estado', function (): void {
@@ -239,16 +239,16 @@ describe('el formato de la llave', function (): void {
     it('solo se reconoce la forma exacta', function (): void {
         $secret = str_repeat('a', 40);
 
-        expect(ApiKeys::parse("tk_7_{$secret}"))->toBe(['tenant_id' => 7, 'hash' => hash('sha256', "tk_7_{$secret}")])
+        expect(ApiKeys::parse("gk_7_{$secret}"))->toBe(['tenant_id' => 7, 'hash' => hash('sha256', "gk_7_{$secret}")])
             ->and(ApiKeys::parse(null))->toBeNull()
             ->and(ApiKeys::parse(''))->toBeNull()
-            ->and(ApiKeys::parse("tk_0_{$secret}"))->toBeNull()
-            ->and(ApiKeys::parse("tk_07_{$secret}"))->toBeNull()
-            ->and(ApiKeys::parse("tk_7_{$secret}x"))->toBeNull()
-            ->and(ApiKeys::parse('tk_7_'.substr($secret, 1)))->toBeNull()
-            ->and(ApiKeys::parse("tk_7_{$secret}\n"))->toBeNull()
+            ->and(ApiKeys::parse("gk_0_{$secret}"))->toBeNull()
+            ->and(ApiKeys::parse("gk_07_{$secret}"))->toBeNull()
+            ->and(ApiKeys::parse("gk_7_{$secret}x"))->toBeNull()
+            ->and(ApiKeys::parse('gk_7_'.substr($secret, 1)))->toBeNull()
+            ->and(ApiKeys::parse("gk_7_{$secret}\n"))->toBeNull()
             ->and(ApiKeys::parse("TK_7_{$secret}"))->toBeNull()
-            ->and(ApiKeys::parse("tk_7_'{$secret}"))->toBeNull();
+            ->and(ApiKeys::parse("gk_7_'{$secret}"))->toBeNull();
     });
 
     it('los permisos se incluyen unos a otros', function (): void {

@@ -81,7 +81,7 @@ it('el aviso de cambio de contraseña sale por cola y en español', function ():
     $mail = (new PasswordChangedNotification)->toMail($user);
 
     expect(new PasswordChangedNotification)->toBeInstanceOf(ShouldQueue::class)
-        ->and($mail->subject)->toBe('Cambiaste tu contraseña de TikaroChat')
+        ->and($mail->subject)->toBe('Cambiaste tu contraseña de GeckoChat')
         ->and($mail->actionUrl)->toBe(route('password.request'));
 });
 

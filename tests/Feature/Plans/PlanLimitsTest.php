@@ -241,7 +241,7 @@ describe('invitar', function (): void {
         addMember($tenant, Role::Agent);
 
         $this->actingAs(adminOf($tenant))->post('/settings/team/invitations', invitePayload(['nueva@empresa-ejemplo.com']))
-            ->assertSessionHasErrors(['limit' => 'Tu plan Inicial permite 2 puestos de agente y ya usas 2. Los observadores no ocupan puesto. Para añadir más agentes o administradores, pide un cambio de plan al equipo de TikaroChat.']);
+            ->assertSessionHasErrors(['limit' => 'Tu plan Inicial permite 2 puestos de agente y ya usas 2. Los observadores no ocupan puesto. Para añadir más agentes o administradores, pide un cambio de plan al equipo de GeckoChat.']);
 
         expect(app(TenantContext::class)->run($tenant, fn (): int => Invitation::query()->count()))->toBe(0);
         Notification::assertNothingSent();

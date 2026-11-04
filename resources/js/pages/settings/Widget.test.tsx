@@ -83,7 +83,7 @@ const copy = {
     appearance_saving: 'Guardando apariencia',
 };
 
-const snippet = '<script src="https://app.tikarochat.test/widget.js" data-key="AbCdEfGhIjKlMnOpQrStUvWxYz012345" async></script>';
+const snippet = '<script src="https://app.geckochat.test/widget.js" data-key="AbCdEfGhIjKlMnOpQrStUvWxYz012345" async></script>';
 
 function renderPage(overrides: Partial<Parameters<typeof Widget>[0]> = {}) {
     return render(<Widget copy={copy} snippet={snippet} enabled origins={[{ id: 1, origin: 'https://tienda-ejemplo.com' }, { id: 2, origin: 'https://www.tienda-ejemplo.com' }]} max={10} appearance={{ mode: 'claro', corner: 'right' }} {...overrides} />);

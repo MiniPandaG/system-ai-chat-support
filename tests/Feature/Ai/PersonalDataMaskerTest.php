@@ -47,7 +47,7 @@ describe('secretos', function (): void {
     it('tapa llaves con forma de llave y contraseñas dichas en voz alta', function (string $text, string $expected): void {
         expect(masked($text, MaskLevel::Company))->toBe($expected);
     })->with([
-        'llave de API de TikaroChat' => ['usé tk_21_Sj1Jf8oSmeAhl1AlnV54v9yagkH3RBlyYIGe7zKl', 'usé [secreto]'],
+        'llave de API de GeckoChat' => ['usé gk_21_Sj1Jf8oSmeAhl1AlnV54v9yagkH3RBlyYIGe7zKl', 'usé [secreto]'],
         'llave sk' => ['mi llave sk-fe4b655dcc4848f28961e8b1a6f4bb3c falló', 'mi llave [secreto] falló'],
         'contraseña con dos puntos' => ['mi contraseña: Hunter2!!', 'mi contraseña: [secreto]'],
         'password con es' => ['el password es abc123', 'el password es [secreto]'],

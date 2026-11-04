@@ -34,7 +34,7 @@
         <env name="GEMINI_API_KEY" value="" force="true"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
         <env name="CACHE_STORE" value="array"/>
-        <env name="DB_DATABASE" value="tikarochat_test"/>
+        <env name="DB_DATABASE" value="geckochat_test"/>
         <env name="HASH_ARGON_MEMORY" value="1024"/>
         <env name="HASH_ARGON_TIME" value="1"/>
         <env name="DB_URL" value=""/>

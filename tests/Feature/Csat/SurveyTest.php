@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\RateLimiter;
 
 beforeEach(function (): void {
     // Los límites de peticiones se miden por dirección y el conjunto de pruebas comparte la suya: aquí se ensanchan.
-    config(['csat.limits.show_per_ip_per_minute' => 10000, 'csat.limits.answer_per_ip_per_minute' => 10000, 'mail.from.address' => 'soporte@tikarochat.test']);
+    config(['csat.limits.show_per_ip_per_minute' => 10000, 'csat.limits.answer_per_ip_per_minute' => 10000, 'mail.from.address' => 'soporte@geckochat.test']);
 });
 
 describe('cuándo se ofrece la encuesta', function (): void {
