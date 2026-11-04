@@ -30,7 +30,7 @@ const panel: SharedProps['panel'] = {
     branding: 'Marca',
     widget: 'Chat web',
     api_keys: 'Llaves de API',
-    knowledge: 'Base de conocimiento', ai: 'Asistente de IA',
+    knowledge: 'Base de conocimiento', ai: 'Asistente de IA', metrics: 'Métricas',
     plan: 'Plan',
     platform: 'Plataforma',
     open_menu: 'Abrir menú',
@@ -46,7 +46,7 @@ function setAuth(unassigned: number | null | undefined) {
         auth: {
             user: { id: 1, name: 'Ana Torres', email: 'ana@empresa-ejemplo.com', role: 'agent' },
             tenant: { id: 1, name: 'Soporte Ejemplo SAS', logo_url: null, theme: null },
-            can: { tickets: true, team: false, branding: false, plan: false, widget: false, api_keys: false, knowledge: false, ai: false },
+            can: { tickets: true, team: false, branding: false, plan: false, widget: false, api_keys: false, knowledge: false, ai: false, metrics: false },
             ...(unassigned === undefined ? {} : { inbox: { unassigned } }),
         },
     };

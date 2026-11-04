@@ -31,6 +31,21 @@ export const widgetCopy: WidgetCopy = {
     contact_save: 'Guardar correo',
     contact_dismiss: 'Ahora no',
     contact_saved: 'Guardamos tu correo en la conversación.',
+    survey_title: '¿Cómo te fue con la atención?',
+    survey_help: 'Tu opinión ayuda al equipo a mejorar. 1 es muy mala y 5 es excelente.',
+    survey_score: 'Calificación',
+    survey_scale_1: 'Muy mala',
+    survey_scale_2: 'Mala',
+    survey_scale_3: 'Regular',
+    survey_scale_4: 'Buena',
+    survey_scale_5: 'Excelente',
+    survey_comment: 'Comentario (opcional)',
+    survey_send: 'Enviar opinión',
+    survey_sending: 'Enviando opinión',
+    survey_dismiss: 'Omitir encuesta',
+    survey_thanks: 'Gracias por tu opinión.',
+    survey_error: 'No se pudo enviar tu opinión. Inténtalo de nuevo.',
+    survey_score_required: 'Elige una calificación del 1 al 5.',
     characters_left: 'Te quedan :count caracteres.',
     too_long: 'El mensaje es demasiado largo. El máximo es de :max caracteres.',
 };
@@ -57,5 +72,6 @@ export function agentMessage(overrides: Partial<WidgetMessage> = {}): WidgetMess
 }
 
 export function conversation(messages: WidgetMessage[] = [customerMessage()], overrides: Partial<Conversation> = {}): Conversation {
-    return { channel: 'tenant.1.widget.01abc', ticket: { status: 'open', ended: false }, messages, contact: { has_email: false }, ...overrides };
+    return { channel: 'tenant.1.widget.01abc', ticket: { status: 'open', ended: false }, messages, contact: { has_email: false },
+        survey: { pending: false }, ...overrides };
 }

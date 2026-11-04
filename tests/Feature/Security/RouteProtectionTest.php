@@ -16,6 +16,8 @@ const PUBLIC_ROUTES = [
     'login',    // inicio de sesión
     'logout',   // cierra la sesión actual; sin sesión no hace nada
     'invitations/{token}',      // aceptar una invitación; el token de un solo uso es la credencial y hay límite de intentos
+    'survey/thanks',            // el agradecimiento tras contestar una encuesta; no muestra nada de nadie y hay límite por IP
+    'survey/{token}',           // la encuesta de satisfacción del cliente; el token de un solo uso es la credencial, abrirla no registra nada y hay límite por IP
     'register',                 // alta de una empresa nueva; solo para visitantes y con límite de intentos
     'forgot-password',          // pide el enlace de recuperación; responde igual exista o no la cuenta
     'reset-password/{token}',   // pantalla a la que llega el enlace del correo

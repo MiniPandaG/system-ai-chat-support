@@ -158,7 +158,7 @@ describe('Ai (ajustes del asistente)', () => {
                 widget: 'Chat web',
                 api_keys: 'Llaves de API',
                 knowledge: 'Base de conocimiento',
-                ai: 'Asistente de IA',
+                ai: 'Asistente de IA', metrics: 'Métricas',
                 plan: 'Plan',
                 platform: 'Plataforma',
                 open_menu: 'Abrir menú',
@@ -170,7 +170,7 @@ describe('Ai (ajustes del asistente)', () => {
             auth: {
                 user: { id: 1, name: 'Ana', email: 'ana@empresa-ejemplo.com', role: 'admin' },
                 tenant: { id: 1, name: 'Soporte Ejemplo SAS', logo_url: null, theme: null },
-                can: { tickets: true, team: true, branding: true, plan: true, widget: true, api_keys: true, knowledge: true, ai: true },
+                can: { tickets: true, team: true, branding: true, plan: true, widget: true, api_keys: true, knowledge: true, ai: true, metrics: true },
             },
         };
     });

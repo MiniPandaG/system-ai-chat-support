@@ -351,7 +351,7 @@ describe('la conversación que ve el visitante', function (): void {
         $keys = array_keys(widgetGet($this, 'conversation', $token)->json());
         $message = array_keys(widgetGet($this, 'conversation', $token)->json('messages.0'));
 
-        expect($keys)->toBe(['channel', 'ticket', 'messages', 'contact'])
+        expect($keys)->toBe(['channel', 'ticket', 'messages', 'contact', 'survey'])
             ->and($message)->toBe(['id', 'client_id', 'author', 'body', 'sent_at', 'agent']);
     });
 

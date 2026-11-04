@@ -145,7 +145,7 @@ describe('Document (revisión de un documento)', () => {
                 security: 'Seguridad',
                 inbox: 'Bandeja',
                 inbox_unassigned: ':count sin asignar',
-                knowledge: 'Base de conocimiento', ai: 'Asistente de IA',
+                knowledge: 'Base de conocimiento', ai: 'Asistente de IA', metrics: 'Métricas',
                 live_on: 'En vivo',
                 live_connecting: 'Conectando…',
                 live_off: 'Sin conexión en vivo',
@@ -164,7 +164,7 @@ describe('Document (revisión de un documento)', () => {
             auth: {
                 user: { id: 1, name: 'Ana', email: 'ana@empresa-ejemplo.com', role: 'admin' },
                 tenant: { id: 1, name: 'Soporte Ejemplo SAS', logo_url: null, theme: null },
-                can: { tickets: true, team: true, branding: true, plan: true, widget: true, api_keys: true, knowledge: true, ai: true },
+                can: { tickets: true, team: true, branding: true, plan: true, widget: true, api_keys: true, knowledge: true, ai: true, metrics: true },
             },
         };
     });
