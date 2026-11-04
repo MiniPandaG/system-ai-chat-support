@@ -25,12 +25,14 @@ use App\Tenancy\TenantJobContext;
 use Illuminate\Contracts\View\View as ViewContract;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Client\Factory as HttpFactory;
+use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use LogicException;
+use Pdo\Mysql;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -115,6 +117,13 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->app->make(TenantJobContext::class)->register();
+
+        TrustProxies::at(config()->array('app.trusted_proxies'));
+
+        // RS-10: en producción la base de datos solo se habla por una conexión cifrada y verificada.
+        if ($this->app->isProduction() && ! array_key_exists(Mysql::ATTR_SSL_CA, config()->array('database.connections.mysql.options'))) {
+            throw new LogicException('En producción la conexión a la base de datos debe ir cifrada: define MYSQL_ATTR_SSL_CA.');
+        }
 
         // Paleta de la empresa en la primera carga de la página, para que no parpadee el naranja de fábrica.
         View::composer('app', function (ViewContract $view): void {

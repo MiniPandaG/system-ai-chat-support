@@ -1,0 +1,189 @@
+# Despliegue de GeckoChat en un VPS propio con Docker y Docker Compose (sin Dokploy). Todas las imágenes se construyen aquí o
+# están fijadas por versión.
+#
+# Qué necesita:
+#   - Un archivo .env junto a este, que parte de .env.example; los secretos los genera scripts/make-env.sh. Nada de eso va al
+#     repositorio.
+#   - ./certs con los certificados de la base de datos: bash scripts/make-db-certs.sh.
+#   - HTTPS lo pone el nginx del propio VPS con certbot (ver entregas/m13/guia-de-operacion.md): el servicio «web» solo escucha en
+#     127.0.0.1:8081 y ese nginx le pasa el tráfico. TRUSTED_PROXIES debe incluir la red de Docker (el nginx de «web» es quien
+#     habla con PHP).
+#   - Memoria: el arranque normal levanta solo lo básico (aplicación, MySQL, Redis, cola, planificador y tiempo real: unos 1,5 GB).
+#     El antivirus de adjuntos, la base vectorial y el modelo de embeddings van en el perfil «completo» y piden unos 3 GB más:
+#     docker compose -f compose.production.yaml --profile completo up -d. Sin ellos NO se entregan adjuntos (quedan «por revisar»
+#     para siempre, nunca se entregan sin revisar) y la base de conocimiento y la IA no pueden indexar ni buscar.
+#
+# Quién habla con quién (solo «web» publica un puerto, y solo en el propio servidor): web → app y reverb; app, queue, scheduler y
+# reverb → mysql, redis y, con el perfil completo, qdrant, embeddings y clamav.
+name: geckochat-prod
+
+x-build-args: &build-args
+  # La llave pública de Reverb se integra al script del panel al construir la imagen.
+  VITE_REVERB_APP_KEY: ${REVERB_APP_KEY:?define REVERB_APP_KEY}
+
+# Todos los servicios de la aplicación usan la misma imagen; se construye una sola vez, en el servicio «app». Si cada uno la
+# construyera, las construcciones en paralelo chocarían al guardar la misma etiqueta.
+x-app: &app
+  image: geckochat-app:prod
+  pull_policy: never
+  env_file: [.env]
+  restart: unless-stopped
+  read_only: true
+  # Con el sistema de archivos de solo lectura, lo único escribible es lo que se monta aquí: la caché de arranque vive en memoria
+  # (www-data es el usuario 82 en esta imagen) y se rehace en cada arranque.
+  tmpfs:
+    - /tmp
+    - /var/www/html/bootstrap/cache:uid=82,gid=82,mode=0755
+  security_opt: ["no-new-privileges:true"]
+  cap_drop: [ALL]
+  volumes:
+    - private-files:/var/www/html/storage/app/private
+    - app-runtime:/var/www/html/storage/framework
+    - app-logs:/var/www/html/storage/logs
+    - ./certs/ca.pem:/etc/ssl/gecko/ca.pem:ro
+  depends_on:
+    migrate:
+      condition: service_completed_successfully
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: docker/production/Dockerfile
+      target: web
+      args: *build-args
+    image: geckochat-web:prod
+    restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
+    # Solo escucha en el propio servidor: el nginx del VPS (con el certificado) le pasa el tráfico por aquí.
+    ports:
+      - "127.0.0.1:${WEB_PORT:-8081}:80"
+    depends_on: [app]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/up >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  app:
+    <<: *app
+    build:
+      context: .
+      dockerfile: docker/production/Dockerfile
+      target: prod
+      args: *build-args
+    pull_policy: build
+    healthcheck:
+      test: ["CMD-SHELL", "php -r 'exit(@fsockopen(\"127.0.0.1\", 9000) ? 0 : 1);'"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # Migraciones con el usuario que tiene DDL (la aplicación no lo tiene). Corre una vez por despliegue, antes que el resto.
+  migrate:
+    <<: *app
+    command: ["php", "artisan", "migrate", "--database=mysql_migrator", "--force"]
+    restart: "no"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  queue:
+    <<: *app
+    command: ["php", "artisan", "queue:work", "--tries=3", "--timeout=60", "--sleep=0", "--max-time=3600"]
+
+  # Mantenimiento programado: revisión de adjuntos, sesiones del widget, índice de conocimiento y limpiezas (routes/console.php).
+  scheduler:
+    <<: *app
+    command: ["php", "artisan", "schedule:work"]
+
+  # Tiempo real: solo web lo alcanza, por /app; la API de publicación (/apps) no se expone.
+  reverb:
+    <<: *app
+    command: ["php", "artisan", "reverb:start", "--host=0.0.0.0", "--port=8080"]
+
+  # Lee el buzón de soporte (IMAP). Sin MAILBOX_IMAP_HOST no hace nada útil: arráncalo con --profile mail cuando haya servidor.
+  mailbox:
+    <<: *app
+    profiles: ["mail"]
+    command: ["php", "artisan", "mail:fetch", "--loop"]
+
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    # Conexión cifrada obligatoria, con el certificado de ./certs. log-bin-trust-function-creators: los disparadores de solo
+    # inserción de audit_logs los crea el usuario de migraciones, que no tiene SUPER.
+    command:
+      - --log-bin-trust-function-creators=1
+      - --require-secure-transport=ON
+      - --ssl-ca=/certs/ca.pem
+      - --ssl-cert=/certs/server-cert.pem
+      - --ssl-key=/certs/server-key.pem
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?define DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE:?define DB_DATABASE}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME:?define DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD:?define DB_PASSWORD}
+      DB_MIGRATOR_USERNAME: ${DB_MIGRATOR_USERNAME:?define DB_MIGRATOR_USERNAME}
+      DB_MIGRATOR_PASSWORD: ${DB_MIGRATOR_PASSWORD:?define DB_MIGRATOR_PASSWORD}
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./docker/production/mysql-provision.sh:/docker-entrypoint-initdb.d/01-provision-users.sh:ro
+      - ./certs:/certs:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?define REDIS_PASSWORD}
+    command: ["sh", "-c", "exec redis-server --requirepass \"$$REDIS_PASSWORD\" --appendonly yes"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" --no-auth-warning ping | grep -q PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # Antivirus de los adjuntos y de los documentos de conocimiento. Sin él nada se entrega: todo queda «por revisar».
+  clamav:
+    image: clamav/clamav:1.4
+    profiles: ["completo"]
+    restart: unless-stopped
+    volumes:
+      - clamav-db:/var/lib/clamav
+
+  qdrant:
+    image: qdrant/qdrant:v1.19.2
+    profiles: ["completo"]
+    restart: unless-stopped
+    environment:
+      QDRANT__SERVICE__API_KEY: ${QDRANT_API_KEY:?define QDRANT_API_KEY}
+    volumes:
+      - qdrant-data:/qdrant/storage
+
+  embeddings:
+    image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.9.4
+    profiles: ["completo"]
+    restart: unless-stopped
+    command: ["--model-id", "intfloat/multilingual-e5-small", "--revision", "614241f622f53c4eeff9890bdc4f31cfecc418b3", "--port", "80", "--max-batch-tokens", "4096", "--tokenization-workers", "2", "--max-client-batch-size", "32"]
+    volumes:
+      - embeddings-data:/data
+
+volumes:
+  private-files:
+  app-runtime:
+  app-logs:
+  mysql-data:
+  redis-data:
+  clamav-db:
+  qdrant-data:
+  embeddings-data:

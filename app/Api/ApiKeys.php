@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Crea, rota y revoca las llaves de API. Una llave es `tk_{empresa}_{40 caracteres}`: la empresa va delante para poder
+ * Crea, rota y revoca las llaves de API. Una llave es `gk_{empresa}_{40 caracteres}`: la empresa va delante para poder
  * fijar el contexto antes de buscar la llave (la búsqueda ya sale con el filtro de empresa) y el resto son unos 238 bits
  * aleatorios. En la base solo queda su huella y un prefijo; la llave completa se devuelve una sola vez, aquí.
  */
@@ -39,12 +39,12 @@ class ApiKeys
         }
 
         $secret = Str::random(self::SECRET_LENGTH);
-        $plain = 'tk_'.$tenant->id.'_'.$secret;
+        $plain = 'gk_'.$tenant->id.'_'.$secret;
 
         $key = new ApiKey;
         $key->forceFill([
             'name' => $name,
-            'prefix' => 'tk_'.$tenant->id.'_'.substr($secret, 0, 6),
+            'prefix' => 'gk_'.$tenant->id.'_'.substr($secret, 0, 6),
             'key_hash' => self::hash($plain),
             'permission' => $permission,
             'created_by' => $actor->id,
@@ -92,7 +92,7 @@ class ApiKeys
      */
     public static function parse(?string $plain): ?array
     {
-        if ($plain === null || preg_match('/\Atk_([1-9]\d{0,17})_([A-Za-z0-9]{'.self::SECRET_LENGTH.'})\z/', $plain, $parts) !== 1) {
+        if ($plain === null || preg_match('/\Agk_([1-9]\d{0,17})_([A-Za-z0-9]{'.self::SECRET_LENGTH.'})\z/', $plain, $parts) !== 1) {
             return null;
         }
 

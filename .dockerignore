@@ -1,0 +1,23 @@
+# Lo que NO entra a las imágenes de producción: dependencias que se instalan dentro, secretos, datos y material de trabajo.
+.git
+.github
+node_modules
+vendor
+.env
+.env.*
+!.env.example
+storage/logs/*
+storage/framework/*
+storage/app/*
+bootstrap/cache/*
+public/build
+public/hot
+public/widget.js
+tests
+docs
+design
+entregas
+backups
+certs
+scripts
+*.log

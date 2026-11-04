@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int|null $max_channels
  * @property int|null $max_tickets_per_month
  * @property int|null $ai_credits_per_month
+ * @property int $tenants_count Solo existe cuando la consulta pidió withCount('tenants').
  */
 class Plan extends Model
 {

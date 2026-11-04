@@ -38,6 +38,9 @@ enum AuditEvent: string
     case BrandingPaletteChanged = 'branding.palette_changed';
     case BrandingPaletteReset = 'branding.palette_reset';
     case PlanAssigned = 'plan.assigned';
+    case PlanCreated = 'plan.created';
+    case PlanUpdated = 'plan.updated';
+    case PlanDefaultChanged = 'plan.default_changed';
     case TicketCreated = 'ticket.created';
     case TicketAssigned = 'ticket.assigned';
     case TicketAttachmentInfected = 'ticket.attachment_infected';
@@ -60,4 +63,6 @@ enum AuditEvent: string
     case AiSettingsChanged = 'ai.settings_changed';
     case AiDraftApproved = 'ai.draft_approved';
     case AiDraftDiscarded = 'ai.draft_discarded';
+    case TenantExported = 'tenant.exported';
+    case TenantPurged = 'tenant.purged';
 }

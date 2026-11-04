@@ -20,6 +20,8 @@ return [
     'api_keys' => 'Llaves de API',
     'plan' => 'Plan',
     'platform' => 'Plataforma',
+    'platform_tenants' => 'Empresas',
+    'platform_plans' => 'Planes',
     'open_menu' => 'Abrir menú',
     'close_menu' => 'Cerrar menú',
     'logout' => 'Cerrar sesión',

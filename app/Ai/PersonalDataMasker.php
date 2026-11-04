@@ -33,7 +33,7 @@ class PersonalDataMasker
 
     private function secrets(string $text): string
     {
-        $text = preg_replace('/\b(?:sk|pk|tk|ghp|gho|xox[abp])[-_][A-Za-z0-9_-]{16,}\b/', '[secreto]', $text) ?? $text;
+        $text = preg_replace('/\b(?:sk|pk|gk|ghp|gho|xox[abp])[-_][A-Za-z0-9_-]{16,}\b/', '[secreto]', $text) ?? $text;
 
         return preg_replace('/\b(contraseña|password|clave|token)(\s*(?:es|:|=)\s*)\S+/iu', '$1$2[secreto]', $text) ?? $text;
     }

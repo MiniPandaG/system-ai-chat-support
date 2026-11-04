@@ -4,17 +4,16 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Enums\AuditEvent;
 use App\Models\Plan;
 use App\Models\Tenant;
-use App\Services\AuditLogger;
+use App\Plans\PlanAssigner;
 use Illuminate\Console\Command;
 
 use function Laravel\Prompts\confirm;
 
 /**
- * Único camino para cambiar el plan de una empresa mientras no exista el panel de la plataforma (F3). Se ejecuta en
- * el servidor, por quien lo administra; ninguna ruta web puede hacerlo.
+ * Cambia el plan de una empresa desde el servidor. El panel de la plataforma hace lo mismo con la misma acción
+ * (`PlanAssigner`) y la misma auditoría.
  */
 class AssignPlan extends Command
 {
@@ -22,7 +21,7 @@ class AssignPlan extends Command
 
     protected $description = 'Asigna un plan a una empresa. Queda en la auditoría.';
 
-    public function handle(AuditLogger $audit): int
+    public function handle(PlanAssigner $assigner): int
     {
         $tenant = Tenant::query()->find((int) $this->argument('tenant'));
 
@@ -60,14 +59,7 @@ class AssignPlan extends Command
             return self::SUCCESS;
         }
 
-        $tenant->forceFill(['plan_id' => $plan->id])->save();
-
-        $audit->record(AuditEvent::PlanAssigned, null, [
-            'tenant_id' => $tenant->id,
-            'from' => $current->slug,
-            'to' => $plan->slug,
-            'via' => 'console',
-        ]);
+        $assigner->assign($tenant, $plan, null, 'console');
 
         $this->info("Listo: «{$tenant->name}» ahora tiene el plan {$plan->slug}.");
 

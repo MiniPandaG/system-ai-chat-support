@@ -22,6 +22,8 @@ use App\Http\Controllers\KnowledgeSearchController;
 use App\Http\Controllers\MetricsController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\PlanController;
+use App\Http\Controllers\PlatformPlanController;
+use App\Http\Controllers\PlatformTenantController;
 use App\Http\Controllers\SecurityController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\SurveyController;
@@ -114,6 +116,15 @@ Route::middleware(['auth', 'verified', 'two-factor.required'])->group(function (
 
     // Descarga de archivos de la empresa: URL firmada que caduca, sesión y empresa dueña (FileStore::temporaryUrl).
     Route::get('/files/{file}', [FileController::class, 'show'])->middleware('signed')->where('file', '[0-9a-z]{26}')->name('files.show');
+
+    // Plataforma: solo el personal de GeckoChat (sin empresa y con el distintivo; TenantPolicy y PlanPolicy). Empresas con su
+    // plan y uso, y el catálogo de planes. Nada de lo que hay aquí abre datos de los clientes de una empresa.
+    Route::get('/platform/tenants', [PlatformTenantController::class, 'index'])->middleware('throttle:120,1')->name('platform.tenants');
+    Route::put('/platform/tenants/{tenant}/plan', [PlatformTenantController::class, 'updatePlan'])->middleware('throttle:30,1')->whereNumber('tenant')->name('platform.tenants.plan');
+    Route::get('/platform/plans', [PlatformPlanController::class, 'index'])->middleware('throttle:120,1')->name('platform.plans');
+    Route::post('/platform/plans', [PlatformPlanController::class, 'store'])->middleware('throttle:30,1')->name('platform.plans.store');
+    Route::put('/platform/plans/{plan}', [PlatformPlanController::class, 'update'])->middleware('throttle:30,1')->whereNumber('plan')->name('platform.plans.update');
+    Route::post('/platform/plans/{plan}/default', [PlatformPlanController::class, 'makeDefault'])->middleware('throttle:30,1')->whereNumber('plan')->name('platform.plans.default');
 
     // Equipo: solo administradores de la empresa (UserPolicy). El miembro se busca dentro de la empresa del usuario.
     Route::get('/settings/team', [TeamController::class, 'index'])->name('team');

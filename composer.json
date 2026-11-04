@@ -1,6 +1,6 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "tikarochat/tikarochat",
+    "name": "geckochat/geckochat",
     "type": "project",
     "description": "Plataforma SaaS multi-empresa de soporte al cliente con tickets, chat e IA.",
     "license": "proprietary",
@@ -38,7 +38,7 @@
         "test": [
             "Composer\\Config::disableProcessTimeout",
             "@php artisan config:clear --ansi",
-            "pest"
+            "@php -d memory_limit=1G vendor/bin/pest"
         ],
         "format": "pint --test",
         "analyse": "phpstan analyse --memory-limit=1G --no-progress",

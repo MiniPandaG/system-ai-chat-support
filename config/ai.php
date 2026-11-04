@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /*
- * IA (M11). Los modelos de TikaroChat se llaman con una llave por proveedor que vive solo en variables de entorno. Un
+ * IA (M11). Los modelos de GeckoChat se llaman con una llave por proveedor que vive solo en variables de entorno. Un
  * proveedor sin llave no aparece en el catálogo. Las direcciones de los proveedores son fijas y salen de aquí: ninguna
  * persona, empresa ni mensaje puede cambiarlas (sin SSRF). «fake» solo existe para pruebas y la aplicación se niega a
  * arrancar con él en producción.

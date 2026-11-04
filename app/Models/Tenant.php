@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 /**
@@ -21,6 +22,7 @@ use Illuminate\Support\Str;
  * @property int $plan_id
  * @property int $last_ticket_number
  * @property string $widget_key
+ * @property int $members_count Solo existe cuando la consulta pidió el conteo de miembros.
  */
 #[Fillable(['name'])]
 class Tenant extends Model
@@ -42,5 +44,13 @@ class Tenant extends Model
     public function plan(): BelongsTo
     {
         return $this->belongsTo(Plan::class);
+    }
+
+    /**
+     * @return HasMany<User, $this>
+     */
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class);
     }
 }

@@ -5,9 +5,11 @@ declare(strict_types=1);
 use Illuminate\Support\Str;
 use Pdo\Mysql;
 
-$mysqlOptions = extension_loaded('pdo_mysql') ? array_filter([
-    Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
-]) : [];
+// Con la autoridad certificadora, la conexión va cifrada y se comprueba que el servidor es el que ella firmó (RS-10).
+$mysqlCa = env('MYSQL_ATTR_SSL_CA');
+$mysqlOptions = extension_loaded('pdo_mysql') && is_string($mysqlCa) && $mysqlCa !== ''
+    ? [Mysql::ATTR_SSL_CA => $mysqlCa, Mysql::ATTR_SSL_VERIFY_SERVER_CERT => true]
+    : [];
 
 return [
 

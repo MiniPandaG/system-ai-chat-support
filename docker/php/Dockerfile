@@ -12,6 +12,6 @@ RUN apk add --no-cache icu-libs libzip libsodium libpng libjpeg-turbo libwebp \
     && apk del .build-deps \
     && rm -rf /tmp/pear
 
-COPY php.ini /usr/local/etc/php/conf.d/zz-tikarochat.ini
+COPY php.ini /usr/local/etc/php/conf.d/zz-geckochat.ini
 
 WORKDIR /var/www/html

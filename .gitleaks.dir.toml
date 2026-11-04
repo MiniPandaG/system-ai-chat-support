@@ -1,7 +1,7 @@
 # Configuración para escanear el árbol de trabajo. Añade a la regla estricta de
 # .gitleaks.toml solo carpetas generadas o ignoradas por Git. El historial se
 # escanea con .gitleaks.toml, sin estas excepciones.
-title = "TikaroChat (árbol de trabajo)"
+title = "GeckoChat (árbol de trabajo)"
 
 [extend]
 path = "/repo/.gitleaks.toml"

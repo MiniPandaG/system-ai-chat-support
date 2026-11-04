@@ -101,6 +101,13 @@ return [
 
     'key' => env('APP_KEY'),
 
+    /*
+    | Direcciones (o rangos CIDR) de los proxies que están delante de la aplicación, separadas por comas. Solo a ellos se les
+    | cree la IP del visitante y el esquema https que reenvían. Vacío (lo seguro) = no se confía en ninguna cabecera reenviada.
+    | Detrás de un proxy como el de Dokploy hay que poner su red; si no, todos los visitantes parecen venir de la misma IP.
+    */
+    'trusted_proxies' => array_values(array_filter(array_map('trim', explode(',', (string) env('TRUSTED_PROXIES', ''))))),
+
     'previous_keys' => [
         ...array_filter(
             explode(',', (string) env('APP_PREVIOUS_KEYS', ''))

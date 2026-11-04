@@ -98,7 +98,7 @@ return [
         'copy_all' => 'Copiar todos',
         'copied' => 'Códigos copiados',
         'download' => 'Descargar como archivo',
-        'file_name' => 'codigos-de-recuperacion-tikarochat.txt',
+        'file_name' => 'codigos-de-recuperacion-geckochat.txt',
         'saved' => 'Ya guardé mis códigos',
         'continue' => 'Continuar',
         'regenerate' => 'Generar códigos nuevos',

@@ -20,7 +20,7 @@ return [
         'invalid_email' => 'Escribe un correo válido, por ejemplo nombre@empresa.com.',
         'summary' => 'Revisa :count campos: :fields.',
         'forgot' => '¿Olvidaste tu contraseña?',
-        'register_prompt' => '¿Tu empresa aún no está en TikaroChat?',
+        'register_prompt' => '¿Tu empresa aún no está en GeckoChat?',
         'register_link' => 'Registra tu empresa',
     ],
 
@@ -129,7 +129,7 @@ return [
         'submit' => 'Crear mi cuenta',
         'submitting' => 'Creando tu cuenta…',
         'invalid' => 'Esta invitación no es válida o ya caducó. Pide una nueva al administrador de tu empresa.',
-        'exists' => 'Este correo ya tiene una cuenta en TikaroChat. Inicia sesión o pide que te inviten con otro correo.',
+        'exists' => 'Este correo ya tiene una cuenta en GeckoChat. Inicia sesión o pide que te inviten con otro correo.',
         'invalid_title' => 'No pudimos abrir la invitación',
         'login' => 'Ir a iniciar sesión',
         'roles' => [

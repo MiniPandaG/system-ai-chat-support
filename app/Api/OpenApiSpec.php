@@ -19,9 +19,9 @@ final class OpenApiSpec
         return [
             'openapi' => '3.1.0',
             'info' => [
-                'title' => 'API de TikaroChat',
+                'title' => 'API de GeckoChat',
                 'version' => '1.0.0',
-                'description' => "Crea y consulta tickets, mensajes y clientes de tu empresa desde tus propios sistemas.\n\n**Autenticación.** Cada petición lleva una llave de API en la cabecera `Authorization: Bearer tk_…`. Las llaves se crean en el panel (Llaves de API) y tienen un nivel de acceso: lectura, escritura (incluye lectura) o administración (incluye escritura).\n\n**Errores.** Siempre `{\"error\": {\"code\", \"message\", \"details\"?}}` con un código estable.\n\n**Listas.** Se paginan por cursor: usa `next_cursor` de la respuesta como `cursor` de la siguiente petición.\n\n**Reintentos seguros.** En las creaciones, envía una `Idempotency-Key` (hasta 64 caracteres) y repetir la petición no crea nada otra vez.\n\n**Límites.** Hay un tope de peticiones por llave y por dirección; al pasarlo la API responde 429 con `Retry-After`.",
+                'description' => "Crea y consulta tickets, mensajes y clientes de tu empresa desde tus propios sistemas.\n\n**Autenticación.** Cada petición lleva una llave de API en la cabecera `Authorization: Bearer gk_…`. Las llaves se crean en el panel (Llaves de API) y tienen un nivel de acceso: lectura, escritura (incluye lectura) o administración (incluye escritura).\n\n**Errores.** Siempre `{\"error\": {\"code\", \"message\", \"details\"?}}` con un código estable.\n\n**Listas.** Se paginan por cursor: usa `next_cursor` de la respuesta como `cursor` de la siguiente petición.\n\n**Reintentos seguros.** En las creaciones, envía una `Idempotency-Key` (hasta 64 caracteres) y repetir la petición no crea nada otra vez.\n\n**Límites.** Hay un tope de peticiones por llave y por dirección; al pasarlo la API responde 429 con `Retry-After`.",
             ],
             'servers' => [['url' => url('/api/v1'), 'description' => 'Esta instalación']],
             'security' => [['bearerAuth' => []]],
@@ -80,7 +80,7 @@ final class OpenApiSpec
                 ],
             ],
             'components' => [
-                'securitySchemes' => ['bearerAuth' => ['type' => 'http', 'scheme' => 'bearer', 'description' => 'Una llave de API de tu empresa: `tk_…`.']],
+                'securitySchemes' => ['bearerAuth' => ['type' => 'http', 'scheme' => 'bearer', 'description' => 'Una llave de API de tu empresa: `gk_…`.']],
                 'parameters' => [
                     'Limit' => ['name' => 'limit', 'in' => 'query', 'description' => 'Cuántos elementos por página (1 a 100, por defecto 25).', 'schema' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 100]],
                     'Cursor' => ['name' => 'cursor', 'in' => 'query', 'description' => 'El `next_cursor` de la página anterior.', 'schema' => ['type' => 'integer', 'minimum' => 1]],
