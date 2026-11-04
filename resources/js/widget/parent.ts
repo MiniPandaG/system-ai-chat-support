@@ -1,8 +1,8 @@
 import type { FrameState } from './types';
 
 /** Identifica los mensajes del marco, y los del script incrustado, entre todo lo que una página recibe por postMessage. */
-export const FRAME_SOURCE = 'tikarochat-widget';
-export const LOADER_SOURCE = 'tikarochat-loader';
+export const FRAME_SOURCE = 'geckochat-widget';
+export const LOADER_SOURCE = 'geckochat-loader';
 
 /**
  * Le cuenta al script incrustado cómo está el widget (abierto o cerrado, mensajes sin leer, esquina) para que ajuste el

@@ -4,11 +4,11 @@ import type { ComponentType, ReactNode, SVGProps } from 'react';
 import logo from '../../images/logo.png';
 import { Button } from '../components/Button';
 import { ConnectionIndicator } from '../components/ConnectionIndicator';
-import { BookIcon, ChartIcon, ChatIcon, GaugeIcon, KeyIcon, InboxIcon, MenuIcon, PaletteIcon, ShieldIcon, SparkIcon, UserIcon, UsersIcon } from '../components/icons';
+import { BookIcon, BuildingIcon, ChartIcon, ChatIcon, GaugeIcon, KeyIcon, InboxIcon, MenuIcon, PaletteIcon, ShieldIcon, SparkIcon, UserIcon, UsersIcon } from '../components/icons';
 import { disconnect } from '../realtime/client';
 import type { SharedProps } from '../types';
 
-export type PanelSection = 'inbox' | 'knowledge' | 'ai' | 'metrics' | 'account' | 'team' | 'branding' | 'widget' | 'api_keys' | 'plan' | 'security';
+export type PanelSection = 'inbox' | 'knowledge' | 'ai' | 'metrics' | 'account' | 'team' | 'branding' | 'widget' | 'api_keys' | 'plan' | 'security' | 'platform_tenants' | 'platform_plans';
 
 interface PanelLayoutProps {
     title: string;
@@ -30,6 +30,8 @@ const navItems: NavItem[] = [
     { key: 'inbox', href: '/tickets', Icon: InboxIcon },
     { key: 'knowledge', href: '/knowledge', Icon: BookIcon },
     { key: 'metrics', href: '/metrics', Icon: ChartIcon },
+    { key: 'platform_tenants', href: '/platform/tenants', Icon: BuildingIcon },
+    { key: 'platform_plans', href: '/platform/plans', Icon: GaugeIcon },
     { key: 'account', href: '/account', Icon: UserIcon },
     { key: 'team', href: '/settings/team', Icon: UsersIcon },
     { key: 'branding', href: '/settings/branding', Icon: PaletteIcon },
@@ -76,7 +78,7 @@ export function PanelLayout({ title, section, wide = false, bare = false, childr
         if (!menuOpen && sheet.open) sheet.close();
     }, [menuOpen]);
 
-    const labels: Record<PanelSection, string> = { inbox: panel.inbox, knowledge: panel.knowledge, ai: panel.ai, metrics: panel.metrics, account: panel.account, team: panel.team, branding: panel.branding, widget: panel.widget, api_keys: panel.api_keys, plan: panel.plan, security: panel.security };
+    const labels: Record<PanelSection, string> = { inbox: panel.inbox, knowledge: panel.knowledge, ai: panel.ai, metrics: panel.metrics, account: panel.account, team: panel.team, branding: panel.branding, widget: panel.widget, api_keys: panel.api_keys, plan: panel.plan, security: panel.security, platform_tenants: panel.platform_tenants ?? '', platform_plans: panel.platform_plans ?? '' };
     // El servidor decide qué secciones ve cada rol; aquí solo se ocultan las que no puede abrir.
     const visibleItems = navItems.filter(
         (item) =>
@@ -88,7 +90,8 @@ export function PanelLayout({ title, section, wide = false, bare = false, childr
             (item.key !== 'ai' || auth?.can.ai === true) &&
             (item.key !== 'metrics' || auth?.can.metrics === true) &&
             (item.key !== 'api_keys' || auth?.can.api_keys === true) &&
-            (item.key !== 'plan' || auth?.can.plan === true),
+            (item.key !== 'plan' || auth?.can.plan === true) &&
+            ((item.key !== 'platform_tenants' && item.key !== 'platform_plans') || auth?.can.platform === true),
     );
     const unassigned = auth?.inbox?.unassigned ?? 0;
     const companyName = auth?.tenant?.name ?? panel.platform;

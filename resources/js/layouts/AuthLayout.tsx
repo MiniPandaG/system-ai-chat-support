@@ -14,7 +14,7 @@ export function AuthLayout({ title, children }: AuthLayoutProps) {
             <main className="mx-auto flex w-full max-w-[25rem] flex-col gap-8 px-4 py-16">
                 <div className="flex items-center gap-3">
                     <img src={logo} alt="" className="size-8" />
-                    <p className="font-display text-xl font-bold text-text">TikaroChat</p>
+                    <p className="font-display text-xl font-bold text-text">GeckoChat</p>
                 </div>
                 <h1 className="font-display text-2xl font-semibold text-text">{title}</h1>
                 {children}

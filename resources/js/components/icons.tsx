@@ -292,3 +292,16 @@ export function FrownIcon(props: IconProps) {
         </Icon>
     );
 }
+
+export function BuildingIcon(props: IconProps) {
+    return (
+        <Icon {...props}>
+            <path d="M4 21V5a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v16" />
+            <path d="M14 10h5a1 1 0 0 1 1 1v10" />
+            <path d="M3 21h18" />
+            <path d="M8 8h2" />
+            <path d="M8 12h2" />
+            <path d="M8 16h2" />
+        </Icon>
+    );
+}

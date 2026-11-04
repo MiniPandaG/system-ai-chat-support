@@ -1,10 +1,10 @@
 // El script que la empresa pega en su sitio. Es lo único del widget que corre en la página del cliente, así que es pequeño,
 // no usa bibliotecas y no lee ni escribe nada de la página: crea un iframe con restricciones y le da tamaño. Todo lo demás
-// (la interfaz, la conversación, el token del visitante) vive dentro del iframe, en el origen de TikaroChat.
+// (la interfaz, la conversación, el token del visitante) vive dentro del iframe, en el origen de GeckoChat.
 
-const FRAME_SOURCE = 'tikarochat-widget';
-const LOADER_SOURCE = 'tikarochat-loader';
-const FRAME_ID = 'tikarochat-widget';
+const FRAME_SOURCE = 'geckochat-widget';
+const LOADER_SOURCE = 'geckochat-loader';
+const FRAME_ID = 'geckochat-widget';
 
 const CLOSED_SIZE = 88;
 const px = (value: number): string => String(value) + 'px';
@@ -92,7 +92,7 @@ export function mount(script: HTMLScriptElement, win: Window): HTMLIFrameElement
     };
 
     win.addEventListener('message', (event: MessageEvent) => {
-        // Solo el iframe que este script creó, y solo desde el origen de TikaroChat.
+        // Solo el iframe que este script creó, y solo desde el origen de GeckoChat.
         if (event.origin !== base || event.source !== frame.contentWindow) return;
 
         const state = parseState(event.data);

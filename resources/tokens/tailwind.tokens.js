@@ -1,5 +1,5 @@
 /**
- * TikaroChat — tema de Tailwind a partir de los mismos tokens de tokens.css.
+ * GeckoChat — tema de Tailwind a partir de los mismos tokens de tokens.css.
  * No duplica valores: cada color referencia la variable CSS correspondiente,
  * así que una empresa que cambia su branding no necesita una build distinta
  * de Tailwind — solo cambian las variables en :root (o en el iframe del widget).

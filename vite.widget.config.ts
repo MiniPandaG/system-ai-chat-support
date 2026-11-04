@@ -11,7 +11,7 @@ export default defineConfig({
         lib: {
             entry: 'resources/js/widget/loader.ts',
             formats: ['iife'],
-            name: 'TikaroChatLoader',
+            name: 'GeckoChatLoader',
             fileName: () => 'widget.js',
         },
     },

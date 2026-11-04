@@ -1,5 +1,5 @@
 /*
-  TikaroChat — tokens de diseño
+  GeckoChat — tokens de diseño
   ==============================
   Capas:
     1. Primitivos privados (_p-*): valores crudos, nunca se usan en componentes.
@@ -67,9 +67,9 @@
 
   /* =========================================================
      TOKENS DE EMPRESA — sobrescribibles desde branding
-     Valores por defecto: naranja Tikaro sobre modo oscuro.
+     Valores por defecto: naranja Gecko sobre modo oscuro.
      ========================================================= */
-  --color-primary: #F65F1E;      /* naranja Tikaro 500 */
+  --color-primary: #F65F1E;      /* naranja Gecko 500 */
   --color-secondary: #2E5EAA;    /* azul tinta — estructura, botones secundarios */
   --color-accent: #2BAFBF;       /* cian — resaltes puntuales, etiqueta "IA" */
   --color-background: #15110D;

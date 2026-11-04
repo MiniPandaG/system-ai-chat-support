@@ -10,7 +10,7 @@ interface WidgetProps {
     config: WidgetConfig;
 }
 
-const seenKey = (key: string): string => `tikarochat:${key}:seen`;
+const seenKey = (key: string): string => `geckochat:${key}:seen`;
 
 /** El mensaje con el que el script incrustado dice cómo está dispuesto el iframe en la página. */
 function layoutOf(data: unknown): { fullscreen: boolean } | null {

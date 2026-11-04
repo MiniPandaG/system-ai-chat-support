@@ -8,8 +8,8 @@ import type { Conversation, OutgoingMessage, WidgetMessage } from './types';
 const FALLBACK_POLL_MS = 15000;
 const RETRY_QUEUED_MS = 8000;
 
-export const tokenKey = (key: string): string => `tikarochat:${key}:token`;
-const outboxKey = (key: string): string => `tikarochat:${key}:outbox`;
+export const tokenKey = (key: string): string => `geckochat:${key}:token`;
+const outboxKey = (key: string): string => `geckochat:${key}:outbox`;
 
 /** Un identificador único para cada mensaje; el servidor lo usa para no duplicarlo si se reenvía. */
 export function newClientId(): string {

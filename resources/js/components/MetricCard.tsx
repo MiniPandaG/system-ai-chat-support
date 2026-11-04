@@ -61,7 +61,7 @@ export function MetricCard({ title, value, hint, icon, change, pointsAsPp = fals
             </p>
             {hint !== undefined && <p className="text-sm text-text-secondary">{hint}</p>}
             {change !== undefined && (
-                <p className={`text-sm font-medium ${described === null ? 'text-text-tertiary' : tones[described.tone]}`}>{described === null ? copy.none : described.text}</p>
+                <p className={`text-sm font-medium ${described === null ? 'text-text-secondary' : tones[described.tone]}`}>{described === null ? copy.none : described.text}</p>
             )}
         </section>
     );
