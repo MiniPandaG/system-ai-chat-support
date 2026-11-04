@@ -1,11 +1,13 @@
-import type { AttachmentsCopy, TicketMessageData } from '../ticketTypes';
+import type { AiDraftCopy, AttachmentsCopy, TicketMessageData } from '../ticketTypes';
 import { AttachmentList } from './AttachmentList';
+import { Badge } from './Badge';
 
 interface MessageBubbleProps {
     message: TicketMessageData;
     /** Texto para quien no ve la posición: «Cliente» o «Agente». */
     authorLabel: string;
     attachmentsCopy: AttachmentsCopy;
+    aiCopy: AiDraftCopy;
 }
 
 /**
@@ -13,14 +15,18 @@ interface MessageBubbleProps {
  * derecha, pero el orden del DOM es el cronológico. El texto es siempre texto: React lo escapa y los saltos de línea
  * se respetan con whitespace-pre-wrap.
  */
-export function MessageBubble({ message, authorLabel, attachmentsCopy }: MessageBubbleProps) {
+export function MessageBubble({ message, authorLabel, attachmentsCopy, aiCopy }: MessageBubbleProps) {
     const fromCustomer = message.author === 'customer';
+    const fromAi = message.author === 'ai';
 
     return (
         <article aria-label={`${authorLabel}: ${message.author_name ?? ''}, ${message.created_label}`} className={`flex flex-col gap-1 ${fromCustomer ? 'items-start' : 'items-end'}`}>
-            <p className="text-xs text-text-tertiary">
-                <span className="font-medium text-text-secondary">{message.author_name}</span> ·{' '}
+            <p className="flex flex-wrap items-center gap-x-1 text-xs text-text-tertiary">
+                <span className="font-medium text-text-secondary">{message.author_name}</span>
+                {fromAi && <Badge variant="info">{aiCopy.badge}</Badge>}
+                <span aria-hidden="true">·</span>
                 <time dateTime={message.created_at}>{message.created_label}</time>
+                {fromAi && message.approved_by !== null && <span>· {aiCopy.approved_by.replace(':name', message.approved_by)}</span>}
             </p>
             {message.body !== '' && (
                 <div

@@ -7,6 +7,7 @@ import { useConnectionState } from '../realtime/hooks';
 import { useTypists } from '../realtime/useTypists';
 import { Alert } from './Alert';
 import { Button } from './Button';
+import { AiDraftPanel } from './AiDraftPanel';
 import { MessageBubble } from './MessageBubble';
 import { NoteBubble } from './NoteBubble';
 import { OutgoingBubble } from './OutgoingBubble';
@@ -116,7 +117,8 @@ export function TicketDetail({ ticket, assignees, tagOptions, copy, canUpdate }:
                                     key={`message-${String(entry.id)}`}
                                     message={entry}
                                     attachmentsCopy={copy.attachments}
-                                    authorLabel={entry.author === 'customer' ? copy.message_author_customer : copy.message_author_agent}
+                                    aiCopy={copy.ai}
+                                    authorLabel={entry.author === 'customer' ? copy.message_author_customer : entry.author === 'ai' ? copy.ai.badge : copy.message_author_agent}
                                 />
                             ),
                         )}
@@ -141,6 +143,7 @@ export function TicketDetail({ ticket, assignees, tagOptions, copy, canUpdate }:
                     <TypingIndicator people={typingPeople} copy={copy.typing} />
                 </div>
             </div>
+            {ticket.ai !== null && canUpdate && <AiDraftPanel ticketId={ticket.id} ai={ticket.ai} copy={copy.ai} />}
             <TicketComposer ticketId={ticket.id} status={ticket.status} canWrite={canUpdate} copy={copy.composer} attachmentsCopy={copy.attachments} onOutgoing={setOutgoing} onTyping={sendTyping} />
         </section>
     );

@@ -31,8 +31,10 @@ export interface AttachmentData {
 export interface TicketMessageData {
     kind: 'message';
     id: number;
-    author: 'customer' | 'agent';
+    author: 'customer' | 'agent' | 'ai';
     author_name: string | null;
+    /** Si lo escribió la IA: la persona que aprobó el borrador. */
+    approved_by: string | null;
     body: string;
     attachments: AttachmentData[];
     created_at: string;
@@ -75,6 +77,38 @@ export interface TicketDetailData {
     /** Compañeros que ya vieron lo último (hasta 5) y cuántos más hay. */
     seen_by: string[];
     seen_more: number;
+    /** Borrador de la IA o en qué quedó su último intento; nulo si no hay o quien mira no puede responder. */
+    ai: TicketAiData | null;
+}
+
+export interface TicketAiData {
+    id: number;
+    status: string;
+    status_label: string;
+    reason_label: string;
+    /** El texto del borrador pendiente; nulo si no hay uno por revisar. */
+    body: string | null;
+    sources: { kind: string; title: string }[];
+    created_label: string;
+}
+
+export interface AiDraftCopy {
+    title: string;
+    hint: string;
+    sources: string;
+    approve: string;
+    edit: string;
+    discard: string;
+    send_edited: string;
+    cancel_edit: string;
+    edit_label: string;
+    last_run: string;
+    badge: string;
+    approved_by: string;
+    discard_title: string;
+    discard_body: string;
+    discard_confirm: string;
+    discard_cancel: string;
 }
 
 export interface Assignee {
@@ -244,6 +278,7 @@ export interface InboxCopy {
 }
 
 export interface TicketsCopy {
+    ai: AiDraftCopy;
     title: string;
     list_label: string;
     new_ticket: string;
