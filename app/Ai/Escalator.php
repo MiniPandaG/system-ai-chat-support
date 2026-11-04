@@ -129,7 +129,7 @@ TXT;
         }
 
         try {
-            $message = ($this->send)($ticket, (string) __('ai.handoff'));
+            $message = ($this->send)($ticket, (string) __('ai.handoff'), false);
         } catch (ValidationException) {
             return;
         }

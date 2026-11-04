@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * Un mensaje que el cliente puede ver. Texto plano: nunca se interpreta como HTML. Las notas internas viven en otra
@@ -54,6 +55,16 @@ class TicketMessage extends Model
     public function attachments(): HasMany
     {
         return $this->hasMany(TicketAttachment::class)->orderBy('created_at')->orderBy('id');
+    }
+
+    /**
+     * La ejecución de la IA que originó este mensaje (si lo envió ella o es su aviso de paso a una persona).
+     *
+     * @return HasOne<AiRun, $this>
+     */
+    public function aiRun(): HasOne
+    {
+        return $this->hasOne(AiRun::class, 'message_id');
     }
 
     /**

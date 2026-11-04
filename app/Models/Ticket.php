@@ -32,6 +32,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int|null $assigned_to
  * @property int|null $created_by
  * @property Carbon $last_message_at
+ * @property Carbon|null $first_response_at
  * @property Carbon|null $resolved_at
  * @property Carbon|null $closed_at
  * @property Carbon $created_at
@@ -92,6 +93,7 @@ class Ticket extends Model
             'priority' => TicketPriority::class,
             'channel' => Channel::class,
             'last_message_at' => 'datetime',
+            'first_response_at' => 'datetime',
             'resolved_at' => 'datetime',
             'closed_at' => 'datetime',
         ];

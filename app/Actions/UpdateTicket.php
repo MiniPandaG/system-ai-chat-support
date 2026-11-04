@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Broadcasting\LiveUpdates;
+use App\Csat\Surveys;
 use App\Enums\AuditEvent;
 use App\Models\Ticket;
 use App\Models\User;
@@ -18,7 +19,7 @@ use App\Tickets\TicketStatus;
  */
 class UpdateTicket
 {
-    public function __construct(private readonly AuditLogger $audit) {}
+    public function __construct(private readonly AuditLogger $audit, private readonly Surveys $surveys) {}
 
     /**
      * @param  array{status?: TicketStatus, priority?: TicketPriority, assigned_to?: int|null}  $changes  Ya validado: quien atiende pertenece a la empresa y es administrador o agente activo.
@@ -47,6 +48,11 @@ class UpdateTicket
 
         if ($ticket->wasChanged('status')) {
             LiveUpdates::visitor($ticket);
+        }
+
+        // La primera vez que se resuelve o se cierra, el cliente recibe la encuesta de satisfacción.
+        if ($ticket->wasChanged('status') && in_array($ticket->status, [TicketStatus::Resolved, TicketStatus::Closed], true)) {
+            $this->surveys->offer($ticket);
         }
 
         if ($ticket->assigned_to !== $previousAssignee) {

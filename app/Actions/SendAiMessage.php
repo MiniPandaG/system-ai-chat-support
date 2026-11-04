@@ -9,6 +9,7 @@ use App\Broadcasting\LiveUpdates;
 use App\Mail\Outbox;
 use App\Models\Ticket;
 use App\Models\TicketMessage;
+use App\Tickets\FirstResponse;
 use App\Tickets\MessageAuthor;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -25,15 +26,22 @@ class SendAiMessage
     public function __construct(private readonly Outbox $outbox) {}
 
     /**
+     * @param  bool  $isAnswer  Falso para el aviso fijo de paso a una persona.
+     *
      * @throws ValidationException
      */
-    public function __invoke(Ticket $ticket, string $body): TicketMessage
+    public function __invoke(Ticket $ticket, string $body, bool $isAnswer = true): TicketMessage
     {
-        $message = DB::transaction(function () use ($ticket, $body): TicketMessage {
+        $message = DB::transaction(function () use ($ticket, $body, $isAnswer): TicketMessage {
             $locked = $this->lockOpen($ticket);
 
             $message = new TicketMessage(['body' => $body]);
             $message->forceFill(['ticket_id' => $locked->id, 'author' => MessageAuthor::Ai, 'user_id' => null])->save();
+
+            // El aviso de que lo atenderá una persona no es una respuesta: no cuenta como primera respuesta.
+            if ($isAnswer) {
+                FirstResponse::stamp($locked, $message);
+            }
 
             $locked->forceFill(['last_message_at' => $message->created_at])->save();
 

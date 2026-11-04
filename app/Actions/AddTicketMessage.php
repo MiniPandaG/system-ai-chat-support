@@ -14,6 +14,7 @@ use App\Models\Ticket;
 use App\Models\TicketAttachment;
 use App\Models\TicketMessage;
 use App\Models\User;
+use App\Tickets\FirstResponse;
 use App\Tickets\MessageAuthor;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -62,6 +63,7 @@ class AddTicketMessage
                     $stored[] = $this->attachments->store($message, $file, $author);
                 }
 
+                FirstResponse::stamp($locked, $message);
                 $locked->forceFill(['last_message_at' => $message->created_at])->save();
 
                 return $message;

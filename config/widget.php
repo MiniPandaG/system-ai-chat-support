@@ -33,6 +33,7 @@ return [
         'reads_per_session_per_minute' => 120,
         'contact_per_session_per_hour' => 5,
         'auth_per_session_per_minute' => 30,
+        'survey_per_session_per_hour' => 10,
     ],
 
 ];

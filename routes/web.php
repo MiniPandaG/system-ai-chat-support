@@ -19,10 +19,12 @@ use App\Http\Controllers\KnowledgeContextController;
 use App\Http\Controllers\KnowledgeController;
 use App\Http\Controllers\KnowledgeDocumentController;
 use App\Http\Controllers\KnowledgeSearchController;
+use App\Http\Controllers\MetricsController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\SecurityController;
 use App\Http\Controllers\SessionController;
+use App\Http\Controllers\SurveyController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\TicketMessageController;
@@ -43,6 +45,11 @@ Route::middleware(['guest', 'throttle:invitation'])->group(function (): void {
     Route::post('/invitations/{token}', [AcceptInvitationController::class, 'store'])->name('invitations.accept');
 });
 
+// La encuesta de satisfacción del cliente: pública, con el token del enlace como único permiso (también la ve quien tenga sesión).
+Route::get('/survey/thanks', [SurveyController::class, 'thanks'])->middleware('throttle:survey-show')->name('survey.thanks');
+Route::get('/survey/{token}', [SurveyController::class, 'show'])->middleware('throttle:survey-show')->name('survey.show');
+Route::post('/survey/{token}', [SurveyController::class, 'store'])->middleware('throttle:survey-answer')->name('survey.answer');
+
 Route::middleware('guest')->group(function (): void {
     Route::get('/register', [RegisterController::class, 'create'])->name('register');
     Route::post('/register', [RegisterController::class, 'store'])->middleware('throttle:register');
@@ -51,6 +58,9 @@ Route::middleware('guest')->group(function (): void {
 // Cuenta: sesión iniciada, correo verificado y, para administradores de la plataforma, 2FA activo.
 Route::middleware(['auth', 'verified', 'two-factor.required'])->group(function (): void {
     Route::get('/account', AccountController::class)->name('account');
+
+    // Métricas del soporte y satisfacción: solo administradores (CsatResponsePolicy).
+    Route::get('/metrics', [MetricsController::class, 'show'])->middleware('throttle:metrics')->name('metrics');
 
     // Bandeja y tickets: todo el equipo activo los ve; administradores y agentes los crean y modifican (TicketPolicy).
     // El ticket se resuelve con el filtro automático de empresa, así que uno de otra empresa da 404.

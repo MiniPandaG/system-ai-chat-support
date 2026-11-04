@@ -8,6 +8,7 @@ use App\Ai\AiChannel;
 use App\Ai\AiReplies;
 use App\Broadcasting\Channels;
 use App\Broadcasting\LiveUpdates;
+use App\Csat\Surveys;
 use App\Mail\Outbox;
 use App\Models\AiSettings;
 use App\Models\Customer;
@@ -40,6 +41,7 @@ class Conversations
         private readonly TenantContext $context,
         private readonly Outbox $outbox,
         private readonly AiReplies $replies,
+        private readonly Surveys $surveys,
     ) {}
 
     /**
@@ -94,7 +96,7 @@ class Conversations
      *
      * El canal es el nombre del canal privado de esta sesión: solo su dueño puede entrar, con su token.
      *
-     * @return array{channel: string, ticket: array{status: string, ended: bool}|null, messages: list<array<string, mixed>>, contact: array{has_email: bool}}
+     * @return array{channel: string, ticket: array{status: string, ended: bool}|null, messages: list<array<string, mixed>>, contact: array{has_email: bool}, survey: array{pending: bool}}
      */
     public function present(WidgetSession $session): array
     {
@@ -123,6 +125,8 @@ class Conversations
                 ],
                 'messages' => array_values($messages),
                 'contact' => ['has_email' => $customer->email !== null],
+                // Una encuesta de satisfacción por contestar: el widget la ofrece cuando la conversación terminó.
+                'survey' => ['pending' => $this->surveys->pendingFor($session)],
             ];
         });
     }

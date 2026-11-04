@@ -9,6 +9,7 @@ use App\Broadcasting\LiveUpdates;
 use App\Mail\Outbox;
 use App\Models\Ticket;
 use App\Models\TicketMessage;
+use App\Tickets\FirstResponse;
 use App\Tickets\MessageAuthor;
 use App\Tickets\TicketStatus;
 use Illuminate\Support\Facades\DB;
@@ -40,6 +41,7 @@ class AddApiMessage
                 $locked->forceFill(['status' => TicketStatus::Open, 'resolved_at' => null]);
             }
 
+            FirstResponse::stamp($locked, $message);
             $locked->forceFill(['last_message_at' => $message->created_at])->save();
 
             return $message;

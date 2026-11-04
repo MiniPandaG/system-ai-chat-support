@@ -8,6 +8,7 @@ return [
     'inbox_unassigned' => ':count sin asignar',
     'knowledge' => 'Base de conocimiento',
     'ai' => 'Asistente de IA',
+    'metrics' => 'Métricas',
     'live_on' => 'En vivo',
     'live_connecting' => 'Conectando…',
     'live_off' => 'Sin conexión en vivo',

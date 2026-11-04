@@ -5,12 +5,14 @@ declare(strict_types=1);
 use App\Providers\AiServiceProvider;
 use App\Providers\ApiServiceProvider;
 use App\Providers\AppServiceProvider;
+use App\Providers\CsatServiceProvider;
 use App\Providers\FortifyServiceProvider;
 use App\Providers\WidgetServiceProvider;
 
 return [
     AiServiceProvider::class,
     ApiServiceProvider::class,
+    CsatServiceProvider::class,
     AppServiceProvider::class,
     FortifyServiceProvider::class,
     WidgetServiceProvider::class,

@@ -47,6 +47,7 @@ class WidgetServiceProvider extends ServiceProvider
 
         RateLimiter::for('widget-read', fn (Request $request): array => $this->bySession($request, 'reads_per_session_per_minute', 'widget-read', 60));
         RateLimiter::for('widget-auth', fn (Request $request): array => $this->bySession($request, 'auth_per_session_per_minute', 'widget-auth', 60));
+        RateLimiter::for('widget-survey', fn (Request $request): array => $this->bySession($request, 'survey_per_session_per_hour', 'widget-survey', 3600));
         RateLimiter::for('widget-contact', fn (Request $request): array => $this->bySession($request, 'contact_per_session_per_hour', 'widget-contact', 3600));
     }
 

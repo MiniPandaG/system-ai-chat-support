@@ -32,7 +32,10 @@ class SecurityHeaders
         }
 
         $headers->set('X-Content-Type-Options', 'nosniff');
-        $headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
+        // Una respuesta con un enlace secreto en la dirección (la encuesta) fija la suya: no mandar ni el origen.
+        if (! $headers->has('Referrer-Policy')) {
+            $headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
+        }
         $headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=()');
         $headers->set('Cross-Origin-Opener-Policy', 'same-origin');
 

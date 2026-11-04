@@ -8,6 +8,7 @@ use App\Http\Controllers\Widget\ConversationController;
 use App\Http\Controllers\Widget\FrameController;
 use App\Http\Controllers\Widget\LogoController;
 use App\Http\Controllers\Widget\MessageController;
+use App\Http\Controllers\Widget\SurveyController;
 use Illuminate\Support\Facades\Route;
 
 // La API del widget no usa cookies ni la sesión del panel: el visitante se identifica con un token en la cabecera
@@ -22,6 +23,7 @@ Route::prefix('api')->group(function (): void {
     Route::middleware('widget.session')->group(function (): void {
         Route::get('/conversation', [ConversationController::class, 'show'])->middleware('throttle:widget-read');
         Route::post('/contact', [ContactController::class, 'store'])->middleware('throttle:widget-contact');
+        Route::post('/survey', [SurveyController::class, 'store'])->middleware('throttle:widget-survey');
         Route::post('/broadcasting/auth', [BroadcastAuthController::class, 'store'])->middleware('throttle:widget-auth');
     });
 });
