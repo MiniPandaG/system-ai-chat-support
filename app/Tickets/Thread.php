@@ -31,7 +31,8 @@ class Thread
                 'kind' => 'message',
                 'id' => $message->id,
                 'author' => $message->author->value,
-                'author_name' => $message->author === MessageAuthor::Customer ? $ticket->customer?->name : ($message->user === null ? __('tickets.integration') : $message->user->name),
+                'author_name' => $this->authorName($ticket, $message),
+                'approved_by' => $message->author === MessageAuthor::Ai ? $message->user?->name : null,
                 'body' => $message->body,
                 'attachments' => array_values($message->attachments->map(fn (TicketAttachment $attachment): array => [
                     'id' => $attachment->id,
@@ -52,7 +53,7 @@ class Thread
                 'entry' => [
                     'kind' => 'note',
                     'id' => $note->id,
-                    'author_name' => $note->user?->name,
+                    'author_name' => $note->user_id === null ? (string) __('ai.assistant_name') : $note->user?->name,
                     'body' => $note->body,
                     'created_at' => $note->created_at->toIso8601String(),
                     'created_label' => $note->created_at->isoFormat('D [de] MMM, h:mm a'),
@@ -65,6 +66,16 @@ class Thread
         usort($entries, static fn (array $a, array $b): int => strcmp($a['sort'], $b['sort']));
 
         return array_values(array_map(static fn (array $item): array => $item['entry'], $entries));
+    }
+
+    private function authorName(Ticket $ticket, TicketMessage $message): ?string
+    {
+        return match (true) {
+            $message->author === MessageAuthor::Customer => $ticket->customer?->name,
+            $message->author === MessageAuthor::Ai => (string) __('ai.assistant_name'),
+            $message->user === null => (string) __('tickets.integration'),
+            default => $message->user->name,
+        };
     }
 
     /** Cadena que ordena bien con strcmp: segundos y microsegundos con ancho fijo, luego tipo e identificador. */

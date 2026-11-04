@@ -36,10 +36,11 @@ class AddTicketMessage
 
     /**
      * @param  list<UploadedFile>  $files
+     * @param  MessageAuthor  $as  Quien figura como autor: `Agent` siempre salvo un borrador de la IA aprobado sin cambios.
      *
      * @throws ValidationException
      */
-    public function __invoke(User $author, Ticket $ticket, string $body, array $files = []): TicketMessage
+    public function __invoke(User $author, Ticket $ticket, string $body, array $files = [], MessageAuthor $as = MessageAuthor::Agent): TicketMessage
     {
         try {
             $prepared = $this->attachments->prepare($files, $author);
@@ -51,11 +52,11 @@ class AddTicketMessage
         $stored = [];
 
         try {
-            $message = DB::transaction(function () use ($author, $ticket, $body, $prepared, &$stored): TicketMessage {
+            $message = DB::transaction(function () use ($author, $ticket, $body, $prepared, $as, &$stored): TicketMessage {
                 $locked = $this->lockOpen($ticket);
 
                 $message = new TicketMessage(['body' => $body]);
-                $message->forceFill(['ticket_id' => $locked->id, 'author' => MessageAuthor::Agent, 'user_id' => $author->id])->save();
+                $message->forceFill(['ticket_id' => $locked->id, 'author' => $as, 'user_id' => $author->id])->save();
 
                 foreach ($prepared as $file) {
                     $stored[] = $this->attachments->store($message, $file, $author);

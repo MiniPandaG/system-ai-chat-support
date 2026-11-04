@@ -22,10 +22,10 @@ class Outbox
 {
     public function __construct(private readonly Threads $threads) {}
 
-    /** El equipo respondió: avisa al cliente por correo. Las notas internas nunca llegan aquí. */
+    /** El equipo (o la IA, con una persona que la aprobó) respondió: avisa al cliente por correo. Las notas internas nunca llegan aquí. */
     public function reply(TicketMessage $message): void
     {
-        if ($message->author !== MessageAuthor::Agent || trim($message->body) === '') {
+        if ($message->author === MessageAuthor::Customer || trim($message->body) === '') {
             return;
         }
 

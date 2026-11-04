@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\Widget;
 
+use App\Ai\AiChannel;
+use App\Ai\AiReplies;
 use App\Broadcasting\Channels;
 use App\Broadcasting\LiveUpdates;
 use App\Mail\Outbox;
+use App\Models\AiSettings;
 use App\Models\Customer;
 use App\Models\Tenant;
 use App\Models\Ticket;
@@ -36,6 +39,7 @@ class Conversations
         private readonly PlanLimits $limits,
         private readonly TenantContext $context,
         private readonly Outbox $outbox,
+        private readonly AiReplies $replies,
     ) {}
 
     /**
@@ -131,7 +135,12 @@ class Conversations
      */
     public function messageFor(TicketMessage $message): array
     {
-        $isAgent = $message->author === MessageAuthor::Agent;
+        $isAgent = $message->author !== MessageAuthor::Customer;
+        $agent = match (true) {
+            ! $isAgent => null,
+            $message->author === MessageAuthor::Ai => AiSettings::current()->identify_as_ai ? (string) __('ai.assistant_name') : null,
+            default => $message->user !== null ? Str::before(trim($message->user->name), ' ') : null,
+        };
 
         return [
             'id' => $message->id,
@@ -139,7 +148,7 @@ class Conversations
             'author' => $isAgent ? 'agent' : 'customer',
             'body' => $message->body,
             'sent_at' => $message->created_at->toIso8601String(),
-            'agent' => $isAgent && $message->user !== null ? Str::before(trim($message->user->name), ' ') : null,
+            'agent' => $agent,
         ];
     }
 
@@ -324,13 +333,14 @@ class Conversations
         }
     }
 
-    /** Avisa al equipo (bandeja y ticket) y a las otras pestañas del mismo visitante. */
+    /** Avisa al equipo (bandeja y ticket) y a las otras pestañas del mismo visitante, y deja que la IA prepare su respuesta si la empresa la tiene encendida en el widget. */
     private function announce(TicketMessage $message): void
     {
         $ticket = Ticket::query()->findOrFail($message->ticket_id);
 
         LiveUpdates::both($ticket);
         LiveUpdates::visitor($ticket);
+        $this->replies->afterCustomerMessage($ticket, $message, AiChannel::Widget);
     }
 
     private function tenantOf(WidgetSession $session): Tenant

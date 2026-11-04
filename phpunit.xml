@@ -27,6 +27,11 @@
         <env name="ATTACHMENT_SCANNER" value="fake"/>
         <env name="KNOWLEDGE_EMBEDDER" value="fake"/>
         <env name="KNOWLEDGE_INDEX" value="fake"/>
+        <env name="AI_FAKE" value="true"/>
+        <env name="DEEPSEEK_API_KEY" value="" force="true"/>
+        <env name="ANTHROPIC_API_KEY" value="" force="true"/>
+        <env name="OPENAI_API_KEY" value="" force="true"/>
+        <env name="GEMINI_API_KEY" value="" force="true"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
         <env name="CACHE_STORE" value="array"/>
         <env name="DB_DATABASE" value="tikarochat_test"/>

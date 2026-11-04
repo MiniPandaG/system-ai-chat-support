@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $id
  * @property int $tenant_id
  * @property int $ticket_id
- * @property int $user_id
+ * @property int|null $user_id Nulo cuando la escribió la IA (el resumen con el que pasa un caso a una persona).
  * @property string $body
  * @property Carbon $created_at
  */

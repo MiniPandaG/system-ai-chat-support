@@ -7,6 +7,7 @@ return [
     'inbox' => 'Bandeja',
     'inbox_unassigned' => ':count sin asignar',
     'knowledge' => 'Base de conocimiento',
+    'ai' => 'Asistente de IA',
     'live_on' => 'En vivo',
     'live_connecting' => 'Conectando…',
     'live_off' => 'Sin conexión en vivo',

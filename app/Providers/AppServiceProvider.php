@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Ai\Providers\FakeModel;
 use App\Attachments\ClamAvScanner;
 use App\Attachments\FakeScanner;
 use App\Attachments\Scanner;
@@ -73,6 +74,9 @@ class AppServiceProvider extends ServiceProvider
                 default => throw new LogicException("KNOWLEDGE_INDEX=\"{$driver}\" no es válido en este entorno: usa «qdrant»."),
             };
         });
+
+        // El proveedor de IA de prueba es uno solo por proceso: así una prueba puede programarlo y revisar lo que recibió.
+        $this->app->singleton(FakeModel::class);
 
         $this->app->bind(Embedder::class, function (): Embedder {
             $driver = config()->string('knowledge.embeddings.driver');

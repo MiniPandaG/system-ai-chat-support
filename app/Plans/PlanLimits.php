@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Plans;
 
+use App\Ai\AiPurpose;
 use App\Enums\Role;
+use App\Models\AiCall;
 use App\Models\Invitation;
 use App\Models\Plan;
 use App\Models\Tenant;
@@ -45,7 +47,7 @@ class PlanLimits
             Limit::Agents => $this->agentSeats($tenant),
             Limit::TicketsPerMonth => $this->ticketsThisMonth($tenant),
             Limit::Channels => $this->activeChannels($tenant),
-            default => 0,
+            Limit::AiCredits => $this->aiCreditsThisMonth($tenant),
         };
     }
 
@@ -175,6 +177,12 @@ class PlanLimits
     private function activeChannels(Tenant $tenant): int
     {
         return $this->context->run($tenant, static fn (): int => WidgetOrigin::query()->exists() ? 1 : 0);
+    }
+
+    /** Un crédito es una respuesta que la IA redactó este mes; lo que falla no gasta y los resúmenes cuentan solo en el gasto en dólares. */
+    private function aiCreditsThisMonth(Tenant $tenant): int
+    {
+        return $this->context->run($tenant, fn (): int => AiCall::query()->where('purpose', AiPurpose::Reply->value)->where('status', 'ok')->where('created_at', '>=', now()->startOfMonth())->count());
     }
 
     private function ticketsThisMonth(Tenant $tenant): int

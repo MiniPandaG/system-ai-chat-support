@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\AiDraftController;
+use App\Http\Controllers\AiSettingsController;
 use App\Http\Controllers\ApiDocsController;
 use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\AttachmentController;
@@ -61,6 +63,9 @@ Route::middleware(['auth', 'verified', 'two-factor.required'])->group(function (
     Route::patch('/tickets/{ticket}', [TicketController::class, 'update'])->middleware('throttle:tickets-write')->whereNumber('ticket')->name('tickets.update');
     // Dentro del ticket: respuestas al cliente, notas internas (solo equipo) y etiquetas.
     Route::post('/tickets/{ticket}/messages', [TicketMessageController::class, 'store'])->middleware('throttle:tickets-message')->whereNumber('ticket')->name('tickets.messages.store');
+    // Revisar el borrador que la IA preparó (TicketPolicy::reply).
+    Route::post('/tickets/{ticket}/ai/{run}/approve', [AiDraftController::class, 'approve'])->middleware('throttle:ai-draft')->whereNumber(['ticket', 'run'])->name('tickets.ai.approve');
+    Route::post('/tickets/{ticket}/ai/{run}/discard', [AiDraftController::class, 'discard'])->middleware('throttle:ai-draft')->whereNumber(['ticket', 'run'])->name('tickets.ai.discard');
     Route::post('/tickets/{ticket}/typing', [TicketTypingController::class, 'store'])->middleware('throttle:tickets-typing')->whereNumber('ticket')->name('tickets.typing');
     Route::post('/tickets/{ticket}/notes', [TicketNoteController::class, 'store'])->middleware('throttle:tickets-message')->whereNumber('ticket')->name('tickets.notes.store');
     Route::post('/tickets/{ticket}/tags', [TicketTagController::class, 'store'])->middleware('throttle:tickets-write')->whereNumber('ticket')->name('tickets.tags.store');
@@ -129,6 +134,9 @@ Route::middleware(['auth', 'verified', 'two-factor.required'])->group(function (
 
     // Chat web: código para incrustar y sitios permitidos, solo administradores (WidgetOriginPolicy).
     Route::get('/settings/widget', [WidgetSettingsController::class, 'show'])->name('widget.settings');
+    // Asistente de IA: canales, modelo y reglas, solo administradores (AiSettingsPolicy).
+    Route::get('/settings/ai', [AiSettingsController::class, 'show'])->name('ai.settings');
+    Route::put('/settings/ai', [AiSettingsController::class, 'update'])->middleware('throttle:ai-settings')->name('ai.settings.update');
     Route::put('/settings/widget/appearance', [WidgetSettingsController::class, 'updateAppearance'])->middleware('throttle:widget-settings')->name('widget.appearance.update');
     Route::post('/settings/widget/origins', [WidgetSettingsController::class, 'store'])->middleware('throttle:widget-settings')->name('widget.origins.store');
     Route::delete('/settings/widget/origins/{origin}', [WidgetSettingsController::class, 'destroy'])->middleware('throttle:widget-settings')->whereNumber('origin')->name('widget.origins.destroy');

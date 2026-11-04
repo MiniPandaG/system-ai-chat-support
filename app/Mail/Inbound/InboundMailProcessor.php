@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Mail\Inbound;
 
+use App\Ai\AiChannel;
+use App\Ai\AiReplies;
 use App\Attachments\AttachmentStore;
 use App\Attachments\PreparedAttachment;
 use App\Broadcasting\LiveUpdates;
@@ -46,6 +48,7 @@ class InboundMailProcessor
         private readonly Threads $threads,
         private readonly TenantContext $context,
         private readonly AttachmentStore $attachments,
+        private readonly AiReplies $replies,
     ) {}
 
     /**
@@ -157,13 +160,15 @@ class InboundMailProcessor
 
         /** @var list<TicketAttachment> $stored */
         $stored = [];
+        $messageId = null;
 
         try {
-            DB::transaction(function () use ($mail, $ticket, $thread, $text, $prepared, $rejectedFiles, &$stored): void {
+            DB::transaction(function () use ($mail, $ticket, $thread, $text, $prepared, $rejectedFiles, &$stored, &$messageId): void {
                 $locked = Ticket::query()->whereKey($ticket->id)->lockForUpdate()->firstOrFail();
 
                 $message = new TicketMessage(['body' => $text]);
                 $message->forceFill(['ticket_id' => $locked->id, 'author' => MessageAuthor::Customer, 'user_id' => null])->save();
+                $messageId = $message->id;
 
                 foreach ($prepared as $file) {
                     $stored[] = $this->attachments->store($message, $file, null);
@@ -200,6 +205,12 @@ class InboundMailProcessor
         $fresh = Ticket::query()->findOrFail($ticket->id);
         LiveUpdates::both($fresh);
         LiveUpdates::visitor($fresh);
+
+        $accepted = $messageId === null ? null : TicketMessage::query()->find($messageId);
+
+        if ($accepted !== null) {
+            $this->replies->afterCustomerMessage($fresh, $accepted, AiChannel::Email);
+        }
 
         return self::ACCEPTED;
     }

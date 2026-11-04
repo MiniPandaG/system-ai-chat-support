@@ -57,4 +57,7 @@ enum AuditEvent: string
     case KnowledgeDocumentDeleted = 'knowledge.document_deleted';
     case KnowledgeDocumentBlocked = 'knowledge.document_blocked';
     case KnowledgeContextChanged = 'knowledge.context_changed';
+    case AiSettingsChanged = 'ai.settings_changed';
+    case AiDraftApproved = 'ai.draft_approved';
+    case AiDraftDiscarded = 'ai.draft_discarded';
 }

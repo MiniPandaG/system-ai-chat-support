@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\CreateTicket;
 use App\Actions\UpdateTicket;
+use App\Ai\TicketAi;
 use App\Broadcasting\LiveUpdates;
 use App\Enums\Role;
 use App\Http\Requests\InboxRequest;
@@ -35,7 +36,7 @@ use Inertia\Response;
  */
 class TicketController extends Controller
 {
-    public function __construct(private readonly Thread $thread, private readonly Inbox $inbox, private readonly Reads $reads) {}
+    public function __construct(private readonly Thread $thread, private readonly Inbox $inbox, private readonly Reads $reads, private readonly TicketAi $ai) {}
 
     public function index(InboxRequest $request): Response
     {
@@ -122,7 +123,7 @@ class TicketController extends Controller
         $page = $this->once(fn () => $this->inbox->page($filters, $user));
 
         return Inertia::render('tickets/Index', [
-            'copy' => fn (): mixed => __('tickets'),
+            'copy' => fn (): array => [...(array) __('tickets'), 'ai' => __('ai.draft')],
             'tickets' => fn (): array => $page()['rows'],
             'next_cursor' => fn (): ?string => $page()['next'],
             'total' => fn (): int => $this->inbox->filtered($filters, $user)->count(),
@@ -235,6 +236,8 @@ class TicketController extends Controller
             'thread' => $this->thread->of($ticket, Gate::allows('viewNotes', $ticket)),
             'seen_by' => $seen['names'],
             'seen_more' => $seen['more'],
+            // El borrador de la IA y en qué quedó su último intento: solo para quien puede responder.
+            'ai' => Gate::allows('reply', $ticket) ? $this->ai->panel($ticket) : null,
         ];
     }
 
