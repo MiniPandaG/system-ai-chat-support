@@ -13,6 +13,7 @@ use App\Auth\LoginThrottle;
 use App\Auth\TwoFactorProvider;
 use App\Http\Controllers\Auth\RecoveryCodeController;
 use App\Http\Requests\TwoFactorChallengeRequest;
+use App\Http\Responses\LoginResponse;
 use App\Http\Responses\PasswordResetLinkResponse;
 use App\Models\User;
 use App\Services\AuditLogger;
@@ -31,8 +32,10 @@ use Laravel\Fortify\Actions\DisableTwoFactorAuthentication;
 use Laravel\Fortify\Actions\EnableTwoFactorAuthentication;
 use Laravel\Fortify\Actions\GenerateNewRecoveryCodes;
 use Laravel\Fortify\Contracts\FailedPasswordResetLinkRequestResponse;
+use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
 use Laravel\Fortify\Contracts\SuccessfulPasswordResetLinkRequestResponse;
 use Laravel\Fortify\Contracts\TwoFactorAuthenticationProvider as TwoFactorAuthenticationProviderContract;
+use Laravel\Fortify\Contracts\TwoFactorLoginResponse as TwoFactorLoginResponseContract;
 use Laravel\Fortify\Fortify;
 use Laravel\Fortify\Http\Controllers\RecoveryCodeController as FortifyRecoveryCodeController;
 use Laravel\Fortify\Http\Requests\TwoFactorLoginRequest;
@@ -44,6 +47,8 @@ class FortifyServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(LoginRateLimiter::class, LoginThrottle::class);
+        $this->app->bind(LoginResponseContract::class, LoginResponse::class);
+        $this->app->bind(TwoFactorLoginResponseContract::class, LoginResponse::class);
         $this->app->bind(FailedPasswordResetLinkRequestResponse::class, PasswordResetLinkResponse::class);
         $this->app->bind(SuccessfulPasswordResetLinkRequestResponse::class, PasswordResetLinkResponse::class);
 
